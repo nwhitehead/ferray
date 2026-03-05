@@ -4,6 +4,29 @@ use std::fmt;
 
 use num_complex::Complex;
 
+pub mod casting;
+pub mod finfo;
+pub mod promotion;
+
+// ---------------------------------------------------------------------------
+// SliceInfoElem — used by the s![] macro
+// ---------------------------------------------------------------------------
+
+/// One element of a multi-axis slice specification, produced by the `s![]` macro.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SliceInfoElem {
+    /// A single integer index along one axis. Reduces dimensionality by 1.
+    Index(isize),
+    /// A slice (start..end with step) along one axis.
+    Slice {
+        /// Start index (inclusive). 0 means the beginning.
+        start: isize,
+        /// End index (exclusive). `None` means the end of the axis.
+        end: Option<isize>,
+        /// Step size. Must not be 0.
+        step: isize,
+    },
+}
 
 // ---------------------------------------------------------------------------
 // DType runtime enum

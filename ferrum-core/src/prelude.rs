@@ -22,7 +22,14 @@ pub use crate::array::aliases::{
 pub use crate::dimension::{Axis, Dimension, Ix0, Ix1, Ix2, Ix3, Ix4, Ix5, Ix6, IxDyn};
 
 // Dtype system
-pub use crate::dtype::{DType, Element};
+pub use crate::dtype::{DType, Element, SliceInfoElem};
+
+// Type casting and promotion
+pub use crate::dtype::casting::{AsType, CastKind};
+pub use crate::dtype::promotion::{Promoted, PromoteTo};
+
+// Proc macros
+pub use ferrum_core_macros::{s, promoted_type, FerrumRecord};
 
 // Error handling
 pub use crate::error::{FerrumError, FerrumResult};

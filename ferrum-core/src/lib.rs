@@ -28,7 +28,7 @@ pub use array::display::{set_print_options, get_print_options};
 
 pub use dimension::{Axis, Dimension, Ix0, Ix1, Ix2, Ix3, Ix4, Ix5, Ix6, IxDyn};
 
-pub use dtype::{DType, Element};
+pub use dtype::{DType, Element, SliceInfoElem};
 
 pub use error::{FerrumError, FerrumResult};
 
@@ -38,4 +38,10 @@ pub use buffer::AsRawBuffer;
 
 pub use dynarray::DynArray;
 
-pub use record::{FerrumRecord, FieldDescriptor};
+pub use record::FieldDescriptor;
+
+// Re-export proc macros from ferrum-core-macros.
+// The derive macro FerrumRecord shares its name with the trait in record::FerrumRecord.
+// Both are re-exported: the derive macro lives in macro namespace, the trait in type namespace.
+pub use ferrum_core_macros::{s, promoted_type, FerrumRecord};
+pub use record::FerrumRecord;
