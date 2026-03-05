@@ -1,0 +1,76 @@
+[package]
+name = "ferrum"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "A NumPy-equivalent library for Rust — N-dimensional arrays with SIMD acceleration"
+
+[dependencies]
+ferrum-core = { workspace = true }
+ferrum-ufunc = { workspace = true }
+ferrum-stats = { workspace = true }
+rayon = { workspace = true }
+
+[dependencies.ferrum-io]
+workspace = true
+optional = true
+
+[dependencies.ferrum-linalg]
+workspace = true
+optional = true
+
+[dependencies.ferrum-fft]
+workspace = true
+optional = true
+
+[dependencies.ferrum-random]
+workspace = true
+optional = true
+
+[dependencies.ferrum-polynomial]
+workspace = true
+optional = true
+
+[dependencies.ferrum-window]
+workspace = true
+optional = true
+
+[dependencies.ferrum-strings]
+workspace = true
+optional = true
+
+[dependencies.ferrum-ma]
+workspace = true
+optional = true
+
+[dependencies.ferrum-stride-tricks]
+workspace = true
+optional = true
+
+[dependencies.ferrum-numpy-interop]
+workspace = true
+optional = true
+
+[features]
+default = ["rayon", "simd", "complex", "strings", "ma", "io", "window"]
+full = ["default", "linalg", "fft", "random", "polynomial", "stride-tricks"]
+rayon = []
+simd = []
+complex = []
+f16 = ["ferrum-core/f16"]
+strings = ["dep:ferrum-strings"]
+ma = ["dep:ferrum-ma"]
+io = ["dep:ferrum-io"]
+linalg = ["dep:ferrum-linalg"]
+fft = ["dep:ferrum-fft"]
+random = ["dep:ferrum-random"]
+polynomial = ["dep:ferrum-polynomial", "linalg"]
+window = ["dep:ferrum-window"]
+stride-tricks = ["dep:ferrum-stride-tricks"]
+numpy = ["dep:ferrum-numpy-interop"]
+serde = ["ferrum-core/serde"]
+no_std = ["ferrum-core/no_std"]
+
+[dev-dependencies]
+proptest = { workspace = true }

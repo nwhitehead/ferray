@@ -1,0 +1,17 @@
+[package]
+name = "ferrum-ufunc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Universal functions and SIMD-accelerated elementwise operations for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+pulp = { workspace = true }
+num-complex = { workspace = true }
+num-traits = { workspace = true }
+rayon = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

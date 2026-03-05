@@ -1,0 +1,30 @@
+[package]
+name = "ferrum-numpy-interop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Python/NumPy interop via PyO3 and Arrow for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+
+[dependencies.pyo3]
+workspace = true
+optional = true
+
+[dependencies.numpy]
+workspace = true
+optional = true
+
+[dependencies.arrow]
+workspace = true
+optional = true
+
+[features]
+default = []
+python = ["dep:pyo3", "dep:numpy"]
+arrow = ["dep:arrow"]
+
+[dev-dependencies]
+proptest = { workspace = true }

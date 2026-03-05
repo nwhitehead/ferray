@@ -1,0 +1,17 @@
+[package]
+name = "ferrum-io"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "NumPy-compatible file I/O (.npy, .npz, memory-mapped) for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+byteorder = { workspace = true }
+flate2 = { workspace = true }
+memmap2 = { workspace = true }
+zip = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

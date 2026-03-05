@@ -1,0 +1,15 @@
+[package]
+name = "ferrum-random"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Random number generation and distributions for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+rayon = { workspace = true }
+rand_core = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

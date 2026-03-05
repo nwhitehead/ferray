@@ -1,0 +1,16 @@
+[package]
+name = "ferrum-fft"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "FFT operations (fft, ifft, rfft, fftfreq, plan caching) for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+rustfft = { workspace = true }
+num-complex = { workspace = true }
+rayon = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

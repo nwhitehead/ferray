@@ -1,0 +1,13 @@
+[package]
+name = "ferrum-stride-tricks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Stride manipulation (as_strided, sliding_window_view) for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
