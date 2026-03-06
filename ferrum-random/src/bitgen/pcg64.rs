@@ -1,0 +1,163 @@
+// ferrum-random: PCG64 BitGenerator implementation
+//
+// PCG-XSL-RR 128/64 (LCG) from Melissa O'Neill's PCG paper.
+// Period: 2^128. No jump support.
+
+use super::BitGenerator;
+
+/// PCG64 (PCG-XSL-RR 128/64) pseudo-random number generator.
+///
+/// Uses a 128-bit linear congruential generator with a permutation-based
+/// output function. Period is 2^128. Does not support `jump()` or `stream()`.
+///
+/// # Example
+/// ```
+/// use ferrum_random::bitgen::Pcg64;
+/// use ferrum_random::bitgen::BitGenerator;
+///
+/// let mut rng = Pcg64::seed_from_u64(42);
+/// let val = rng.next_u64();
+/// ```
+pub struct Pcg64 {
+    state: u128,
+    inc: u128,
+}
+
+/// Default multiplier for the LCG (from PCG paper).
+const PCG_DEFAULT_MULTIPLIER: u128 = 0x2360_ED05_1FC6_5DA4_4385_DF64_9FCC_F645;
+
+impl Pcg64 {
+    /// Internal step function: advance the LCG state.
+    #[inline]
+    fn step(&mut self) {
+        self.state = self
+            .state
+            .wrapping_mul(PCG_DEFAULT_MULTIPLIER)
+            .wrapping_add(self.inc);
+    }
+
+    /// Output function: XSL-RR permutation of the 128-bit state to 64-bit output.
+    #[inline]
+    fn output(state: u128) -> u64 {
+        let xsl = ((state >> 64) ^ state) as u64;
+        let rot = (state >> 122) as u32;
+        xsl.rotate_right(rot)
+    }
+}
+
+impl BitGenerator for Pcg64 {
+    fn next_u64(&mut self) -> u64 {
+        let old_state = self.state;
+        self.step();
+        Self::output(old_state)
+    }
+
+    fn seed_from_u64(seed: u64) -> Self {
+        // Use SplitMix64-like expansion for seeding
+        let seed128 = {
+            let mut s = seed;
+            let a = splitmix64_step(&mut s);
+            let b = splitmix64_step(&mut s);
+            ((a as u128) << 64) | (b as u128)
+        };
+        // inc must be odd
+        let inc = {
+            let mut s = seed.wrapping_add(0xda3e39cb94b95bdb);
+            let a = splitmix64_step(&mut s);
+            let b = splitmix64_step(&mut s);
+            (((a as u128) << 64) | (b as u128)) | 1
+        };
+
+        let mut rng = Pcg64 { state: 0, inc };
+        rng.step();
+        rng.state = rng.state.wrapping_add(seed128);
+        rng.step();
+        rng
+    }
+
+    fn jump(&mut self) -> Option<()> {
+        // PCG64 does not support jump-ahead
+        None
+    }
+
+    fn stream(_seed: u64, _stream_id: u64) -> Option<Self> {
+        // PCG64 does not support stream IDs in this implementation
+        None
+    }
+}
+
+/// SplitMix64 step for seed expansion.
+fn splitmix64_step(state: &mut u64) -> u64 {
+    *state = state.wrapping_add(0x9e3779b97f4a7c15);
+    let mut z = *state;
+    z = (z ^ (z >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+    z = (z ^ (z >> 27)).wrapping_mul(0x94d049bb133111eb);
+    z ^ (z >> 31)
+}
+
+impl Clone for Pcg64 {
+    fn clone(&self) -> Self {
+        Self {
+            state: self.state,
+            inc: self.inc,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deterministic_output() {
+        let mut rng1 = Pcg64::seed_from_u64(42);
+        let mut rng2 = Pcg64::seed_from_u64(42);
+        for _ in 0..1000 {
+            assert_eq!(rng1.next_u64(), rng2.next_u64());
+        }
+    }
+
+    #[test]
+    fn different_seeds_differ() {
+        let mut rng1 = Pcg64::seed_from_u64(42);
+        let mut rng2 = Pcg64::seed_from_u64(43);
+        let mut same = true;
+        for _ in 0..100 {
+            if rng1.next_u64() != rng2.next_u64() {
+                same = false;
+                break;
+            }
+        }
+        assert!(!same);
+    }
+
+    #[test]
+    fn jump_not_supported() {
+        let mut rng = Pcg64::seed_from_u64(42);
+        assert!(rng.jump().is_none());
+    }
+
+    #[test]
+    fn stream_not_supported() {
+        assert!(Pcg64::stream(42, 0).is_none());
+    }
+
+    #[test]
+    fn output_covers_full_range() {
+        let mut rng = Pcg64::seed_from_u64(12345);
+        let mut seen_high = false;
+        let mut seen_low = false;
+        for _ in 0..10_000 {
+            let v = rng.next_u64();
+            if v > (u64::MAX / 2) {
+                seen_high = true;
+            } else {
+                seen_low = true;
+            }
+            if seen_high && seen_low {
+                break;
+            }
+        }
+        assert!(seen_high && seen_low);
+    }
+}
