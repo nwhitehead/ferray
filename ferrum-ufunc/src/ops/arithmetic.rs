@@ -243,10 +243,10 @@ where
 /// Elementwise cube root.
 pub fn cbrt<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + crate::cr_math::CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::cbrt)
+    unary_float_op(input, T::cr_cbrt)
 }
 
 /// Elementwise square: x^2.

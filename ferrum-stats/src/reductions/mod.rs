@@ -163,9 +163,7 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                lane.iter()
-                    .copied()
-                    .fold(<T as Element>::zero(), |acc, x| acc + x)
+                parallel::pairwise_sum(lane, <T as Element>::zero())
             });
             make_result(&out_s, result)
         }
@@ -445,10 +443,7 @@ where
     match axis {
         None => {
             let n = T::from(data.len()).unwrap();
-            let total: T = data
-                .iter()
-                .copied()
-                .fold(<T as Element>::zero(), |a, b| a + b);
+            let total = parallel::pairwise_sum(&data, <T as Element>::zero());
             make_result(&[], vec![total / n])
         }
         Some(ax) => {
@@ -458,10 +453,7 @@ where
             let axis_len = shape[ax];
             let n = T::from(axis_len).unwrap();
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                let total: T = lane
-                    .iter()
-                    .copied()
-                    .fold(<T as Element>::zero(), |a, b| a + b);
+                let total = parallel::pairwise_sum(lane, <T as Element>::zero());
                 total / n
             });
             make_result(&out_s, result)
@@ -497,19 +489,12 @@ where
                 ));
             }
             let nf = T::from(n).unwrap();
-            let mean_val: T = data
-                .iter()
-                .copied()
-                .fold(<T as Element>::zero(), |a, b| a + b)
-                / nf;
-            let var_val: T = data
-                .iter()
-                .copied()
-                .map(|x| {
-                    let d = x - mean_val;
-                    d * d
-                })
-                .fold(<T as Element>::zero(), |a, b| a + b)
+            let mean_val = parallel::pairwise_sum(&data, <T as Element>::zero()) / nf;
+            let sq_diffs: Vec<T> = data.iter().copied().map(|x| {
+                let d = x - mean_val;
+                d * d
+            }).collect();
+            let var_val = parallel::pairwise_sum(&sq_diffs, <T as Element>::zero())
                 / T::from(n - ddof).unwrap();
             make_result(&[], vec![var_val])
         }
@@ -526,19 +511,12 @@ where
             let nf = T::from(axis_len).unwrap();
             let denom = T::from(axis_len - ddof).unwrap();
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                let mean_val: T = lane
-                    .iter()
-                    .copied()
-                    .fold(<T as Element>::zero(), |a, b| a + b)
-                    / nf;
-                lane.iter()
-                    .copied()
-                    .map(|x| {
-                        let d = x - mean_val;
-                        d * d
-                    })
-                    .fold(<T as Element>::zero(), |a, b| a + b)
-                    / denom
+                let mean_val = parallel::pairwise_sum(lane, <T as Element>::zero()) / nf;
+                let sq_diffs: Vec<T> = lane.iter().copied().map(|x| {
+                    let d = x - mean_val;
+                    d * d
+                }).collect();
+                parallel::pairwise_sum(&sq_diffs, <T as Element>::zero()) / denom
             });
             make_result(&out_s, result)
         }

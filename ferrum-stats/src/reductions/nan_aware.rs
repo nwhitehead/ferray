@@ -13,10 +13,8 @@ use super::{collect_data, make_result, output_shape, reduce_axis_general, valida
 
 /// Sum a lane, skipping NaN values. Returns zero for all-NaN.
 fn lane_nansum<T: Float>(lane: &[T]) -> T {
-    lane.iter()
-        .copied()
-        .filter(|x| !x.is_nan())
-        .fold(T::zero(), |a, b| a + b)
+    let non_nan: Vec<T> = lane.iter().copied().filter(|x| !x.is_nan()).collect();
+    crate::parallel::pairwise_sum(&non_nan, T::zero())
 }
 
 /// Product of a lane, skipping NaN values. Returns one for all-NaN.
@@ -29,45 +27,27 @@ fn lane_nanprod<T: Float>(lane: &[T]) -> T {
 
 /// Mean of a lane, skipping NaN values. Returns NaN for all-NaN.
 fn lane_nanmean<T: Float>(lane: &[T]) -> T {
-    let mut sum = T::zero();
-    let mut count = 0usize;
-    for &x in lane {
-        if !x.is_nan() {
-            sum = sum + x;
-            count += 1;
-        }
-    }
-    if count == 0 {
+    let non_nan: Vec<T> = lane.iter().copied().filter(|x| !x.is_nan()).collect();
+    if non_nan.is_empty() {
         T::nan()
     } else {
-        sum / T::from(count).unwrap()
+        crate::parallel::pairwise_sum(&non_nan, T::zero()) / T::from(non_nan.len()).unwrap()
     }
 }
 
 /// Variance of a lane, skipping NaN values.
 fn lane_nanvar<T: Float>(lane: &[T], ddof: usize) -> T {
-    let mut sum = T::zero();
-    let mut count = 0usize;
-    for &x in lane {
-        if !x.is_nan() {
-            sum = sum + x;
-            count += 1;
-        }
-    }
+    let non_nan: Vec<T> = lane.iter().copied().filter(|x| !x.is_nan()).collect();
+    let count = non_nan.len();
     if count <= ddof {
         return T::nan();
     }
-    let mean = sum / T::from(count).unwrap();
-    let var_sum = lane
-        .iter()
-        .copied()
-        .filter(|x| !x.is_nan())
-        .map(|x| {
-            let d = x - mean;
-            d * d
-        })
-        .fold(T::zero(), |a, b| a + b);
-    var_sum / T::from(count - ddof).unwrap()
+    let mean = crate::parallel::pairwise_sum(&non_nan, T::zero()) / T::from(count).unwrap();
+    let sq_diffs: Vec<T> = non_nan.iter().map(|&x| {
+        let d = x - mean;
+        d * d
+    }).collect();
+    crate::parallel::pairwise_sum(&sq_diffs, T::zero()) / T::from(count - ddof).unwrap()
 }
 
 /// Min of a lane, skipping NaN values. Returns NaN for all-NaN.

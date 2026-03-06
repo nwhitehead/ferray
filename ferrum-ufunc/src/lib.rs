@@ -17,6 +17,7 @@
 // - Rayon parallelism for large arrays (REQ-21)
 // - Operator overloads (+, -, *, /, %, &, |, ^, !, <<, >>)
 
+pub mod cr_math;
 pub mod dispatch;
 pub mod helpers;
 pub mod kernels;

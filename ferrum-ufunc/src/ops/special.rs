@@ -8,6 +8,7 @@ use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
 use num_traits::Float;
 
+use crate::cr_math::CrMath;
 use crate::helpers::unary_float_op;
 
 /// Normalized sinc function: sin(pi*x) / (pi*x).
@@ -15,7 +16,7 @@ use crate::helpers::unary_float_op;
 /// AC-13: `sinc(0.0) == 1.0`.
 pub fn sinc<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
     let pi = T::from(std::f64::consts::PI).unwrap_or_else(|| <T as Element>::one());
@@ -24,7 +25,7 @@ where
             <T as Element>::one()
         } else {
             let px = pi * x;
-            px.sin() / px
+            px.cr_sin() / px
         }
     })
 }
@@ -35,7 +36,7 @@ where
 /// AC-13: `i0(0.0) == 1.0`.
 pub fn i0<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
     unary_float_op(input, bessel_i0)
@@ -45,7 +46,7 @@ where
 ///
 /// Uses the Abramowitz and Stegun approximation for |x| <= 3.75 and
 /// an asymptotic expansion for |x| > 3.75.
-fn bessel_i0<T: Float>(x: T) -> T {
+fn bessel_i0<T: Float + CrMath>(x: T) -> T {
     let ax = x.abs();
     let three_point_seven_five = T::from(3.75).unwrap();
 
@@ -74,7 +75,7 @@ fn bessel_i0<T: Float>(x: T) -> T {
         let c8 = T::from(0.00392377).unwrap();
         let poly = c0
             + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * (c6 + t * (c7 + t * c8)))))));
-        poly * ax.exp() / ax.sqrt()
+        poly * ax.cr_exp() / ax.sqrt()
     }
 }
 
@@ -93,7 +94,7 @@ where
             1.0
         } else {
             let px = std::f32::consts::PI * x;
-            px.sin() / px
+            core_math::sinf(px) / px
         }
     })
 }

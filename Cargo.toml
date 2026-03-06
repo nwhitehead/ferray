@@ -65,3 +65,4 @@ arrow = "54"
 polars = { version = "0.46", default-features = false }
 rand_core = "0.6"
 proptest = "1.6"
+core-math = "1.0"

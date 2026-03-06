@@ -12,6 +12,7 @@ pulp = { workspace = true }
 num-complex = { workspace = true }
 num-traits = { workspace = true }
 rayon = { workspace = true }
+core-math = { workspace = true }
 
 [dependencies.half]
 workspace = true

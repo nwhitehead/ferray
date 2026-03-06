@@ -10,6 +10,7 @@ use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
 use num_traits::Float;
 
+use crate::cr_math::CrMath;
 use crate::helpers::{binary_float_op, unary_float_op};
 
 // ---------------------------------------------------------------------------
@@ -19,73 +20,73 @@ use crate::helpers::{binary_float_op, unary_float_op};
 /// Elementwise sine.
 pub fn sin<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::sin)
+    unary_float_op(input, T::cr_sin)
 }
 
 /// Elementwise cosine.
 pub fn cos<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::cos)
+    unary_float_op(input, T::cr_cos)
 }
 
 /// Elementwise tangent.
 pub fn tan<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::tan)
+    unary_float_op(input, T::cr_tan)
 }
 
 /// Elementwise arc sine.
 pub fn arcsin<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::asin)
+    unary_float_op(input, T::cr_asin)
 }
 
 /// Elementwise arc cosine.
 pub fn arccos<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::acos)
+    unary_float_op(input, T::cr_acos)
 }
 
 /// Elementwise arc tangent.
 pub fn arctan<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::atan)
+    unary_float_op(input, T::cr_atan)
 }
 
 /// Elementwise two-argument arc tangent (atan2).
 pub fn arctan2<T, D>(y: &Array<T, D>, x: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    binary_float_op(y, x, T::atan2)
+    binary_float_op(y, x, T::cr_atan2)
 }
 
 /// Elementwise hypotenuse: sqrt(a^2 + b^2).
 pub fn hypot<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    binary_float_op(a, b, T::hypot)
+    binary_float_op(a, b, T::cr_hypot)
 }
 
 // ---------------------------------------------------------------------------
@@ -95,55 +96,55 @@ where
 /// Elementwise hyperbolic sine.
 pub fn sinh<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::sinh)
+    unary_float_op(input, T::cr_sinh)
 }
 
 /// Elementwise hyperbolic cosine.
 pub fn cosh<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::cosh)
+    unary_float_op(input, T::cr_cosh)
 }
 
 /// Elementwise hyperbolic tangent.
 pub fn tanh<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::tanh)
+    unary_float_op(input, T::cr_tanh)
 }
 
 /// Elementwise inverse hyperbolic sine.
 pub fn arcsinh<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::asinh)
+    unary_float_op(input, T::cr_asinh)
 }
 
 /// Elementwise inverse hyperbolic cosine.
 pub fn arccosh<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::acosh)
+    unary_float_op(input, T::cr_acosh)
 }
 
 /// Elementwise inverse hyperbolic tangent.
 pub fn arctanh<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::atanh)
+    unary_float_op(input, T::cr_atanh)
 }
 
 // ---------------------------------------------------------------------------

@@ -8,95 +8,96 @@ use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
 use num_traits::Float;
 
+use crate::cr_math::CrMath;
 use crate::helpers::{binary_float_op, unary_float_op};
 
 /// Elementwise exponential (e^x).
 pub fn exp<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::exp)
+    unary_float_op(input, T::cr_exp)
 }
 
 /// Elementwise 2^x.
 pub fn exp2<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::exp2)
+    unary_float_op(input, T::cr_exp2)
 }
 
 /// Elementwise exp(x) - 1, accurate near zero.
 pub fn expm1<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::exp_m1)
+    unary_float_op(input, T::cr_exp_m1)
 }
 
 /// Elementwise natural logarithm.
 pub fn log<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::ln)
+    unary_float_op(input, T::cr_ln)
 }
 
 /// Elementwise base-2 logarithm.
 pub fn log2<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::log2)
+    unary_float_op(input, T::cr_log2)
 }
 
 /// Elementwise base-10 logarithm.
 pub fn log10<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::log10)
+    unary_float_op(input, T::cr_log10)
 }
 
 /// Elementwise ln(1 + x), accurate near zero.
 pub fn log1p<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
-    unary_float_op(input, T::ln_1p)
+    unary_float_op(input, T::cr_ln_1p)
 }
 
 /// log(exp(a) + exp(b)), computed in a numerically stable way.
 pub fn logaddexp<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
     binary_float_op(a, b, |x, y| {
         let max = if x > y { x } else { y };
         let min = if x > y { y } else { x };
-        max + (min - max).exp().ln_1p()
+        max + (min - max).cr_exp().cr_ln_1p()
     })
 }
 
 /// log2(2^a + 2^b), computed in a numerically stable way.
 pub fn logaddexp2<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
-    T: Element + Float,
+    T: Element + Float + CrMath,
     D: Dimension,
 {
     let ln2 = T::from(std::f64::consts::LN_2).unwrap_or_else(|| <T as Element>::one());
     binary_float_op(a, b, |x, y| {
         let max = if x > y { x } else { y };
         let min = if x > y { y } else { x };
-        max + ((min - max) * ln2).exp().ln_1p() / ln2
+        max + ((min - max) * ln2).cr_exp().cr_ln_1p() / ln2
     })
 }
 

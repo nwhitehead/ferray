@@ -143,10 +143,7 @@ where
     let means: Vec<T> = matrix
         .iter()
         .map(|row| {
-            row.iter()
-                .copied()
-                .fold(<T as Element>::zero(), |a, b| a + b)
-                / nf
+            crate::parallel::pairwise_sum(row, <T as Element>::zero()) / nf
         })
         .collect();
 
