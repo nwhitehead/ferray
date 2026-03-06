@@ -1,0 +1,37 @@
+{
+  "function": "numpy.strings.count",
+  "ferrum_function": "ferrum_strings::count",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "aabaa",
+            "abab",
+            "cccc",
+            ""
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "str"
+        },
+        "substr": "a"
+      },
+      "expected": {
+        "data": [
+          4,
+          2,
+          0,
+          0
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "int64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

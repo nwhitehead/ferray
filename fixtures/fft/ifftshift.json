@@ -1,0 +1,44 @@
+{
+  "function": "numpy.fft.ifftshift",
+  "ferrum_function": "ferrum_fft::ifftshift",
+  "test_cases": [
+    {
+      "name": "roundtrip_1d",
+      "inputs": {
+        "x": {
+          "data": [
+            -4.0,
+            -3.0,
+            -2.0,
+            -1.0,
+            0.0,
+            1.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            8
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          -4.0,
+          -3.0,
+          -2.0,
+          -1.0
+        ],
+        "shape": [
+          8
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

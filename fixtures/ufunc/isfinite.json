@@ -1,0 +1,40 @@
+{
+  "function": "numpy.isfinite",
+  "ferrum_function": "ferrum_ufunc::isfinite",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "NaN",
+            "Inf",
+            "-Inf",
+            0.0,
+            1.0,
+            -1.0
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          false,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "shape": [
+          6
+        ],
+        "dtype": "bool"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

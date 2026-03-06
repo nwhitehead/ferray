@@ -1,0 +1,101 @@
+{
+  "function": "numpy.roots",
+  "ferrum_function": "ferrum_polynomial::Polynomial::roots",
+  "test_cases": [
+    {
+      "name": "quadratic_real",
+      "inputs": {
+        "coefficients_numpy_order": {
+          "data": [
+            1.0,
+            -3.0,
+            2.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "roots_real_sorted": {
+          "data": [
+            1.0,
+            2.0
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "quadratic_complex",
+      "inputs": {
+        "coefficients_numpy_order": {
+          "data": [
+            1.0,
+            0.0,
+            1.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "roots": {
+          "data": [
+            {
+              "re": -0.0,
+              "im": 1.0
+            },
+            {
+              "re": 0.0,
+              "im": -1.0
+            }
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "complex128"
+        }
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "cubic_real",
+      "inputs": {
+        "coefficients_numpy_order": {
+          "data": [
+            1.0,
+            -6.0,
+            11.0,
+            -6.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "roots_real_sorted": {
+          "data": [
+            1.0000000000000002,
+            1.999999999999998,
+            3.0000000000000018
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

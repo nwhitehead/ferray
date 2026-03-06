@@ -1,0 +1,156 @@
+{
+  "function": "numpy.quantile",
+  "ferrum_function": "ferrum_stats::quantile",
+  "test_cases": [
+    {
+      "name": "q0.0",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 0.0
+      },
+      "expected": {
+        "data": 1.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "q0.25",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 0.25
+      },
+      "expected": {
+        "data": 3.25,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "q0.5",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 0.5
+      },
+      "expected": {
+        "data": 5.5,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "q0.75",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 0.75
+      },
+      "expected": {
+        "data": 7.75,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "q1.0",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 1.0
+      },
+      "expected": {
+        "data": 10.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "function": "numpy.ones",
+  "ferrum_function": "ferrum_core::ones",
+  "test_cases": [
+    {
+      "name": "ones_5_float64",
+      "inputs": {
+        "shape": [
+          5
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "ones_3x4_float64",
+      "inputs": {
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "ones_2x3x4_float32",
+      "inputs": {
+        "shape": [
+          2,
+          3,
+          4
+        ],
+        "dtype": "float32"
+      },
+      "expected": {
+        "data": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "shape": [
+          2,
+          3,
+          4
+        ],
+        "dtype": "float32"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "ones_0_float64",
+      "inputs": {
+        "shape": [
+          0
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [],
+        "shape": [
+          0
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "ones_1_int64",
+      "inputs": {
+        "shape": [
+          1
+        ],
+        "dtype": "int64"
+      },
+      "expected": {
+        "data": [
+          1
+        ],
+        "shape": [
+          1
+        ],
+        "dtype": "int64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

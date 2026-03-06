@@ -1,0 +1,73 @@
+[package]
+name = "ferrum-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+ferrum-core = { path = "../ferrum-core" }
+ferrum-ufunc = { path = "../ferrum-ufunc" }
+ferrum-stats = { path = "../ferrum-stats" }
+ferrum-linalg = { path = "../ferrum-linalg" }
+ferrum-fft = { path = "../ferrum-fft" }
+num-complex = "0.4"
+num-traits = "0.2"
+
+[workspace]
+
+# -- Fuzz targets --
+
+[[bin]]
+name = "ufunc_trig"
+path = "fuzz_targets/ufunc_trig.rs"
+doc = false
+
+[[bin]]
+name = "ufunc_explog"
+path = "fuzz_targets/ufunc_explog.rs"
+doc = false
+
+[[bin]]
+name = "ufunc_arithmetic"
+path = "fuzz_targets/ufunc_arithmetic.rs"
+doc = false
+
+[[bin]]
+name = "ufunc_rounding"
+path = "fuzz_targets/ufunc_rounding.rs"
+doc = false
+
+[[bin]]
+name = "core_creation"
+path = "fuzz_targets/core_creation.rs"
+doc = false
+
+[[bin]]
+name = "core_indexing"
+path = "fuzz_targets/core_indexing.rs"
+doc = false
+
+[[bin]]
+name = "core_reshape"
+path = "fuzz_targets/core_reshape.rs"
+doc = false
+
+[[bin]]
+name = "stats_reductions"
+path = "fuzz_targets/stats_reductions.rs"
+doc = false
+
+[[bin]]
+name = "linalg_ops"
+path = "fuzz_targets/linalg_ops.rs"
+doc = false
+
+[[bin]]
+name = "fft_roundtrip"
+path = "fuzz_targets/fft_roundtrip.rs"
+doc = false

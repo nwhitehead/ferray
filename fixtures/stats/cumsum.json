@@ -1,0 +1,134 @@
+{
+  "function": "numpy.cumsum",
+  "ferrum_function": "ferrum_stats::cumsum",
+  "test_cases": [
+    {
+      "name": "1d",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          1.0,
+          3.0,
+          6.0,
+          10.0
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_axis0",
+      "inputs": {
+        "x": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0
+          ],
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float64"
+        },
+        "axis": 0
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          6.0,
+          8.0,
+          10.0,
+          12.0,
+          15.0,
+          18.0,
+          21.0
+        ],
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_axis1",
+      "inputs": {
+        "x": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0
+          ],
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float64"
+        },
+        "axis": 1
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.0,
+          3.0,
+          6.0,
+          4.0,
+          9.0,
+          15.0,
+          22.0,
+          8.0,
+          17.0,
+          27.0,
+          38.0
+        ],
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "function": "numpy.polyfit",
+  "ferrum_function": "ferrum_polynomial::Polynomial::fit",
+  "test_cases": [
+    {
+      "name": "degree_1",
+      "inputs": {
+        "x": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "y": {
+          "data": [
+            1.0,
+            3.0,
+            7.0,
+            13.0,
+            21.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "degree": 1
+      },
+      "expected": {
+        "coefficients_numpy_order": {
+          "data": [
+            5.000000000000001,
+            -0.9999999999999978
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "degree_2",
+      "inputs": {
+        "x": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "y": {
+          "data": [
+            1.0,
+            3.0,
+            7.0,
+            13.0,
+            21.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "degree": 2
+      },
+      "expected": {
+        "coefficients_numpy_order": {
+          "data": [
+            1.000000000000001,
+            0.9999999999999961,
+            1.000000000000006
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "degree_3",
+      "inputs": {
+        "x": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "y": {
+          "data": [
+            1.0,
+            3.0,
+            7.0,
+            13.0,
+            21.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "degree": 3
+      },
+      "expected": {
+        "coefficients_numpy_order": {
+          "data": [
+            -3.7710948961946156e-16,
+            1.000000000000002,
+            0.999999999999993,
+            1.0000000000000044
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        }
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

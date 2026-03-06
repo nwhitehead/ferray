@@ -1,0 +1,102 @@
+{
+  "function": "numpy.unique",
+  "ferrum_function": "ferrum_stats::unique",
+  "test_cases": [
+    {
+      "name": "basic",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            4.0,
+            1.0,
+            5.0,
+            9.0,
+            2.0,
+            6.0,
+            5.0,
+            3.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          9.0
+        ],
+        "shape": [
+          7
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "with_counts",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            4.0,
+            1.0,
+            5.0,
+            9.0,
+            2.0,
+            6.0,
+            5.0,
+            3.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "return_counts": true
+      },
+      "expected": {
+        "values": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            9.0
+          ],
+          "shape": [
+            7
+          ],
+          "dtype": "float64"
+        },
+        "counts": {
+          "data": [
+            2,
+            1,
+            2,
+            1,
+            2,
+            1,
+            1
+          ],
+          "shape": [
+            7
+          ],
+          "dtype": "int64"
+        }
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

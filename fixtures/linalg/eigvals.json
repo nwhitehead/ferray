@@ -1,0 +1,35 @@
+{
+  "function": "numpy.linalg.eigvals",
+  "ferrum_function": "ferrum_linalg::eigvals",
+  "test_cases": [
+    {
+      "name": "2x2",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          -0.3722813232690143,
+          5.372281323269014
+        ],
+        "shape": [
+          2
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

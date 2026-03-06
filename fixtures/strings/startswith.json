@@ -1,0 +1,37 @@
+{
+  "function": "numpy.strings.startswith",
+  "ferrum_function": "ferrum_strings::startswith",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "hello",
+            "help",
+            "world",
+            "helm"
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "str"
+        },
+        "substr": "hel"
+      },
+      "expected": {
+        "data": [
+          true,
+          true,
+          false,
+          true
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "bool"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

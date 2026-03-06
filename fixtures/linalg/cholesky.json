@@ -1,0 +1,80 @@
+{
+  "function": "numpy.linalg.cholesky",
+  "ferrum_function": "ferrum_linalg::cholesky",
+  "test_cases": [
+    {
+      "name": "2x2_spd",
+      "inputs": {
+        "a": {
+          "data": [
+            4.0,
+            2.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          2.0,
+          0.0,
+          1.0,
+          1.4142135623730951
+        ],
+        "shape": [
+          2,
+          2
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "3x3_spd",
+      "inputs": {
+        "a": {
+          "data": [
+            25.0,
+            15.0,
+            -5.0,
+            15.0,
+            18.0,
+            0.0,
+            -5.0,
+            0.0,
+            11.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          5.0,
+          0.0,
+          0.0,
+          3.0,
+          3.0,
+          0.0,
+          -1.0,
+          1.0,
+          3.0
+        ],
+        "shape": [
+          3,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

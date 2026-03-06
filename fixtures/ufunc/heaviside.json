@@ -1,0 +1,168 @@
+{
+  "function": "numpy.heaviside",
+  "ferrum_function": "ferrum_ufunc::heaviside",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "a": {
+          "data": [
+            -2.0,
+            -1.0,
+            0.0,
+            1.0,
+            2.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          0.5,
+          1.0,
+          1.0
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "zero_val",
+      "inputs": {
+        "a": {
+          "data": [
+            -1.0,
+            0.0,
+            1.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "one_val",
+      "inputs": {
+        "a": {
+          "data": [
+            -1.0,
+            0.0,
+            1.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.0,
+          1.0
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "special",
+      "inputs": {
+        "a": {
+          "data": [
+            "NaN",
+            "Inf",
+            "-Inf"
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          "NaN",
+          1.0,
+          0.0
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

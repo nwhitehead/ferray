@@ -1,0 +1,170 @@
+{
+  "function": "numpy.zeros",
+  "ferrum_function": "ferrum_core::zeros",
+  "test_cases": [
+    {
+      "name": "zeros_5_float64",
+      "inputs": {
+        "shape": [
+          5
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "zeros_3x4_float64",
+      "inputs": {
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "zeros_2x3x4_float64",
+      "inputs": {
+        "shape": [
+          2,
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shape": [
+          2,
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "zeros_0_float64",
+      "inputs": {
+        "shape": [
+          0
+        ],
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [],
+        "shape": [
+          0
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "zeros_5_float32",
+      "inputs": {
+        "shape": [
+          5
+        ],
+        "dtype": "float32"
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "float32"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "zeros_5_int32",
+      "inputs": {
+        "shape": [
+          5
+        ],
+        "dtype": "int32"
+      },
+      "expected": {
+        "data": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "int32"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "function": "numpy.histogram_bin_edges",
+  "ferrum_function": "ferrum_stats::histogram_bin_edges",
+  "test_cases": [
+    {
+      "name": "5_bins",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            1.5,
+            2.5,
+            3.0,
+            3.5,
+            4.0,
+            2.0,
+            1.0
+          ],
+          "shape": [
+            9
+          ],
+          "dtype": "float64"
+        },
+        "bins": 5
+      },
+      "expected": {
+        "data": [
+          1.0,
+          1.6,
+          2.2,
+          2.8,
+          3.4,
+          4.0
+        ],
+        "shape": [
+          6
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

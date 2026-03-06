@@ -1,0 +1,37 @@
+{
+  "function": "numpy.strings.endswith",
+  "ferrum_function": "ferrum_strings::endswith",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "hello",
+            "help",
+            "world",
+            "helm"
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "str"
+        },
+        "substr": "ld"
+      },
+      "expected": {
+        "data": [
+          false,
+          false,
+          true,
+          false
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "bool"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

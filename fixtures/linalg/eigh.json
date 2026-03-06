@@ -1,0 +1,50 @@
+{
+  "function": "numpy.linalg.eigh",
+  "ferrum_function": "ferrum_linalg::eigh",
+  "test_cases": [
+    {
+      "name": "2x2_symmetric",
+      "inputs": {
+        "a": {
+          "data": [
+            2.0,
+            1.0,
+            1.0,
+            3.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "eigenvalues": {
+          "data": [
+            1.381966011250105,
+            3.618033988749895
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        },
+        "eigenvectors": {
+          "data": [
+            -0.8506508083520399,
+            0.5257311121191335,
+            0.5257311121191335,
+            0.8506508083520399
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

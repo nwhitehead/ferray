@@ -1,0 +1,124 @@
+{
+  "function": "numpy.ma.compressed",
+  "ferrum_function": "ferrum_ma::MaskedArray::compressed",
+  "test_cases": [
+    {
+      "name": "basic",
+      "inputs": {
+        "data": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "mask": {
+          "data": [
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "bool"
+        }
+      },
+      "expected": {
+        "data": [
+          1.0,
+          2.0,
+          4.0,
+          5.0
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "all_masked",
+      "inputs": {
+        "data": {
+          "data": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "mask": {
+          "data": [
+            true,
+            true,
+            true
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "bool"
+        }
+      },
+      "expected": {
+        "data": [],
+        "shape": [
+          0
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "no_mask",
+      "inputs": {
+        "data": {
+          "data": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "mask": {
+          "data": [
+            false,
+            false,
+            false
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "bool"
+        }
+      },
+      "expected": {
+        "data": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

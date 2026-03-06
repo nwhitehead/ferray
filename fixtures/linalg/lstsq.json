@@ -1,0 +1,51 @@
+{
+  "function": "numpy.linalg.lstsq",
+  "ferrum_function": "ferrum_linalg::lstsq",
+  "test_cases": [
+    {
+      "name": "overdetermined",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            1.0,
+            1.0,
+            2.0,
+            1.0,
+            3.0
+          ],
+          "shape": [
+            3,
+            2
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            1.0,
+            2.0,
+            2.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "x": {
+          "data": [
+            0.6666666666666663,
+            0.5000000000000002
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        },
+        "rank": 2
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

@@ -1004,6 +1004,7 @@ dependencies = [
  "faer",
  "ferrum-core",
  "ferrum-ufunc",
+ "half",
  "num-complex",
  "num-traits",
  "proptest",

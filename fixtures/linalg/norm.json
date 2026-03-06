@@ -1,0 +1,97 @@
+{
+  "function": "numpy.linalg.norm",
+  "ferrum_function": "ferrum_linalg::norm",
+  "test_cases": [
+    {
+      "name": "vector_l2",
+      "inputs": {
+        "a": {
+          "data": [
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        },
+        "ord": 2
+      },
+      "expected": {
+        "data": 5.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "vector_l1",
+      "inputs": {
+        "a": {
+          "data": [
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        },
+        "ord": 1
+      },
+      "expected": {
+        "data": 7.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "vector_inf",
+      "inputs": {
+        "a": {
+          "data": [
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        },
+        "ord": "Inf"
+      },
+      "expected": {
+        "data": 4.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "matrix_fro",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        },
+        "ord": "fro"
+      },
+      "expected": {
+        "data": 5.477225575051661,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

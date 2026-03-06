@@ -1,0 +1,16 @@
+[workspace]
+
+[package]
+name = "ferrum-bench"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ferrum-core = { path = "../../ferrum-core" }
+ferrum-ufunc = { path = "../../ferrum-ufunc" }
+ferrum-stats = { path = "../../ferrum-stats" }
+ferrum-linalg = { path = "../../ferrum-linalg" }
+ferrum-fft = { path = "../../ferrum-fft" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+num-complex = "0.4"

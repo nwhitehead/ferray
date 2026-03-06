@@ -1,0 +1,191 @@
+{
+  "function": "numpy.eye",
+  "ferrum_function": "ferrum_core::eye",
+  "test_cases": [
+    {
+      "name": "eye_3_3_k0_float64",
+      "inputs": {
+        "n": 3,
+        "m": 3,
+        "k": 0,
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "shape": [
+          3,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "eye_4_4_k0_float64",
+      "inputs": {
+        "n": 4,
+        "m": 4,
+        "k": 0,
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "eye_3_4_k0_float64",
+      "inputs": {
+        "n": 3,
+        "m": 4,
+        "k": 0,
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "eye_3_3_k1_float64",
+      "inputs": {
+        "n": 3,
+        "m": 3,
+        "k": 1,
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "shape": [
+          3,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "eye_3_3_k-1_float64",
+      "inputs": {
+        "n": 3,
+        "m": 3,
+        "k": -1,
+        "dtype": "float64"
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "shape": [
+          3,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "eye_4_4_k0_int32",
+      "inputs": {
+        "n": 4,
+        "m": 4,
+        "k": 0,
+        "dtype": "int32"
+      },
+      "expected": {
+        "data": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "int32"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

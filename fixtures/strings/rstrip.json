@@ -1,0 +1,65 @@
+{
+  "function": "numpy.strings.rstrip",
+  "ferrum_function": "ferrum_strings::rstrip",
+  "test_cases": [
+    {
+      "name": "whitespace",
+      "inputs": {
+        "x": {
+          "data": [
+            "  hello  ",
+            "\tworld\t",
+            "  foo",
+            "bar  ",
+            "none"
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "str"
+        }
+      },
+      "expected": {
+        "data": [
+          "  hello",
+          "\tworld",
+          "  foo",
+          "bar",
+          "none"
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "with_chars",
+      "inputs": {
+        "x": {
+          "data": [
+            "xxhelloxx",
+            "xxworldxx"
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "str"
+        },
+        "chars": "x"
+      },
+      "expected": {
+        "data": [
+          "xxhello",
+          "xxworld"
+        ],
+        "shape": [
+          2
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

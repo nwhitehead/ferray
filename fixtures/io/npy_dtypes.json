@@ -1,0 +1,309 @@
+{
+  "function": "numpy.save/load",
+  "ferrum_function": "ferrum_io::save/load",
+  "test_cases": [
+    {
+      "name": "dtype_float32",
+      "inputs": {
+        "data": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float32"
+        },
+        "numpy_dtype_str": "<f4"
+      },
+      "expected": {
+        "shape": [
+          5
+        ],
+        "dtype": "float32",
+        "numpy_dtype_str": "<f4"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_float64",
+      "inputs": {
+        "data": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "float64"
+        },
+        "numpy_dtype_str": "<f8"
+      },
+      "expected": {
+        "shape": [
+          5
+        ],
+        "dtype": "float64",
+        "numpy_dtype_str": "<f8"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_int32",
+      "inputs": {
+        "data": {
+          "data": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "int32"
+        },
+        "numpy_dtype_str": "<i4"
+      },
+      "expected": {
+        "shape": [
+          5
+        ],
+        "dtype": "int32",
+        "numpy_dtype_str": "<i4"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_int64",
+      "inputs": {
+        "data": {
+          "data": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "int64"
+        },
+        "numpy_dtype_str": "<i8"
+      },
+      "expected": {
+        "shape": [
+          5
+        ],
+        "dtype": "int64",
+        "numpy_dtype_str": "<i8"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_uint8",
+      "inputs": {
+        "data": {
+          "data": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "uint8"
+        },
+        "numpy_dtype_str": "|u1"
+      },
+      "expected": {
+        "shape": [
+          5
+        ],
+        "dtype": "uint8",
+        "numpy_dtype_str": "|u1"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_complex64",
+      "inputs": {
+        "data": {
+          "data": [
+            {
+              "re": 1.0,
+              "im": 2.0
+            },
+            {
+              "re": 3.0,
+              "im": 4.0
+            },
+            {
+              "re": 5.0,
+              "im": 6.0
+            }
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "complex64"
+        },
+        "numpy_dtype_str": "<c8"
+      },
+      "expected": {
+        "shape": [
+          3
+        ],
+        "dtype": "complex64",
+        "numpy_dtype_str": "<c8"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_complex128",
+      "inputs": {
+        "data": {
+          "data": [
+            {
+              "re": 1.0,
+              "im": 2.0
+            },
+            {
+              "re": 3.0,
+              "im": 4.0
+            },
+            {
+              "re": 5.0,
+              "im": 6.0
+            }
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "complex128"
+        },
+        "numpy_dtype_str": "<c16"
+      },
+      "expected": {
+        "shape": [
+          3
+        ],
+        "dtype": "complex128",
+        "numpy_dtype_str": "<c16"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "dtype_bool",
+      "inputs": {
+        "data": {
+          "data": [
+            true,
+            false,
+            true,
+            false,
+            true
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "bool"
+        },
+        "numpy_dtype_str": "|b1"
+      },
+      "expected": {
+        "shape": [
+          5
+        ],
+        "dtype": "bool",
+        "numpy_dtype_str": "|b1"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_f64",
+      "inputs": {
+        "data": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0
+          ],
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float64"
+        },
+        "numpy_dtype_str": "<f8"
+      },
+      "expected": {
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64",
+        "numpy_dtype_str": "<f8"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_fortran_order",
+      "inputs": {
+        "data": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0
+          ],
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float64"
+        },
+        "fortran_order": true,
+        "numpy_dtype_str": "<f8"
+      },
+      "expected": {
+        "shape": [
+          3,
+          4
+        ],
+        "dtype": "float64",
+        "fortran_order": true
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

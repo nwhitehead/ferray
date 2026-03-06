@@ -1,5 +1,6 @@
 [workspace]
 resolver = "2"
+exclude = ["benchmarks/ferrum_bench"]
 members = [
     "ferrum",
     "ferrum-core",

@@ -1,0 +1,37 @@
+{
+  "function": "numpy.strings (find>=0)",
+  "ferrum_function": "ferrum_strings::contains",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "hello",
+            "world",
+            "help",
+            "foo"
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "str"
+        },
+        "substr": "hel"
+      },
+      "expected": {
+        "data": [
+          true,
+          false,
+          true,
+          false
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "bool"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}
