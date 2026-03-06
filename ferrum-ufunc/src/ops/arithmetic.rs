@@ -11,13 +11,13 @@
 //
 // Reduction: add_reduce, add_accumulate, multiply_outer
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, Ix1, IxDyn};
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 use num_traits::Float;
 
-use crate::helpers::{unary_float_op, binary_float_op, binary_broadcast_op};
+use crate::helpers::{binary_broadcast_op, binary_float_op, unary_float_op};
 
 // ---------------------------------------------------------------------------
 // Basic arithmetic (binary, same-shape)
@@ -32,7 +32,8 @@ where
     if a.shape() != b.shape() {
         return Err(FerrumError::shape_mismatch(format!(
             "add: shapes {:?} and {:?} do not match",
-            a.shape(), b.shape()
+            a.shape(),
+            b.shape()
         )));
     }
     let data: Vec<T> = a.iter().zip(b.iter()).map(|(&x, &y)| x + y).collect();
@@ -48,7 +49,8 @@ where
     if a.shape() != b.shape() {
         return Err(FerrumError::shape_mismatch(format!(
             "subtract: shapes {:?} and {:?} do not match",
-            a.shape(), b.shape()
+            a.shape(),
+            b.shape()
         )));
     }
     let data: Vec<T> = a.iter().zip(b.iter()).map(|(&x, &y)| x - y).collect();
@@ -64,7 +66,8 @@ where
     if a.shape() != b.shape() {
         return Err(FerrumError::shape_mismatch(format!(
             "multiply: shapes {:?} and {:?} do not match",
-            a.shape(), b.shape()
+            a.shape(),
+            b.shape()
         )));
     }
     let data: Vec<T> = a.iter().zip(b.iter()).map(|(&x, &y)| x * y).collect();
@@ -80,7 +83,8 @@ where
     if a.shape() != b.shape() {
         return Err(FerrumError::shape_mismatch(format!(
             "divide: shapes {:?} and {:?} do not match",
-            a.shape(), b.shape()
+            a.shape(),
+            b.shape()
         )));
     }
     let data: Vec<T> = a.iter().zip(b.iter()).map(|(&x, &y)| x / y).collect();
@@ -151,10 +155,7 @@ where
 }
 
 /// Return (floor_divide, remainder) as a tuple of arrays.
-pub fn divmod<T, D>(
-    a: &Array<T, D>,
-    b: &Array<T, D>,
-) -> FerrumResult<(Array<T, D>, Array<T, D>)>
+pub fn divmod<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<(Array<T, D>, Array<T, D>)>
 where
     T: Element + Float,
     D: Dimension,
@@ -260,10 +261,7 @@ where
 /// Heaviside step function.
 ///
 /// `heaviside(x, h0)` returns 0 for x < 0, h0 for x == 0, and 1 for x > 0.
-pub fn heaviside<T, D>(
-    x: &Array<T, D>,
-    h0: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn heaviside<T, D>(x: &Array<T, D>, h0: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -326,10 +324,7 @@ where
 // ---------------------------------------------------------------------------
 
 /// Elementwise addition with broadcasting.
-pub fn add_broadcast<T, D1, D2>(
-    a: &Array<T, D1>,
-    b: &Array<T, D2>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn add_broadcast<T, D1, D2>(a: &Array<T, D1>, b: &Array<T, D2>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + std::ops::Add<Output = T> + Copy,
     D1: Dimension,
@@ -384,10 +379,7 @@ where
 /// Reduce by addition along an axis (column sums, row sums, etc.).
 ///
 /// AC-2: `add_reduce` computes correct column sums.
-pub fn add_reduce<T, D>(
-    input: &Array<T, D>,
-    axis: usize,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn add_reduce<T, D>(input: &Array<T, D>, axis: usize) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + std::ops::Add<Output = T> + Copy,
     D: Dimension,
@@ -439,10 +431,7 @@ where
 /// Running (cumulative) addition along an axis.
 ///
 /// AC-2: `add_accumulate` produces running sums.
-pub fn add_accumulate<T, D>(
-    input: &Array<T, D>,
-    axis: usize,
-) -> FerrumResult<Array<T, D>>
+pub fn add_accumulate<T, D>(input: &Array<T, D>, axis: usize) -> FerrumResult<Array<T, D>>
 where
     T: Element + std::ops::Add<Output = T> + Copy,
     D: Dimension,
@@ -453,10 +442,7 @@ where
 /// Outer product: multiply_outer(a, b)[i, j] = a[i] * b[j].
 ///
 /// AC-3: multiply_outer produces correct outer product.
-pub fn multiply_outer<T>(
-    a: &Array<T, Ix1>,
-    b: &Array<T, Ix1>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn multiply_outer<T>(a: &Array<T, Ix1>, b: &Array<T, Ix1>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + std::ops::Mul<Output = T> + Copy,
 {
@@ -484,10 +470,7 @@ where
 /// Cumulative sum along an axis (or flattened if axis is None).
 ///
 /// AC-11: `cumsum([1,2,3,4]) == [1,3,6,10]`.
-pub fn cumsum<T, D>(
-    input: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, D>>
+pub fn cumsum<T, D>(input: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, D>>
 where
     T: Element + std::ops::Add<Output = T> + Copy,
     D: Dimension,
@@ -531,10 +514,7 @@ where
 }
 
 /// Cumulative product along an axis (or flattened if axis is None).
-pub fn cumprod<T, D>(
-    input: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, D>>
+pub fn cumprod<T, D>(input: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, D>>
 where
     T: Element + std::ops::Mul<Output = T> + Copy,
     D: Dimension,
@@ -575,10 +555,7 @@ where
 }
 
 /// Cumulative sum ignoring NaNs.
-pub fn nancumsum<T, D>(
-    input: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, D>>
+pub fn nancumsum<T, D>(input: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -586,17 +563,20 @@ where
     // Replace NaN with zero, then cumsum
     let cleaned: Vec<T> = input
         .iter()
-        .map(|&x| if x.is_nan() { <T as Element>::zero() } else { x })
+        .map(|&x| {
+            if x.is_nan() {
+                <T as Element>::zero()
+            } else {
+                x
+            }
+        })
         .collect();
     let arr = Array::from_vec(input.dim().clone(), cleaned)?;
     cumsum(&arr, axis)
 }
 
 /// Cumulative product ignoring NaNs.
-pub fn nancumprod<T, D>(
-    input: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, D>>
+pub fn nancumprod<T, D>(input: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -616,10 +596,7 @@ where
 /// Compute the n-th discrete difference along the given axis.
 ///
 /// AC-11: `diff([1,3,6,10], 1) == [2,3,4]`.
-pub fn diff<T>(
-    input: &Array<T, Ix1>,
-    n: usize,
-) -> FerrumResult<Array<T, Ix1>>
+pub fn diff<T>(input: &Array<T, Ix1>, n: usize) -> FerrumResult<Array<T, Ix1>>
 where
     T: Element + std::ops::Sub<Output = T> + Copy,
 {
@@ -669,10 +646,7 @@ where
 /// Compute the gradient of a 1-D array using central differences.
 ///
 /// Edge values use forward/backward differences.
-pub fn gradient<T>(
-    input: &Array<T, Ix1>,
-    spacing: Option<T>,
-) -> FerrumResult<Array<T, Ix1>>
+pub fn gradient<T>(input: &Array<T, Ix1>, spacing: Option<T>) -> FerrumResult<Array<T, Ix1>>
 where
     T: Element + Float,
 {
@@ -706,10 +680,7 @@ where
 // ---------------------------------------------------------------------------
 
 /// Cross product of two 3-element 1-D arrays.
-pub fn cross<T>(
-    a: &Array<T, Ix1>,
-    b: &Array<T, Ix1>,
-) -> FerrumResult<Array<T, Ix1>>
+pub fn cross<T>(a: &Array<T, Ix1>, b: &Array<T, Ix1>) -> FerrumResult<Array<T, Ix1>>
 where
     T: Element + std::ops::Mul<Output = T> + std::ops::Sub<Output = T> + Copy,
 {
@@ -736,11 +707,7 @@ where
 ///
 /// If `dx` is provided, it is the spacing between sample points.
 /// If `x` is provided, it gives the sample point coordinates.
-pub fn trapezoid<T>(
-    y: &Array<T, Ix1>,
-    x: Option<&Array<T, Ix1>>,
-    dx: Option<T>,
-) -> FerrumResult<T>
+pub fn trapezoid<T>(y: &Array<T, Ix1>, x: Option<&Array<T, Ix1>>, dx: Option<T>) -> FerrumResult<T>
 where
     T: Element + Float,
 {
@@ -771,6 +738,174 @@ where
     }
 
     Ok(total)
+}
+
+// ---------------------------------------------------------------------------
+// f16 variants (f32-promoted)
+// ---------------------------------------------------------------------------
+
+/// Elementwise absolute value for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn absolute_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::abs)
+}
+
+/// Elementwise negation for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn negative_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, |x| -x)
+}
+
+/// Elementwise square root for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn sqrt_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::sqrt)
+}
+
+/// Elementwise cube root for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn cbrt_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::cbrt)
+}
+
+/// Elementwise square for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn square_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, |x| x * x)
+}
+
+/// Elementwise reciprocal for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn reciprocal_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::recip)
+}
+
+/// Elementwise sign for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn sign_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, |x| {
+        if x.is_nan() {
+            f32::NAN
+        } else if x > 0.0 {
+            1.0
+        } else if x < 0.0 {
+            -1.0
+        } else {
+            0.0
+        }
+    })
+}
+
+/// Elementwise addition for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn add_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| x + y)
+}
+
+/// Elementwise subtraction for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn subtract_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| x - y)
+}
+
+/// Elementwise multiplication for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn multiply_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| x * y)
+}
+
+/// Elementwise division for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn divide_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| x / y)
+}
+
+/// Elementwise power for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn power_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, f32::powf)
+}
+
+/// Floor division for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn floor_divide_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| (x / y).floor())
+}
+
+/// Elementwise remainder for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn remainder_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| {
+        let r = x % y;
+        if (r < 0.0 && y > 0.0) || (r > 0.0 && y < 0.0) {
+            r + y
+        } else {
+            r
+        }
+    })
 }
 
 #[cfg(test)]
@@ -1016,11 +1151,8 @@ mod tests {
     #[test]
     fn test_add_reduce_ac2() {
         // AC-2: add_reduce computes correct column sums
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let r = add_reduce(&a, 0).unwrap();
         assert_eq!(r.shape(), &[3]);
         let s: Vec<f64> = r.iter().copied().collect();
@@ -1069,11 +1201,7 @@ mod tests {
 
     #[test]
     fn test_add_broadcast() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 1]),
-            vec![1.0, 2.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 1]), vec![1.0, 2.0]).unwrap();
         let b = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![10.0, 20.0, 30.0]).unwrap();
         let r = add_broadcast(&a, &b).unwrap();
         assert_eq!(r.shape(), &[2, 3]);
@@ -1105,5 +1233,78 @@ mod tests {
         let s = r.as_slice().unwrap();
         assert!((s[0] - 10.0 / 3.0).abs() < 1e-12);
         assert!((s[1] - 20.0 / 7.0).abs() < 1e-12);
+    }
+
+    #[cfg(feature = "f16")]
+    mod f16_tests {
+        use super::*;
+
+        fn arr1_f16(data: &[f32]) -> Array<half::f16, Ix1> {
+            let n = data.len();
+            let vals: Vec<half::f16> = data.iter().map(|&x| half::f16::from_f32(x)).collect();
+            Array::from_vec(Ix1::new([n]), vals).unwrap()
+        }
+
+        #[test]
+        fn test_add_f16() {
+            let a = arr1_f16(&[1.0, 2.0, 3.0]);
+            let b = arr1_f16(&[4.0, 5.0, 6.0]);
+            let r = add_f16(&a, &b).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 5.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 7.0).abs() < 0.01);
+            assert!((s[2].to_f32() - 9.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_multiply_f16() {
+            let a = arr1_f16(&[2.0, 3.0]);
+            let b = arr1_f16(&[4.0, 5.0]);
+            let r = multiply_f16(&a, &b).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 8.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 15.0).abs() < 0.1);
+        }
+
+        #[test]
+        fn test_sqrt_f16() {
+            let a = arr1_f16(&[1.0, 4.0, 9.0, 16.0]);
+            let r = sqrt_f16(&a).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 1.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 2.0).abs() < 0.01);
+            assert!((s[2].to_f32() - 3.0).abs() < 0.01);
+            assert!((s[3].to_f32() - 4.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_absolute_f16() {
+            let a = arr1_f16(&[-1.0, 2.0, -3.0]);
+            let r = absolute_f16(&a).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 1.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 2.0).abs() < 0.01);
+            assert!((s[2].to_f32() - 3.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_power_f16() {
+            let a = arr1_f16(&[2.0, 3.0]);
+            let b = arr1_f16(&[3.0, 2.0]);
+            let r = power_f16(&a, &b).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 8.0).abs() < 0.1);
+            assert!((s[1].to_f32() - 9.0).abs() < 0.1);
+        }
+
+        #[test]
+        fn test_divide_f16() {
+            let a = arr1_f16(&[10.0, 20.0]);
+            let b = arr1_f16(&[2.0, 4.0]);
+            let r = divide_f16(&a, &b).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 5.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 5.0).abs() < 0.01);
+        }
     }
 }

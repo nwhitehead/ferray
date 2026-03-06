@@ -3,10 +3,10 @@
 // Mirrors numpy's constants module: np.pi, np.e, np.inf, np.nan, etc.
 
 /// The ratio of a circle's circumference to its diameter.
-pub const PI: f64 = std::f64::consts::PI;
+pub const PI: f64 = core::f64::consts::PI;
 
 /// Euler's number, the base of natural logarithms.
-pub const E: f64 = std::f64::consts::E;
+pub const E: f64 = core::f64::consts::E;
 
 /// Positive infinity.
 pub const INF: f64 = f64::INFINITY;

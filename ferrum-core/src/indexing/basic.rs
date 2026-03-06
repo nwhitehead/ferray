@@ -90,11 +90,7 @@ impl SliceSpec {
     /// Convert to an ndarray Slice.
     #[allow(clippy::wrong_self_convention)]
     fn to_ndarray_slice(&self) -> ndarray::Slice {
-        ndarray::Slice::new(
-            self.start.unwrap_or(0),
-            self.stop,
-            self.step.unwrap_or(1),
-        )
+        ndarray::Slice::new(self.start.unwrap_or(0), self.stop, self.step.unwrap_or(1))
     }
 
     /// Convert to an ndarray SliceInfoElem (used by s![] macro integration).
@@ -121,11 +117,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     /// # Errors
     /// - `AxisOutOfBounds` if `axis >= ndim`
     /// - `IndexOutOfBounds` if `index` is out of range (supports negative)
-    pub fn index_axis(
-        &self,
-        axis: Axis,
-        index: isize,
-    ) -> FerrumResult<ArrayView<'_, T, IxDyn>>
+    pub fn index_axis(&self, axis: Axis, index: isize) -> FerrumResult<ArrayView<'_, T, IxDyn>>
     where
         D::NdarrayDim: ndarray::RemoveAxis,
     {
@@ -150,11 +142,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     /// # Errors
     /// - `AxisOutOfBounds` if `axis >= ndim`
     /// - `InvalidValue` if step is zero
-    pub fn slice_axis(
-        &self,
-        axis: Axis,
-        spec: SliceSpec,
-    ) -> FerrumResult<ArrayView<'_, T, IxDyn>> {
+    pub fn slice_axis(&self, axis: Axis, spec: SliceSpec) -> FerrumResult<ArrayView<'_, T, IxDyn>> {
         let ndim = self.ndim();
         let ax = axis.index();
         if ax >= ndim {
@@ -200,10 +188,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     /// # Errors
     /// - `InvalidValue` if `specs.len() != ndim()`
     /// - Any errors from individual axis slicing
-    pub fn slice_multi(
-        &self,
-        specs: &[SliceSpec],
-    ) -> FerrumResult<ArrayView<'_, T, IxDyn>> {
+    pub fn slice_multi(&self, specs: &[SliceSpec]) -> FerrumResult<ArrayView<'_, T, IxDyn>> {
         let ndim = self.ndim();
         if specs.len() != ndim {
             return Err(FerrumError::invalid_value(format!(
@@ -358,11 +343,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
 
 impl<'a, T: Element, D: Dimension> ArrayView<'a, T, D> {
     /// Index into the view along a given axis, removing that axis.
-    pub fn index_axis(
-        &self,
-        axis: Axis,
-        index: isize,
-    ) -> FerrumResult<ArrayView<'a, T, IxDyn>>
+    pub fn index_axis(&self, axis: Axis, index: isize) -> FerrumResult<ArrayView<'a, T, IxDyn>>
     where
         D::NdarrayDim: ndarray::RemoveAxis,
     {
@@ -382,11 +363,7 @@ impl<'a, T: Element, D: Dimension> ArrayView<'a, T, D> {
     }
 
     /// Slice the view along a given axis.
-    pub fn slice_axis(
-        &self,
-        axis: Axis,
-        spec: SliceSpec,
-    ) -> FerrumResult<ArrayView<'a, T, IxDyn>> {
+    pub fn slice_axis(&self, axis: Axis, spec: SliceSpec) -> FerrumResult<ArrayView<'a, T, IxDyn>> {
         let ndim = self.ndim();
         let ax = axis.index();
         if ax >= ndim {
@@ -519,11 +496,7 @@ mod tests {
 
     #[test]
     fn index_axis_row() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let row = arr.index_axis(Axis(0), 1).unwrap();
         assert_eq!(row.shape(), &[4]);
         let data: Vec<i32> = row.iter().copied().collect();
@@ -532,11 +505,7 @@ mod tests {
 
     #[test]
     fn index_axis_column() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let col = arr.index_axis(Axis(1), 2).unwrap();
         assert_eq!(col.shape(), &[3]);
         let data: Vec<i32> = col.iter().copied().collect();
@@ -545,11 +514,7 @@ mod tests {
 
     #[test]
     fn index_axis_negative() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let row = arr.index_axis(Axis(0), -1).unwrap();
         let data: Vec<i32> = row.iter().copied().collect();
         assert_eq!(data, vec![8, 9, 10, 11]);
@@ -557,22 +522,15 @@ mod tests {
 
     #[test]
     fn index_axis_out_of_bounds() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         assert!(arr.index_axis(Axis(0), 3).is_err());
         assert!(arr.index_axis(Axis(2), 0).is_err());
     }
 
     #[test]
     fn index_axis_is_zero_copy() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let row = arr.index_axis(Axis(0), 0).unwrap();
         assert_eq!(row.as_ptr(), arr.as_ptr());
     }
@@ -593,7 +551,9 @@ mod tests {
     #[test]
     fn slice_axis_step() {
         let arr = Array::<i32, Ix1>::from_vec(Ix1::new([6]), vec![0, 1, 2, 3, 4, 5]).unwrap();
-        let sliced = arr.slice_axis(Axis(0), SliceSpec::with_step(0, 6, 2)).unwrap();
+        let sliced = arr
+            .slice_axis(Axis(0), SliceSpec::with_step(0, 6, 2))
+            .unwrap();
         assert_eq!(sliced.shape(), &[3]);
         let data: Vec<i32> = sliced.iter().copied().collect();
         assert_eq!(data, vec![0, 2, 4]);
@@ -619,7 +579,9 @@ mod tests {
     fn slice_axis_negative_step_partial() {
         let arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0, 1, 2, 3, 4]).unwrap();
         // Range [1, 4) traversed backwards with step -1: [3, 2, 1]
-        let sliced = arr.slice_axis(Axis(0), SliceSpec::with_step(1, 4, -1)).unwrap();
+        let sliced = arr
+            .slice_axis(Axis(0), SliceSpec::with_step(1, 4, -1))
+            .unwrap();
         let data: Vec<i32> = sliced.iter().copied().collect();
         assert_eq!(data, vec![3, 2, 1]);
     }
@@ -634,11 +596,7 @@ mod tests {
 
     #[test]
     fn slice_axis_2d_rows() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([4, 3]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([4, 3]), (0..12).collect()).unwrap();
         let sliced = arr.slice_axis(Axis(0), SliceSpec::new(1, 3)).unwrap();
         assert_eq!(sliced.shape(), &[2, 3]);
         let data: Vec<i32> = sliced.iter().copied().collect();
@@ -658,9 +616,10 @@ mod tests {
     #[test]
     fn slice_axis_zero_step_error() {
         let arr = Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![1, 2, 3]).unwrap();
-        assert!(arr
-            .slice_axis(Axis(0), SliceSpec::with_step(0, 3, 0))
-            .is_err());
+        assert!(
+            arr.slice_axis(Axis(0), SliceSpec::with_step(0, 3, 0))
+                .is_err()
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -669,11 +628,7 @@ mod tests {
 
     #[test]
     fn slice_multi_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([4, 5]),
-            (0..20).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([4, 5]), (0..20).collect()).unwrap();
         let sliced = arr
             .slice_multi(&[SliceSpec::new(1, 3), SliceSpec::new(0, 4)])
             .unwrap();
@@ -682,11 +637,7 @@ mod tests {
 
     #[test]
     fn slice_multi_wrong_count() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            (0..6).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), (0..6).collect()).unwrap();
         assert!(arr.slice_multi(&[SliceSpec::full()]).is_err());
     }
 
@@ -696,31 +647,27 @@ mod tests {
 
     #[test]
     fn insert_axis_at_front() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let expanded = arr.insert_axis(Axis(0)).unwrap();
         assert_eq!(expanded.shape(), &[1, 3]);
     }
 
     #[test]
     fn insert_axis_at_end() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let expanded = arr.insert_axis(Axis(1)).unwrap();
         assert_eq!(expanded.shape(), &[3, 1]);
     }
 
     #[test]
     fn insert_axis_out_of_bounds() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         assert!(arr.insert_axis(Axis(3)).is_err());
     }
 
     #[test]
     fn remove_axis_single() {
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([1, 3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([1, 3]), vec![1.0, 2.0, 3.0]).unwrap();
         let squeezed = arr.remove_axis(Axis(0)).unwrap();
         assert_eq!(squeezed.shape(), &[3]);
         let data: Vec<f64> = squeezed.iter().copied().collect();
@@ -729,15 +676,13 @@ mod tests {
 
     #[test]
     fn remove_axis_not_one() {
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
         assert!(arr.remove_axis(Axis(0)).is_err());
     }
 
     #[test]
     fn remove_axis_out_of_bounds() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         assert!(arr.remove_axis(Axis(1)).is_err());
     }
 
@@ -747,11 +692,7 @@ mod tests {
 
     #[test]
     fn flat_index_positive() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         assert_eq!(*arr.flat_index(0).unwrap(), 1);
         assert_eq!(*arr.flat_index(3).unwrap(), 4);
         assert_eq!(*arr.flat_index(5).unwrap(), 6);
@@ -777,11 +718,7 @@ mod tests {
 
     #[test]
     fn get_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         assert_eq!(*arr.get(&[0, 0]).unwrap(), 0);
         assert_eq!(*arr.get(&[1, 2]).unwrap(), 6);
         assert_eq!(*arr.get(&[2, 3]).unwrap(), 11);
@@ -789,33 +726,22 @@ mod tests {
 
     #[test]
     fn get_negative_indices() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         assert_eq!(*arr.get(&[-1, -1]).unwrap(), 11);
         assert_eq!(*arr.get(&[-3, 0]).unwrap(), 0);
     }
 
     #[test]
     fn get_wrong_ndim() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            (0..6).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), (0..6).collect()).unwrap();
         assert!(arr.get(&[0]).is_err());
         assert!(arr.get(&[0, 0, 0]).is_err());
     }
 
     #[test]
     fn get_mut_modify() {
-        let mut arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let mut arr =
+            Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         *arr.get_mut(&[1, 2]).unwrap() = 99;
         assert_eq!(*arr.get(&[1, 2]).unwrap(), 99);
     }
@@ -826,11 +752,7 @@ mod tests {
 
     #[test]
     fn view_index_axis() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let v = arr.view();
         let row = v.index_axis(Axis(0), 1).unwrap();
         let data: Vec<i32> = row.iter().copied().collect();
@@ -848,8 +770,7 @@ mod tests {
 
     #[test]
     fn view_insert_remove_axis() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let v = arr.view();
         let expanded = v.insert_axis(Axis(0)).unwrap();
         assert_eq!(expanded.shape(), &[1, 4]);
@@ -859,11 +780,7 @@ mod tests {
 
     #[test]
     fn view_get() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let v = arr.view();
         assert_eq!(*v.get(&[1, 2]).unwrap(), 6);
     }
@@ -874,8 +791,7 @@ mod tests {
 
     #[test]
     fn view_mut_slice_axis() {
-        let mut arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![1, 2, 3, 4, 5]).unwrap();
+        let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![1, 2, 3, 4, 5]).unwrap();
         {
             let mut vm = arr.view_mut();
             let mut sliced = vm.slice_axis_mut(Axis(0), SliceSpec::new(1, 3)).unwrap();
@@ -893,11 +809,7 @@ mod tests {
 
     #[test]
     fn index_axis_3d() {
-        let arr = Array::<i32, Ix3>::from_vec(
-            Ix3::new([2, 3, 4]),
-            (0..24).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix3>::from_vec(Ix3::new([2, 3, 4]), (0..24).collect()).unwrap();
         let plane = arr.index_axis(Axis(0), 1).unwrap();
         assert_eq!(plane.shape(), &[3, 4]);
         assert_eq!(*plane.get(&[0, 0]).unwrap(), 12);

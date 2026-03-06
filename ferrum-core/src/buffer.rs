@@ -3,9 +3,9 @@
 use crate::dimension::Dimension;
 use crate::dtype::{DType, Element};
 
+use crate::array::arc::ArcArray;
 use crate::array::owned::Array;
 use crate::array::view::ArrayView;
-use crate::array::arc::ArcArray;
 
 /// Trait exposing the raw memory layout of an array for zero-copy interop.
 ///
@@ -119,11 +119,8 @@ mod tests {
 
     #[test]
     fn raw_buffer_array() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
 
         assert_eq!(arr.raw_shape(), &[2, 3]);
         assert_eq!(arr.raw_dtype(), DType::F64);
@@ -137,11 +134,7 @@ mod tests {
 
     #[test]
     fn raw_buffer_view() {
-        let arr = Array::<f32, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let arr = Array::<f32, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let v = arr.view();
 
         assert_eq!(v.raw_dtype(), DType::F32);
@@ -151,11 +144,7 @@ mod tests {
 
     #[test]
     fn raw_buffer_arc() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1, 2, 3, 4],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 2]), vec![1, 2, 3, 4]).unwrap();
         let arc = ArcArray::from_owned(arr);
 
         assert_eq!(arc.raw_dtype(), DType::I32);

@@ -4,9 +4,9 @@ use crate::dimension::Dimension;
 use crate::dtype::{DType, Element};
 use crate::error::{FerrumError, FerrumResult};
 
+use super::ArrayFlags;
 use super::owned::Array;
 use super::view::ArrayView;
-use super::ArrayFlags;
 
 // ---------------------------------------------------------------------------
 // REQ-35: Core introspection for Array<T, D>
@@ -117,11 +117,8 @@ mod tests {
 
     #[test]
     fn introspect_basics() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
 
         assert_eq!(arr.ndim(), 2);
         assert_eq!(arr.size(), 6);
@@ -151,11 +148,8 @@ mod tests {
 
     #[test]
     fn transpose_view() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let t = arr.t();
         assert_eq!(t.shape(), &[3, 2]);
         assert_eq!(t.size(), 6);
@@ -163,8 +157,7 @@ mod tests {
 
     #[test]
     fn copy_is_independent() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let copy = arr.copy();
         assert_eq!(copy.as_slice().unwrap(), arr.as_slice().unwrap());
         assert_ne!(copy.as_ptr(), arr.as_ptr());
@@ -172,11 +165,7 @@ mod tests {
 
     #[test]
     fn to_vec_flat() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1, 2, 3, 4],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 2]), vec![1, 2, 3, 4]).unwrap();
         assert_eq!(arr.to_vec_flat(), vec![1, 2, 3, 4]);
     }
 
@@ -189,11 +178,8 @@ mod tests {
 
     #[test]
     fn view_introspection() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let v = arr.view();
         assert_eq!(v.itemsize(), 8);
         assert_eq!(v.nbytes(), 48);
@@ -202,11 +188,8 @@ mod tests {
 
     #[test]
     fn view_transpose() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let v = arr.view();
         let vt = v.t();
         assert_eq!(vt.shape(), &[3, 2]);

@@ -128,8 +128,7 @@ mod tests {
 
     #[test]
     fn mapv_double() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let doubled = arr.mapv(|x| x * 2.0);
         assert_eq!(doubled.as_slice().unwrap(), &[2.0, 4.0, 6.0, 8.0]);
         // Original unchanged
@@ -138,18 +137,15 @@ mod tests {
 
     #[test]
     fn mapv_inplace_negate() {
-        let mut arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, -2.0, 3.0]).unwrap();
+        let mut arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, -2.0, 3.0]).unwrap();
         arr.mapv_inplace(|x| -x);
         assert_eq!(arr.as_slice().unwrap(), &[-1.0, 2.0, -3.0]);
     }
 
     #[test]
     fn zip_mut_with_add() {
-        let mut a =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
-        let b =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![10.0, 20.0, 30.0]).unwrap();
+        let mut a = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let b = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![10.0, 20.0, 30.0]).unwrap();
         a.zip_mut_with(&b, |x, y| *x += y).unwrap();
         assert_eq!(a.as_slice().unwrap(), &[11.0, 22.0, 33.0]);
     }
@@ -163,11 +159,8 @@ mod tests {
 
     #[test]
     fn fold_axis_sum_rows() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         // Sum along axis 1 (sum each row)
         let sums = arr.fold_axis(Axis(1), 0.0, |acc, &x| *acc + x).unwrap();
         assert_eq!(sums.shape(), &[2]);
@@ -177,11 +170,8 @@ mod tests {
 
     #[test]
     fn fold_axis_sum_cols() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         // Sum along axis 0 (sum each column)
         let sums = arr.fold_axis(Axis(0), 0.0, |acc, &x| *acc + x).unwrap();
         assert_eq!(sums.shape(), &[3]);
@@ -197,16 +187,14 @@ mod tests {
 
     #[test]
     fn map_to_different_type() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.5, 2.7, 3.1]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.5, 2.7, 3.1]).unwrap();
         let ints: Array<i32, Ix1> = arr.map_to(|x| x as i32);
         assert_eq!(ints.as_slice().unwrap(), &[1, 2, 3]);
     }
 
     #[test]
     fn view_mapv() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let v = arr.view();
         let doubled = v.mapv(|x| x * 2.0);
         assert_eq!(doubled.as_slice().unwrap(), &[2.0, 4.0, 6.0]);

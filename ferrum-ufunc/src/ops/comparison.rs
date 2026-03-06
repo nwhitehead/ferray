@@ -3,10 +3,10 @@
 // equal, not_equal, less, less_equal, greater, greater_equal,
 // array_equal, array_equiv, allclose, isclose
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
 use crate::helpers::binary_map_op;
@@ -93,12 +93,7 @@ where
 /// Test whether two arrays are element-wise close within tolerances.
 ///
 /// |a - b| <= atol + rtol * |b|
-pub fn allclose<T, D>(
-    a: &Array<T, D>,
-    b: &Array<T, D>,
-    rtol: T,
-    atol: T,
-) -> FerrumResult<bool>
+pub fn allclose<T, D>(a: &Array<T, D>, b: &Array<T, D>, rtol: T, atol: T) -> FerrumResult<bool>
 where
     T: Element + Float,
     D: Dimension,

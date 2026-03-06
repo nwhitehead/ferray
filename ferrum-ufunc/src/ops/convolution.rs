@@ -2,10 +2,10 @@
 //
 // convolve with modes: Full, Same, Valid
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Ix1;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 /// Convolution mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -97,7 +97,10 @@ fn derive_record_multi_type() {
 
 #[test]
 fn derive_record_multi_type_size() {
-    assert_eq!(Measurement::record_size(), std::mem::size_of::<Measurement>());
+    assert_eq!(
+        Measurement::record_size(),
+        std::mem::size_of::<Measurement>()
+    );
     // f64(8) + f32(4) + i32(4) + bool(1) + padding(7) = 24 for repr(C)
     // The exact size depends on alignment, but it's at least 17
     assert!(Measurement::record_size() >= 17);
@@ -278,6 +281,5 @@ use num_complex::Complex;
 
 #[test]
 fn promoted_type_complex_f32() {
-    let _: ferrum_core::promoted_type!(f32, Complex<f32>) =
-        Complex::new(1.0f32, 0.0f32);
+    let _: ferrum_core::promoted_type!(f32, Complex<f32>) = Complex::new(1.0f32, 0.0f32);
 }

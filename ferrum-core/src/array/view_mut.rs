@@ -4,8 +4,8 @@ use crate::dimension::Dimension;
 use crate::dtype::Element;
 use crate::layout::MemoryLayout;
 
-use super::owned::Array;
 use super::ArrayFlags;
+use super::owned::Array;
 
 /// A mutable, borrowed view into an existing array's data.
 ///
@@ -119,8 +119,7 @@ mod tests {
 
     #[test]
     fn view_mut_from_owned() {
-        let mut arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let mut arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let v = arr.view_mut();
         assert_eq!(v.shape(), &[3]);
         assert!(v.flags().writeable);
@@ -129,8 +128,7 @@ mod tests {
 
     #[test]
     fn view_mut_modify() {
-        let mut arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let mut arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         {
             let mut v = arr.view_mut();
             if let Some(s) = v.as_slice_mut() {

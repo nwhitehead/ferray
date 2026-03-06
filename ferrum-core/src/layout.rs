@@ -31,8 +31,8 @@ impl MemoryLayout {
     }
 }
 
-impl std::fmt::Display for MemoryLayout {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for MemoryLayout {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::C => write!(f, "C"),
             Self::Fortran => write!(f, "F"),
@@ -42,6 +42,7 @@ impl std::fmt::Display for MemoryLayout {
 }
 
 /// Determine memory layout from shape and strides.
+#[cfg(not(feature = "no_std"))]
 pub(crate) fn detect_layout(shape: &[usize], strides: &[isize]) -> MemoryLayout {
     if shape.is_empty() {
         return MemoryLayout::C; // scalar-like
@@ -59,6 +60,7 @@ pub(crate) fn detect_layout(shape: &[usize], strides: &[isize]) -> MemoryLayout 
     }
 }
 
+#[cfg(not(feature = "no_std"))]
 fn is_c_contiguous(shape: &[usize], strides: &[isize]) -> bool {
     if shape.len() != strides.len() {
         return false;
@@ -80,6 +82,7 @@ fn is_c_contiguous(shape: &[usize], strides: &[isize]) -> bool {
     true
 }
 
+#[cfg(not(feature = "no_std"))]
 fn is_f_contiguous(shape: &[usize], strides: &[isize]) -> bool {
     if shape.len() != strides.len() {
         return false;

@@ -4,9 +4,9 @@ use crate::dimension::Dimension;
 use crate::dtype::Element;
 use crate::layout::MemoryLayout;
 
+use super::ArrayFlags;
 use super::owned::Array;
 use super::view::ArrayView;
-use super::ArrayFlags;
 
 /// A copy-on-write array that is either a borrowed view or an owned array.
 ///
@@ -169,8 +169,7 @@ mod tests {
 
     #[test]
     fn cow_from_view() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let view = arr.view();
         let cow = CowArray::from_view(view);
         assert!(cow.is_borrowed());
@@ -180,8 +179,7 @@ mod tests {
 
     #[test]
     fn cow_from_owned() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let cow = CowArray::from_owned(arr);
         assert!(cow.is_owned());
         assert!(!cow.is_borrowed());
@@ -189,8 +187,7 @@ mod tests {
 
     #[test]
     fn cow_to_mut_clones_when_borrowed() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let view = arr.view();
         let mut cow = CowArray::from_view(view);
 
@@ -202,8 +199,7 @@ mod tests {
 
     #[test]
     fn cow_into_owned() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let view = arr.view();
         let cow = CowArray::from_view(view);
         let owned = cow.into_owned();

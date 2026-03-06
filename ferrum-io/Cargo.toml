@@ -13,5 +13,13 @@ flate2 = { workspace = true }
 memmap2 = { workspace = true }
 zip = { workspace = true }
 
+[dependencies.half]
+workspace = true
+optional = true
+
+[features]
+default = []
+f16 = ["dep:half", "ferrum-core/f16"]
+
 [dev-dependencies]
 proptest = { workspace = true }

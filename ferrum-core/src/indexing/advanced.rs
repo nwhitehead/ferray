@@ -28,11 +28,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     /// # Errors
     /// - `AxisOutOfBounds` if `axis >= ndim`
     /// - `IndexOutOfBounds` if any index is out of range
-    pub fn index_select(
-        &self,
-        axis: Axis,
-        indices: &[isize],
-    ) -> FerrumResult<Array<T, IxDyn>> {
+    pub fn index_select(&self, axis: Axis, indices: &[isize]) -> FerrumResult<Array<T, IxDyn>> {
         let ndim = self.ndim();
         let ax = axis.index();
         if ax >= ndim {
@@ -63,10 +59,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     ///
     /// # Errors
     /// - `ShapeMismatch` if mask shape is incompatible
-    pub fn boolean_index(
-        &self,
-        mask: &Array<bool, D>,
-    ) -> FerrumResult<Array<T, Ix1>> {
+    pub fn boolean_index(&self, mask: &Array<bool, D>) -> FerrumResult<Array<T, Ix1>> {
         if self.shape() != mask.shape() {
             return Err(FerrumError::shape_mismatch(format!(
                 "boolean index mask shape {:?} does not match array shape {:?}",
@@ -92,10 +85,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     ///
     /// # Errors
     /// - `ShapeMismatch` if `mask.len() != self.size()`
-    pub fn boolean_index_flat(
-        &self,
-        mask: &Array<bool, Ix1>,
-    ) -> FerrumResult<Array<T, Ix1>> {
+    pub fn boolean_index_flat(&self, mask: &Array<bool, Ix1>) -> FerrumResult<Array<T, Ix1>> {
         if mask.size() != self.size() {
             return Err(FerrumError::shape_mismatch(format!(
                 "flat boolean mask length {} does not match array size {}",
@@ -121,11 +111,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
     ///
     /// # Errors
     /// - `ShapeMismatch` if mask shape differs from array shape
-    pub fn boolean_index_assign(
-        &mut self,
-        mask: &Array<bool, D>,
-        value: T,
-    ) -> FerrumResult<()> {
+    pub fn boolean_index_assign(&mut self, mask: &Array<bool, D>, value: T) -> FerrumResult<()> {
         if self.shape() != mask.shape() {
             return Err(FerrumError::shape_mismatch(format!(
                 "boolean index mask shape {:?} does not match array shape {:?}",
@@ -189,11 +175,7 @@ impl<T: Element, D: Dimension> Array<T, D> {
 
 impl<T: Element, D: Dimension> ArrayView<'_, T, D> {
     /// Select elements along an axis using an array of indices (copy).
-    pub fn index_select(
-        &self,
-        axis: Axis,
-        indices: &[isize],
-    ) -> FerrumResult<Array<T, IxDyn>> {
+    pub fn index_select(&self, axis: Axis, indices: &[isize]) -> FerrumResult<Array<T, IxDyn>> {
         let ndim = self.ndim();
         let ax = axis.index();
         if ax >= ndim {
@@ -213,10 +195,7 @@ impl<T: Element, D: Dimension> ArrayView<'_, T, D> {
     }
 
     /// Select elements using a boolean mask (copy).
-    pub fn boolean_index(
-        &self,
-        mask: &Array<bool, D>,
-    ) -> FerrumResult<Array<T, Ix1>> {
+    pub fn boolean_index(&self, mask: &Array<bool, D>) -> FerrumResult<Array<T, Ix1>> {
         if self.shape() != mask.shape() {
             return Err(FerrumError::shape_mismatch(format!(
                 "boolean index mask shape {:?} does not match view shape {:?}",
@@ -265,11 +244,7 @@ mod tests {
 
     #[test]
     fn index_select_rows() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([4, 3]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([4, 3]), (0..12).collect()).unwrap();
         let sel = arr.index_select(Axis(0), &[0, 2, 3]).unwrap();
         assert_eq!(sel.shape(), &[3, 3]);
         let data: Vec<i32> = sel.iter().copied().collect();
@@ -278,11 +253,7 @@ mod tests {
 
     #[test]
     fn index_select_columns() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let sel = arr.index_select(Axis(1), &[0, 2]).unwrap();
         assert_eq!(sel.shape(), &[3, 2]);
         let data: Vec<i32> = sel.iter().copied().collect();
@@ -336,11 +307,9 @@ mod tests {
     #[test]
     fn boolean_index_1d() {
         let arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![10, 20, 30, 40, 50]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![true, false, true, false, true],
-        )
-        .unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![true, false, true, false, true])
+                .unwrap();
         let selected = arr.boolean_index(&mask).unwrap();
         assert_eq!(selected.shape(), &[3]);
         assert_eq!(selected.as_slice().unwrap(), &[10, 30, 50]);
@@ -348,11 +317,7 @@ mod tests {
 
     #[test]
     fn boolean_index_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let mask = Array::<bool, Ix2>::from_vec(
             Ix2::new([2, 3]),
             vec![true, false, true, false, true, false],
@@ -381,8 +346,7 @@ mod tests {
     #[test]
     fn boolean_index_returns_copy() {
         let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
-        let mask =
-            Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![true, true, true]).unwrap();
+        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![true, true, true]).unwrap();
         let selected = arr.boolean_index(&mask).unwrap();
         assert_ne!(selected.as_ptr() as usize, arr.as_ptr() as usize);
     }
@@ -393,11 +357,7 @@ mod tests {
 
     #[test]
     fn boolean_index_flat_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let mask = Array::<bool, Ix1>::from_vec(
             Ix1::new([6]),
             vec![false, true, false, true, false, true],
@@ -409,11 +369,7 @@ mod tests {
 
     #[test]
     fn boolean_index_flat_wrong_size() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let mask =
             Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
         assert!(arr.boolean_index_flat(&mask).is_err());
@@ -426,11 +382,9 @@ mod tests {
     #[test]
     fn boolean_assign_scalar() {
         let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![1, 2, 3, 4, 5]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![true, false, true, false, true],
-        )
-        .unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![true, false, true, false, true])
+                .unwrap();
         arr.boolean_index_assign(&mask, 0).unwrap();
         assert_eq!(arr.as_slice().unwrap(), &[0, 2, 0, 4, 0]);
     }
@@ -438,11 +392,9 @@ mod tests {
     #[test]
     fn boolean_assign_array() {
         let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![1, 2, 3, 4, 5]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![false, true, false, true, false],
-        )
-        .unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, true, false])
+                .unwrap();
         let values = Array::<i32, Ix1>::from_vec(Ix1::new([2]), vec![99, 88]).unwrap();
         arr.boolean_index_assign_array(&mask, &values).unwrap();
         assert_eq!(arr.as_slice().unwrap(), &[1, 99, 3, 88, 5]);
@@ -451,19 +403,15 @@ mod tests {
     #[test]
     fn boolean_assign_array_wrong_count() {
         let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![1, 2, 3]).unwrap();
-        let mask =
-            Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![true, true, false]).unwrap();
+        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![true, true, false]).unwrap();
         let values = Array::<i32, Ix1>::from_vec(Ix1::new([1]), vec![99]).unwrap();
         assert!(arr.boolean_index_assign_array(&mask, &values).is_err());
     }
 
     #[test]
     fn boolean_assign_2d() {
-        let mut arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let mut arr =
+            Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let mask = Array::<bool, Ix2>::from_vec(
             Ix2::new([2, 3]),
             vec![false, true, false, false, true, false],
@@ -480,11 +428,7 @@ mod tests {
 
     #[test]
     fn view_index_select() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let v = arr.view();
         let sel = v.index_select(Axis(1), &[0, 3]).unwrap();
         assert_eq!(sel.shape(), &[3, 2]);

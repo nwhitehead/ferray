@@ -16,6 +16,7 @@ members = [
     "ferrum-ma",
     "ferrum-stride-tricks",
     "ferrum-numpy-interop",
+    "ferrum-autodiff",
 ]
 
 [workspace.package]

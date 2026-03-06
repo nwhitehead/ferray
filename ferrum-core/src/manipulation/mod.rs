@@ -81,7 +81,9 @@ pub fn squeeze<T: Element, D: Dimension>(
                     ax, shape[ax],
                 )));
             }
-            let new_shape: Vec<usize> = shape.iter().enumerate()
+            let new_shape: Vec<usize> = shape
+                .iter()
+                .enumerate()
                 .filter(|&(i, _)| i != ax)
                 .map(|(_, &s)| s)
                 .collect();
@@ -287,7 +289,11 @@ pub fn concatenate<T: Element>(
         let mut src_flat = 0usize;
         let mut src_mul = 1usize;
         for i in (0..ndim).rev() {
-            let idx = if i == axis { local_concat_idx } else { nd_idx[i] };
+            let idx = if i == axis {
+                local_concat_idx
+            } else {
+                nd_idx[i]
+            };
             src_flat += idx * src_mul;
             src_mul *= src_shape[i];
         }
@@ -310,14 +316,9 @@ pub fn concatenate<T: Element>(
 /// Returns `FerrumError::InvalidValue` if the array list is empty.
 /// Returns `FerrumError::ShapeMismatch` if shapes differ.
 /// Returns `FerrumError::AxisOutOfBounds` if axis > ndim.
-pub fn stack<T: Element>(
-    arrays: &[Array<T, IxDyn>],
-    axis: usize,
-) -> FerrumResult<Array<T, IxDyn>> {
+pub fn stack<T: Element>(arrays: &[Array<T, IxDyn>], axis: usize) -> FerrumResult<Array<T, IxDyn>> {
     if arrays.is_empty() {
-        return Err(FerrumError::invalid_value(
-            "stack: need at least one array",
-        ));
+        return Err(FerrumError::invalid_value("stack: need at least one array"));
     }
     let base_shape = arrays[0].shape();
     let ndim = base_shape.len();
@@ -430,9 +431,7 @@ pub fn dstack<T: Element>(arrays: &[Array<T, IxDyn>]) -> FerrumResult<Array<T, I
 ///
 /// # Errors
 /// Returns errors on shape mismatches.
-pub fn block<T: Element>(
-    blocks: &[Vec<Array<T, IxDyn>>],
-) -> FerrumResult<Array<T, IxDyn>> {
+pub fn block<T: Element>(blocks: &[Vec<Array<T, IxDyn>>]) -> FerrumResult<Array<T, IxDyn>> {
     if blocks.is_empty() {
         return Err(FerrumError::invalid_value("block: empty input"));
     }
@@ -776,11 +775,7 @@ pub fn flip<T: Element, D: Dimension>(
         for i in 0..ndim {
             let idx = rem / strides[i];
             rem %= strides[i];
-            let src_idx = if i == axis {
-                shape[i] - 1 - idx
-            } else {
-                idx
-            };
+            let src_idx = if i == axis { shape[i] - 1 - idx } else { idx };
             src_flat += src_idx * strides[i];
         }
         data.push(src_data[src_flat].clone());
@@ -826,10 +821,7 @@ pub fn flipud<T: Element, D: Dimension>(a: &Array<T, D>) -> FerrumResult<Array<T
 ///
 /// # Errors
 /// Returns `FerrumError::InvalidValue` if the array has fewer than 2 dimensions.
-pub fn rot90<T: Element, D: Dimension>(
-    a: &Array<T, D>,
-    k: i32,
-) -> FerrumResult<Array<T, IxDyn>> {
+pub fn rot90<T: Element, D: Dimension>(a: &Array<T, D>, k: i32) -> FerrumResult<Array<T, IxDyn>> {
     if a.ndim() < 2 {
         return Err(FerrumError::invalid_value(
             "rot90: array must be at least 2-D",
@@ -1021,10 +1013,7 @@ mod tests {
         let b = broadcast_to(&a, &[3, 3]).unwrap();
         assert_eq!(b.shape(), &[3, 3]);
         let data: Vec<f64> = b.iter().copied().collect();
-        assert_eq!(
-            data,
-            vec![1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0]
-        );
+        assert_eq!(data, vec![1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0]);
     }
 
     #[test]

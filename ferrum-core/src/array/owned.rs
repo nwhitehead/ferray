@@ -92,9 +92,8 @@ impl<T: Element, D: Dimension> Array<T, D> {
             )));
         }
         let nd_dim = dim.to_ndarray_dim();
-        let inner = ndarray::Array::from_shape_vec(nd_dim, data).map_err(|e| {
-            FerrumError::shape_mismatch(format!("ndarray shape error: {e}"))
-        })?;
+        let inner = ndarray::Array::from_shape_vec(nd_dim, data)
+            .map_err(|e| FerrumError::shape_mismatch(format!("ndarray shape error: {e}")))?;
         Ok(Self { inner, dim })
     }
 
@@ -113,10 +112,8 @@ impl<T: Element, D: Dimension> Array<T, D> {
             )));
         }
         let nd_dim = dim.to_ndarray_dim();
-        let inner =
-            ndarray::Array::from_shape_vec(nd_dim.f(), data).map_err(|e| {
-                FerrumError::shape_mismatch(format!("ndarray shape error: {e}"))
-            })?;
+        let inner = ndarray::Array::from_shape_vec(nd_dim.f(), data)
+            .map_err(|e| FerrumError::shape_mismatch(format!("ndarray shape error: {e}")))?;
         let dim = D::from_ndarray_dim(&inner.raw_dim());
         Ok(Self { inner, dim })
     }
@@ -256,8 +253,7 @@ mod tests {
 
     #[test]
     fn create_from_vec() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([4]), vec![1, 2, 3, 4]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([4]), vec![1, 2, 3, 4]).unwrap();
         assert_eq!(arr.shape(), &[4]);
         assert_eq!(arr.as_slice().unwrap(), &[1, 2, 3, 4]);
     }
@@ -282,11 +278,9 @@ mod tests {
 
     #[test]
     fn from_vec_f_order() {
-        let arr = Array::<f64, Ix2>::from_vec_f(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr =
+            Array::<f64, Ix2>::from_vec_f(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         assert_eq!(arr.shape(), &[2, 3]);
         assert_eq!(arr.layout(), MemoryLayout::Fortran);
     }
@@ -301,8 +295,7 @@ mod tests {
     #[test]
     fn ndarray_roundtrip() {
         let original = vec![1.0_f64, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), original.clone()).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), original.clone()).unwrap();
         let nd: ndarray::Array<f64, ndarray::Ix2> = arr.into();
         let arr2: Array<f64, Ix2> = nd.into();
         assert_eq!(arr2.as_slice().unwrap(), &original[..]);
@@ -310,8 +303,7 @@ mod tests {
 
     #[test]
     fn dynamic_rank() {
-        let arr =
-            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0; 6]).unwrap();
+        let arr = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0; 6]).unwrap();
         assert_eq!(arr.ndim(), 2);
         assert_eq!(arr.shape(), &[2, 3]);
     }

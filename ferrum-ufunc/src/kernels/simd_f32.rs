@@ -4,7 +4,7 @@
 // current implementation delegates to scalar libm; the dispatch path is
 // wired so that future polynomial-approximation SIMD kernels plug in here.
 
-use crate::dispatch::{dispatch_unary_f32, dispatch_binary_f32};
+use crate::dispatch::{dispatch_binary_f32, dispatch_unary_f32};
 
 /// SIMD-dispatched f32 sin.
 #[inline]

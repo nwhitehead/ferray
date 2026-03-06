@@ -2,10 +2,10 @@
 //
 // sinc, i0 (modified Bessel function of the first kind, order 0)
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
 use crate::helpers::unary_float_op;
@@ -73,14 +73,29 @@ fn bessel_i0<T: Float>(x: T) -> T {
         let c7 = T::from(-0.01647633).unwrap();
         let c8 = T::from(0.00392377).unwrap();
         let poly = c0
-            + t * (c1
-                + t * (c2
-                    + t * (c3
-                        + t * (c4
-                            + t * (c5
-                                + t * (c6 + t * (c7 + t * c8)))))));
+            + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * (c6 + t * (c7 + t * c8)))))));
         poly * ax.exp() / ax.sqrt()
     }
+}
+
+// ---------------------------------------------------------------------------
+// f16 variants (f32-promoted)
+// ---------------------------------------------------------------------------
+
+/// Normalized sinc function for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn sinc_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, |x| {
+        if x == 0.0 {
+            1.0
+        } else {
+            let px = std::f32::consts::PI * x;
+            px.sin() / px
+        }
+    })
 }
 
 #[cfg(test)]

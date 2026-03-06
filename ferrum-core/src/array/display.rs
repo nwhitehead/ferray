@@ -6,10 +6,10 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use crate::dimension::Dimension;
 use crate::dtype::Element;
 
-use super::owned::Array;
-use super::view::ArrayView;
 use super::arc::ArcArray;
 use super::cow::CowArray;
+use super::owned::Array;
+use super::view::ArrayView;
 
 // ---------------------------------------------------------------------------
 // Global print options
@@ -27,12 +27,7 @@ static PRINT_EDGEITEMS: AtomicUsize = AtomicUsize::new(3);
 /// - `threshold`: total element count above which truncation kicks in (default 1000)
 /// - `linewidth`: max characters per line (default 75)
 /// - `edgeitems`: number of items shown at each edge when truncated (default 3)
-pub fn set_print_options(
-    precision: usize,
-    threshold: usize,
-    linewidth: usize,
-    edgeitems: usize,
-) {
+pub fn set_print_options(precision: usize, threshold: usize, linewidth: usize, edgeitems: usize) {
     PRINT_PRECISION.store(precision, Ordering::Relaxed);
     PRINT_THRESHOLD.store(threshold, Ordering::Relaxed);
     PRINT_LINEWIDTH.store(linewidth, Ordering::Relaxed);
@@ -208,7 +203,12 @@ impl<T: Element, D: Dimension> fmt::Display for ArrayView<'_, T, D> {
 
 impl<T: Element, D: Dimension> fmt::Debug for ArrayView<'_, T, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ArrayView(dtype={}, shape={:?}, ", T::dtype(), self.shape())?;
+        write!(
+            f,
+            "ArrayView(dtype={}, shape={:?}, ",
+            T::dtype(),
+            self.shape()
+        )?;
         format_array_data::<T, D>(&self.inner, f)?;
         write!(f, ")")
     }
@@ -223,15 +223,21 @@ impl<T: Element, D: Dimension> fmt::Display for ArcArray<T, D> {
         // Build a temporary ndarray view for formatting
         let nd_dim = self.dim().to_ndarray_dim();
         let slice = self.as_slice();
-        let view = ndarray::ArrayView::from_shape(nd_dim, slice)
-            .expect("ArcArray shape consistent");
+        let view =
+            ndarray::ArrayView::from_shape(nd_dim, slice).expect("ArcArray shape consistent");
         format_array_data::<T, D>(&view, f)
     }
 }
 
 impl<T: Element, D: Dimension> fmt::Debug for ArcArray<T, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ArcArray(dtype={}, shape={:?}, refs={}, ", T::dtype(), self.shape(), self.ref_count())?;
+        write!(
+            f,
+            "ArcArray(dtype={}, shape={:?}, refs={}, ",
+            T::dtype(),
+            self.shape(),
+            self.ref_count()
+        )?;
         fmt::Display::fmt(self, f)?;
         write!(f, ")")
     }
@@ -274,8 +280,7 @@ mod tests {
 
     #[test]
     fn display_1d() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([4]), vec![1, 2, 3, 4]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([4]), vec![1, 2, 3, 4]).unwrap();
         let s = format!("{arr}");
         assert!(s.contains("[1, 2, 3, 4]"));
         assert!(s.starts_with("array("));
@@ -283,11 +288,7 @@ mod tests {
 
     #[test]
     fn display_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let s = format!("{arr}");
         assert!(s.contains("[1, 2, 3]"));
         assert!(s.contains("[4, 5, 6]"));
@@ -295,8 +296,7 @@ mod tests {
 
     #[test]
     fn debug_format() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0]).unwrap();
         let s = format!("{arr:?}");
         assert!(s.contains("dtype=float64"));
         assert!(s.contains("shape=[2]"));
@@ -307,8 +307,7 @@ mod tests {
         // Set low threshold to force truncation
         set_print_options(8, 5, 75, 2);
 
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([10]), (0..10).collect()).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([10]), (0..10).collect()).unwrap();
         let s = format!("{arr}");
         assert!(s.contains("..."));
 
@@ -318,8 +317,7 @@ mod tests {
 
     #[test]
     fn arc_display() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30]).unwrap();
         let arc = ArcArray::from_owned(arr);
         let s = format!("{arc}");
         assert!(s.contains("[10, 20, 30]"));
@@ -327,8 +325,7 @@ mod tests {
 
     #[test]
     fn cow_display() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([2]), vec![7, 8]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([2]), vec![7, 8]).unwrap();
         let cow = CowArray::from_owned(arr);
         let s = format!("{cow}");
         assert!(s.contains("[7, 8]"));

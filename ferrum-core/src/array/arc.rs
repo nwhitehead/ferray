@@ -6,9 +6,9 @@ use crate::dimension::Dimension;
 use crate::dtype::Element;
 use crate::layout::MemoryLayout;
 
+use super::ArrayFlags;
 use super::owned::Array;
 use super::view::ArrayView;
-use super::ArrayFlags;
 
 /// A reference-counted N-dimensional array with copy-on-write semantics.
 ///
@@ -233,8 +233,7 @@ mod tests {
 
     #[test]
     fn arc_from_owned() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let arc = ArcArray::from_owned(arr);
         assert_eq!(arc.shape(), &[3]);
         assert_eq!(arc.as_slice(), &[1.0, 2.0, 3.0]);
@@ -243,8 +242,7 @@ mod tests {
 
     #[test]
     fn arc_clone_shares() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let arc1 = ArcArray::from_owned(arr);
         let arc2 = arc1.clone();
         assert_eq!(arc1.ref_count(), 2);
@@ -254,8 +252,7 @@ mod tests {
 
     #[test]
     fn arc_cow_on_mutation() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let arc1 = ArcArray::from_owned(arr);
         let mut arc2 = arc1.clone();
 
@@ -276,8 +273,7 @@ mod tests {
 
     #[test]
     fn arc_view_sees_old_data_after_cow() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let mut arc = ArcArray::from_owned(arr);
         let arc_clone = arc.clone();
 
@@ -296,8 +292,7 @@ mod tests {
 
     #[test]
     fn arc_unique_no_clone() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let mut arc = ArcArray::from_owned(arr);
         let ptr_before = arc.as_ptr();
 
@@ -309,8 +304,7 @@ mod tests {
 
     #[test]
     fn arc_into_owned() {
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
         let arc = ArcArray::from_owned(arr);
         let owned = arc.into_owned();
         assert_eq!(owned.shape(), &[2, 3]);
@@ -318,8 +312,7 @@ mod tests {
 
     #[test]
     fn arc_mapv_inplace() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let mut arc = ArcArray::from_owned(arr);
         arc.mapv_inplace(|x| x * 2.0);
         assert_eq!(arc.as_slice(), &[2.0, 4.0, 6.0]);
@@ -327,8 +320,7 @@ mod tests {
 
     #[test]
     fn arc_copy_is_independent() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         let arc = ArcArray::from_owned(arr);
         let copy = arc.copy();
         assert_ne!(arc.as_ptr(), copy.as_ptr());

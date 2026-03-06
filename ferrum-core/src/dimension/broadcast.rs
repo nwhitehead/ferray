@@ -40,8 +40,16 @@ pub fn broadcast_shapes(a: &[usize], b: &[usize]) -> FerrumResult<Vec<usize>> {
     let mut result = vec![0usize; ndim];
 
     for i in 0..ndim {
-        let da = if i < ndim - a.len() { 1 } else { a[i - (ndim - a.len())] };
-        let db = if i < ndim - b.len() { 1 } else { b[i - (ndim - b.len())] };
+        let da = if i < ndim - a.len() {
+            1
+        } else {
+            a[i - (ndim - a.len())]
+        };
+        let db = if i < ndim - b.len() {
+            1
+        } else {
+            b[i - (ndim - b.len())]
+        };
 
         if da == db {
             result[i] = da;
@@ -157,20 +165,13 @@ pub fn broadcast_to<'a, T: Element, D: Dimension>(
     // Build ndarray view with computed strides
     // We need to create an IxDyn view with the broadcast strides
     let nd_shape = ndarray::IxDyn(target_shape);
-    let nd_strides = ndarray::IxDyn(
-        &new_strides
-            .iter()
-            .map(|&s| s as usize)
-            .collect::<Vec<_>>(),
-    );
+    let nd_strides = ndarray::IxDyn(&new_strides.iter().map(|&s| s as usize).collect::<Vec<_>>());
 
     // Use from_shape_ptr with the broadcast strides
     let ptr = array.as_ptr();
     // SAFETY: the broadcast strides ensure we only access valid memory
     // from the source array. Stride-0 dimensions repeat the same element.
-    let nd_view = unsafe {
-        ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr)
-    };
+    let nd_view = unsafe { ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr) };
 
     Ok(ArrayView::from_ndarray(nd_view))
 }
@@ -197,17 +198,10 @@ pub fn broadcast_view_to<'a, T: Element, D: Dimension>(
     let new_strides = broadcast_strides(src_shape, src_strides, target_shape)?;
 
     let nd_shape = ndarray::IxDyn(target_shape);
-    let nd_strides = ndarray::IxDyn(
-        &new_strides
-            .iter()
-            .map(|&s| s as usize)
-            .collect::<Vec<_>>(),
-    );
+    let nd_strides = ndarray::IxDyn(&new_strides.iter().map(|&s| s as usize).collect::<Vec<_>>());
 
     let ptr = view.as_ptr();
-    let nd_view = unsafe {
-        ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr)
-    };
+    let nd_view = unsafe { ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr) };
 
     Ok(ArrayView::from_ndarray(nd_view))
 }
@@ -275,17 +269,12 @@ impl<'a, T: Element, D: Dimension> ArrayView<'a, T, D> {
         let new_strides = broadcast_strides(src_shape, src_strides, target_shape)?;
 
         let nd_shape = ndarray::IxDyn(target_shape);
-        let nd_strides = ndarray::IxDyn(
-            &new_strides
-                .iter()
-                .map(|&s| s as usize)
-                .collect::<Vec<_>>(),
-        );
+        let nd_strides =
+            ndarray::IxDyn(&new_strides.iter().map(|&s| s as usize).collect::<Vec<_>>());
 
         let ptr = self.as_ptr();
-        let nd_view = unsafe {
-            ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr)
-        };
+        let nd_view =
+            unsafe { ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr) };
 
         Ok(ArrayView::from_ndarray(nd_view))
     }
@@ -346,8 +335,7 @@ mod tests {
 
     #[test]
     fn broadcast_shapes_multi_test() {
-        let result =
-            broadcast_shapes_multi(&[&[2, 1], &[3], &[1, 3]]).unwrap();
+        let result = broadcast_shapes_multi(&[&[2, 1], &[3], &[1, 3]]).unwrap();
         assert_eq!(result, vec![2, 3]);
     }
 
@@ -402,8 +390,7 @@ mod tests {
     #[test]
     fn broadcast_to_column_to_2d() {
         // (3,1) -> (3,4)
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([3, 1]), vec![1.0, 2.0, 3.0]).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([3, 1]), vec![1.0, 2.0, 3.0]).unwrap();
         let view = broadcast_to(&arr, &[3, 4]).unwrap();
         assert_eq!(view.shape(), &[3, 4]);
 
@@ -469,11 +456,8 @@ mod tests {
     #[test]
     fn broadcast_3d() {
         // (2,1,4) + (3,4) -> (2,3,4)
-        let a = Array::<i32, Ix3>::from_vec(
-            Ix3::new([2, 1, 4]),
-            vec![1, 2, 3, 4, 5, 6, 7, 8],
-        )
-        .unwrap();
+        let a =
+            Array::<i32, Ix3>::from_vec(Ix3::new([2, 1, 4]), vec![1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
         let view = a.broadcast_to(&[2, 3, 4]).unwrap();
         assert_eq!(view.shape(), &[2, 3, 4]);
         assert_eq!(view.size(), 24);
@@ -481,16 +465,14 @@ mod tests {
 
     #[test]
     fn broadcast_to_same_shape() {
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
         let view = arr.broadcast_to(&[2, 3]).unwrap();
         assert_eq!(view.shape(), &[2, 3]);
     }
 
     #[test]
     fn broadcast_to_cannot_shrink() {
-        let arr =
-            Array::<f64, Ix2>::from_vec(Ix2::new([3, 4]), vec![1.0; 12]).unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([3, 4]), vec![1.0; 12]).unwrap();
         assert!(arr.broadcast_to(&[3]).is_err());
     }
 }

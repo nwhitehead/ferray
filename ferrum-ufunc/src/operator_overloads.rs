@@ -9,10 +9,10 @@
 //
 // Users can call these directly: `ufunc::array_add(&a, &b)` etc.
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
 use crate::ops::bitwise::{BitwiseOps, ShiftOps};

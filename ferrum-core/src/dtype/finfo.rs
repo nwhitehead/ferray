@@ -2,7 +2,7 @@
 //
 // Mirrors numpy.finfo and numpy.iinfo for compile-time type metadata.
 
-use std::fmt;
+use core::fmt;
 
 // ---------------------------------------------------------------------------
 // FloatInfo — returned by finfo::<T>()
@@ -138,8 +138,8 @@ impl FloatType for f32 {
             bits: 32,
             nmant: f32::MANTISSA_DIGITS - 1, // 23
             nexp: 8,
-            maxexp: f32::MAX_EXP,   // 128
-            minexp: f32::MIN_EXP,   // -125
+            maxexp: f32::MAX_EXP, // 128
+            minexp: f32::MIN_EXP, // -125
         }
     }
 }
@@ -163,8 +163,8 @@ impl FloatType for f64 {
             bits: 64,
             nmant: f64::MANTISSA_DIGITS - 1, // 52
             nexp: 11,
-            maxexp: f64::MAX_EXP,   // 1024
-            minexp: f64::MIN_EXP,   // -1021
+            maxexp: f64::MAX_EXP, // 1024
+            minexp: f64::MIN_EXP, // -1021
         }
     }
 }

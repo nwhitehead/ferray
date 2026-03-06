@@ -34,14 +34,12 @@ pub unsafe trait FerrumRecord: Clone + Send + Sync + 'static {
     /// Return descriptors for all fields, in declaration order.
     fn field_descriptors() -> &'static [FieldDescriptor];
 
-    /// Total size of one record in bytes (same as `std::mem::size_of::<Self>()`).
+    /// Total size of one record in bytes (same as `core::mem::size_of::<Self>()`).
     fn record_size() -> usize;
 
     /// Return the field descriptor for a named field, if it exists.
     fn field_by_name(name: &str) -> Option<&'static FieldDescriptor> {
-        Self::field_descriptors()
-            .iter()
-            .find(|fd| fd.name == name)
+        Self::field_descriptors().iter().find(|fd| fd.name == name)
     }
 }
 
@@ -85,7 +83,7 @@ mod tests {
         }
 
         fn record_size() -> usize {
-            std::mem::size_of::<Self>()
+            core::mem::size_of::<Self>()
         }
     }
 

@@ -212,13 +212,8 @@ impl<T: Element, D: Dimension> UninitArray<T, D> {
         // SAFETY: MaybeUninit<T> has the same layout as T, and the caller
         // guarantees all elements are initialized.
         let mut raw_vec = std::mem::ManuallyDrop::new(self.data);
-        let data: Vec<T> = unsafe {
-            Vec::from_raw_parts(
-                raw_vec.as_mut_ptr() as *mut T,
-                len,
-                raw_vec.capacity(),
-            )
-        };
+        let data: Vec<T> =
+            unsafe { Vec::from_raw_parts(raw_vec.as_mut_ptr() as *mut T, len, raw_vec.capacity()) };
 
         let inner = ndarray::Array::from_shape_vec(nd_dim, data)
             .expect("UninitArray assume_init: shape/data mismatch (this is a bug)");
@@ -238,7 +233,9 @@ pub fn empty<T: Element, D: Dimension>(dim: D) -> UninitArray<T, D> {
     let mut data = Vec::with_capacity(size);
     // SAFETY: MaybeUninit does not require initialization.
     // We set the length to match the capacity; each element is MaybeUninit.
-    unsafe { data.set_len(size); }
+    unsafe {
+        data.set_len(size);
+    }
     UninitArray { data, dim }
 }
 
@@ -625,9 +622,7 @@ pub fn diag<T: Element>(a: &Array<T, IxDyn>, k: isize) -> FerrumResult<Array<T, 
             let len = diag_vals.len();
             Array::from_vec(IxDyn::new(&[len]), diag_vals)
         }
-        _ => Err(FerrumError::invalid_value(
-            "diag: input must be 1-D or 2-D",
-        )),
+        _ => Err(FerrumError::invalid_value("diag: input must be 1-D or 2-D")),
     }
 }
 
@@ -890,8 +885,8 @@ mod tests {
     fn test_logspace() {
         let a = logspace(0.0_f64, 2.0, 3, true, 10.0).unwrap();
         let data = a.as_slice().unwrap();
-        assert!((data[0] - 1.0).abs() < 1e-10);   // 10^0
-        assert!((data[1] - 10.0).abs() < 1e-10);  // 10^1
+        assert!((data[0] - 1.0).abs() < 1e-10); // 10^0
+        assert!((data[1] - 10.0).abs() < 1e-10); // 10^1
         assert!((data[2] - 100.0).abs() < 1e-10); // 10^2
     }
 
@@ -1002,10 +997,7 @@ mod tests {
         let d = diag(&a, 0).unwrap();
         assert_eq!(d.shape(), &[3, 3]);
         let data: Vec<f64> = d.iter().copied().collect();
-        assert_eq!(
-            data,
-            vec![1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 3.0]
-        );
+        assert_eq!(data, vec![1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 3.0]);
     }
 
     #[test]
@@ -1027,10 +1019,7 @@ mod tests {
         let d = diag(&a, 1).unwrap();
         assert_eq!(d.shape(), &[3, 3]);
         let data: Vec<f64> = d.iter().copied().collect();
-        assert_eq!(
-            data,
-            vec![0.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]
-        );
+        assert_eq!(data, vec![0.0, 1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0]);
     }
 
     #[test]
@@ -1048,10 +1037,7 @@ mod tests {
     fn test_tri() {
         let a = tri::<f64>(3, 3, 0).unwrap();
         let data = a.as_slice().unwrap();
-        assert_eq!(
-            data,
-            &[1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0]
-        );
+        assert_eq!(data, &[1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0]);
     }
 
     #[test]

@@ -1,6 +1,6 @@
 // ferrum-ufunc: SIMD kernels for f64 (REQ-17, REQ-18)
 
-use crate::dispatch::{dispatch_unary_f64, dispatch_binary_f64};
+use crate::dispatch::{dispatch_binary_f64, dispatch_unary_f64};
 
 /// SIMD-dispatched f64 sin.
 #[inline]

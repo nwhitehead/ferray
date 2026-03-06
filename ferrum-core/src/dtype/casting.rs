@@ -10,10 +10,14 @@
 // - isrealobj / iscomplexobj — type inspection predicates
 // - astype() / view_cast() — methods on Array for explicit casting
 
+#[cfg(not(feature = "no_std"))]
 use crate::dimension::Dimension;
 use crate::dtype::{DType, Element};
-use crate::error::{FerrumError, FerrumResult};
+#[cfg(not(feature = "no_std"))]
+use crate::error::FerrumError;
+use crate::error::FerrumResult;
 
+#[cfg(not(feature = "no_std"))]
 use super::promotion::PromoteTo;
 
 // ---------------------------------------------------------------------------
@@ -208,6 +212,10 @@ pub fn iscomplexobj<T: Element>() -> bool {
     T::dtype().is_complex()
 }
 
+// ===========================================================================
+// Everything below requires std (depends on Array / ndarray)
+// ===========================================================================
+
 // ---------------------------------------------------------------------------
 // astype() — explicit type casting on Array (REQ-25)
 // ---------------------------------------------------------------------------
@@ -217,6 +225,7 @@ pub fn iscomplexobj<T: Element>() -> bool {
 /// This is intentionally a separate trait so that mixed-type binary operations
 /// do NOT compile implicitly (REQ-24). Users must call `.astype::<T>()` or use
 /// `add_promoted()` etc.
+#[cfg(not(feature = "no_std"))]
 pub trait AsType<D: Dimension> {
     /// Cast all elements to type `U`, returning a new array.
     ///
@@ -229,11 +238,13 @@ pub trait AsType<D: Dimension> {
 
 /// Internal trait that performs the actual casting. Implemented for specific
 /// (T, U) pairs where `T: PromoteTo<U>` or where unsafe casting is valid.
+#[cfg(not(feature = "no_std"))]
 pub trait AsTypeInner<U: Element, D: Dimension> {
     /// Perform the cast.
     fn astype_inner(&self) -> FerrumResult<crate::array::owned::Array<U, D>>;
 }
 
+#[cfg(not(feature = "no_std"))]
 impl<T: Element, D: Dimension> AsType<D> for crate::array::owned::Array<T, D> {
     fn astype<U: Element>(&self) -> FerrumResult<crate::array::owned::Array<U, D>>
     where
@@ -244,6 +255,7 @@ impl<T: Element, D: Dimension> AsType<D> for crate::array::owned::Array<T, D> {
 }
 
 /// Blanket implementation: any T that can PromoteTo<U> can astype.
+#[cfg(not(feature = "no_std"))]
 impl<T, U, D> AsTypeInner<U, D> for crate::array::owned::Array<T, D>
 where
     T: Element + PromoteTo<U>,
@@ -271,11 +283,12 @@ where
 ///
 /// # Errors
 /// Returns `FerrumError::InvalidDtype` if the element sizes are incompatible.
+#[cfg(not(feature = "no_std"))]
 pub fn view_cast<T: Element, U: Element, D: Dimension>(
     arr: &crate::array::owned::Array<T, D>,
 ) -> FerrumResult<crate::array::owned::Array<U, D>> {
-    let t_size = std::mem::size_of::<T>();
-    let u_size = std::mem::size_of::<U>();
+    let t_size = core::mem::size_of::<T>();
+    let u_size = core::mem::size_of::<U>();
 
     if t_size != u_size {
         return Err(FerrumError::invalid_dtype(format!(
@@ -293,7 +306,7 @@ pub fn view_cast<T: Element, U: Element, D: Dimension>(
 
     // Safety: T and U have the same size, we're doing a byte-level reinterpret
     let reinterpreted: Vec<U> = unsafe {
-        let mut data = std::mem::ManuallyDrop::new(data);
+        let mut data = core::mem::ManuallyDrop::new(data);
         Vec::from_raw_parts(data.as_mut_ptr() as *mut U, len, len)
     };
 
@@ -304,6 +317,7 @@ pub fn view_cast<T: Element, U: Element, D: Dimension>(
 // add_promoted / mul_promoted etc. — promoted binary operations (REQ-24)
 // ---------------------------------------------------------------------------
 
+#[cfg(not(feature = "no_std"))]
 impl<T: Element, D: Dimension> crate::array::owned::Array<T, D> {
     /// Add two arrays after promoting both to their common type.
     ///
@@ -317,12 +331,14 @@ impl<T: Element, D: Dimension> crate::array::owned::Array<T, D> {
         U: Element,
         T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
         U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
-        <T as super::promotion::Promoted<U>>::Output: Element + std::ops::Add<Output = <T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Add<Output = <T as super::promotion::Promoted<U>>::Output>,
     {
         type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
 
         let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
-        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = other.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
 
         let result = a_promoted + b_promoted;
         Ok(crate::array::owned::Array::from_ndarray(result))
@@ -337,12 +353,14 @@ impl<T: Element, D: Dimension> crate::array::owned::Array<T, D> {
         U: Element,
         T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
         U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
-        <T as super::promotion::Promoted<U>>::Output: Element + std::ops::Sub<Output = <T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Sub<Output = <T as super::promotion::Promoted<U>>::Output>,
     {
         type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
 
         let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
-        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = other.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
 
         let result = a_promoted - b_promoted;
         Ok(crate::array::owned::Array::from_ndarray(result))
@@ -357,12 +375,14 @@ impl<T: Element, D: Dimension> crate::array::owned::Array<T, D> {
         U: Element,
         T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
         U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
-        <T as super::promotion::Promoted<U>>::Output: Element + std::ops::Mul<Output = <T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Mul<Output = <T as super::promotion::Promoted<U>>::Output>,
     {
         type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
 
         let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
-        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = other.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
 
         let result = a_promoted * b_promoted;
         Ok(crate::array::owned::Array::from_ndarray(result))
@@ -377,12 +397,14 @@ impl<T: Element, D: Dimension> crate::array::owned::Array<T, D> {
         U: Element,
         T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
         U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
-        <T as super::promotion::Promoted<U>>::Output: Element + std::ops::Div<Output = <T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Div<Output = <T as super::promotion::Promoted<U>>::Output>,
     {
         type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
 
         let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
-        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = other.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
 
         let result = a_promoted / b_promoted;
         Ok(crate::array::owned::Array::from_ndarray(result))
@@ -486,11 +508,8 @@ mod tests {
 
     #[test]
     fn astype_widen() {
-        let arr = crate::array::owned::Array::<i32, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![1, 2, 3],
-        )
-        .unwrap();
+        let arr =
+            crate::array::owned::Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![1, 2, 3]).unwrap();
         let result = arr.astype::<f64>().unwrap();
         assert_eq!(result.as_slice().unwrap(), &[1.0, 2.0, 3.0]);
         assert_eq!(result.dtype(), DType::F64);
@@ -498,11 +517,8 @@ mod tests {
 
     #[test]
     fn astype_same_type() {
-        let arr = crate::array::owned::Array::<f64, Ix1>::from_vec(
-            Ix1::new([2]),
-            vec![1.5, 2.5],
-        )
-        .unwrap();
+        let arr = crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.5, 2.5])
+            .unwrap();
         let result = arr.astype::<f64>().unwrap();
         assert_eq!(result.as_slice().unwrap(), &[1.5, 2.5]);
     }
@@ -510,11 +526,8 @@ mod tests {
     #[test]
     fn view_cast_same_size() {
         // f32 and i32 are both 4 bytes
-        let arr = crate::array::owned::Array::<f32, Ix1>::from_vec(
-            Ix1::new([2]),
-            vec![1.0, 2.0],
-        )
-        .unwrap();
+        let arr = crate::array::owned::Array::<f32, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0])
+            .unwrap();
         let result = view_cast::<f32, i32, Ix1>(&arr);
         assert!(result.is_ok());
         let casted = result.unwrap();
@@ -523,27 +536,19 @@ mod tests {
 
     #[test]
     fn view_cast_different_size_fails() {
-        let arr = crate::array::owned::Array::<f64, Ix1>::from_vec(
-            Ix1::new([2]),
-            vec![1.0, 2.0],
-        )
-        .unwrap();
+        let arr = crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0])
+            .unwrap();
         let result = view_cast::<f64, f32, Ix1>(&arr);
         assert!(result.is_err());
     }
 
     #[test]
     fn add_promoted_i32_f64() {
-        let a = crate::array::owned::Array::<i32, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![1, 2, 3],
-        )
-        .unwrap();
-        let b = crate::array::owned::Array::<f64, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![0.5, 1.5, 2.5],
-        )
-        .unwrap();
+        let a =
+            crate::array::owned::Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![1, 2, 3]).unwrap();
+        let b =
+            crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![0.5, 1.5, 2.5])
+                .unwrap();
         let result = a.add_promoted(&b).unwrap();
         assert_eq!(result.dtype(), DType::F64);
         assert_eq!(result.as_slice().unwrap(), &[1.5, 3.5, 5.5]);
@@ -551,16 +556,10 @@ mod tests {
 
     #[test]
     fn mul_promoted_u8_i16() {
-        let a = crate::array::owned::Array::<u8, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![2, 3, 4],
-        )
-        .unwrap();
-        let b = crate::array::owned::Array::<i16, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![10, 20, 30],
-        )
-        .unwrap();
+        let a =
+            crate::array::owned::Array::<u8, Ix1>::from_vec(Ix1::new([3]), vec![2, 3, 4]).unwrap();
+        let b = crate::array::owned::Array::<i16, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30])
+            .unwrap();
         let result = a.mul_promoted(&b).unwrap();
         // u8 + i16 => i16
         assert_eq!(result.dtype(), DType::I16);
@@ -569,16 +568,10 @@ mod tests {
 
     #[test]
     fn sub_promoted_f32_f64() {
-        let a = crate::array::owned::Array::<f32, Ix1>::from_vec(
-            Ix1::new([2]),
-            vec![10.0, 20.0],
-        )
-        .unwrap();
-        let b = crate::array::owned::Array::<f64, Ix1>::from_vec(
-            Ix1::new([2]),
-            vec![1.0, 2.0],
-        )
-        .unwrap();
+        let a = crate::array::owned::Array::<f32, Ix1>::from_vec(Ix1::new([2]), vec![10.0, 20.0])
+            .unwrap();
+        let b = crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0])
+            .unwrap();
         let result = a.sub_promoted(&b).unwrap();
         assert_eq!(result.dtype(), DType::F64);
         assert_eq!(result.as_slice().unwrap(), &[9.0, 18.0]);

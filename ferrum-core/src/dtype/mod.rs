@@ -1,6 +1,6 @@
 // ferrum-core: Element trait and DType runtime enum (REQ-6, REQ-7)
 
-use std::fmt;
+use core::fmt;
 
 use num_complex::Complex;
 
@@ -78,7 +78,7 @@ impl DType {
     #[inline]
     pub fn size_of(self) -> usize {
         match self {
-            Self::Bool => std::mem::size_of::<bool>(),
+            Self::Bool => core::mem::size_of::<bool>(),
             Self::U8 => 1,
             Self::U16 => 2,
             Self::U32 => 4,
@@ -102,7 +102,7 @@ impl DType {
     #[inline]
     pub fn alignment(self) -> usize {
         match self {
-            Self::Bool => std::mem::align_of::<bool>(),
+            Self::Bool => core::mem::align_of::<bool>(),
             Self::U8 => 1,
             Self::U16 => 2,
             Self::U32 => 4,
@@ -115,10 +115,10 @@ impl DType {
             Self::I128 => 16,
             Self::F32 => 4,
             Self::F64 => 8,
-            Self::Complex32 => std::mem::align_of::<Complex<f32>>(),
-            Self::Complex64 => std::mem::align_of::<Complex<f64>>(),
+            Self::Complex32 => core::mem::align_of::<Complex<f32>>(),
+            Self::Complex64 => core::mem::align_of::<Complex<f64>>(),
             #[cfg(feature = "f16")]
-            Self::F16 => std::mem::align_of::<half::f16>(),
+            Self::F16 => core::mem::align_of::<half::f16>(),
         }
     }
 
@@ -173,9 +173,13 @@ impl DType {
                 | Self::Complex64
         ) || {
             #[cfg(feature = "f16")]
-            { matches!(self, Self::F16) }
+            {
+                matches!(self, Self::F16)
+            }
             #[cfg(not(feature = "f16"))]
-            { false }
+            {
+                false
+            }
         }
     }
 }
@@ -379,7 +383,6 @@ impl Element for half::f16 {
         half::f16::ONE
     }
 }
-
 
 #[cfg(test)]
 mod tests {

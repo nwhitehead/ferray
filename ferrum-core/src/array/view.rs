@@ -6,8 +6,8 @@ use crate::dimension::Dimension;
 use crate::dtype::Element;
 use crate::layout::MemoryLayout;
 
-use super::owned::Array;
 use super::ArrayFlags;
+use super::owned::Array;
 
 /// An immutable, borrowed view into an existing array's data.
 ///
@@ -118,19 +118,11 @@ impl<'a, T: Element> ArrayView<'a, T, IxDyn> {
     /// - No mutable reference to the same memory region exists for the
     ///   duration of `'a`.
     /// - `strides` are given in units of elements (not bytes).
-    pub unsafe fn from_shape_ptr(
-        ptr: *const T,
-        shape: &[usize],
-        strides: &[usize],
-    ) -> Self {
+    pub unsafe fn from_shape_ptr(ptr: *const T, shape: &[usize], strides: &[usize]) -> Self {
         let nd_shape = ndarray::IxDyn(shape);
         let nd_strides = ndarray::IxDyn(strides);
-        let nd_view = unsafe {
-            ndarray::ArrayView::from_shape_ptr(
-                nd_shape.strides(nd_strides),
-                ptr,
-            )
-        };
+        let nd_view =
+            unsafe { ndarray::ArrayView::from_shape_ptr(nd_shape.strides(nd_strides), ptr) };
         Self::from_ndarray(nd_view)
     }
 }
@@ -159,11 +151,8 @@ mod tests {
 
     #[test]
     fn view_from_owned() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let v = arr.view();
         assert_eq!(v.shape(), &[2, 3]);
         assert_eq!(v.size(), 6);
@@ -173,11 +162,8 @@ mod tests {
 
     #[test]
     fn view_shares_data() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let v = arr.view();
         // Same pointer
         assert_eq!(arr.as_ptr(), v.as_ptr());
@@ -185,11 +171,8 @@ mod tests {
 
     #[test]
     fn view_to_owned() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let v = arr.view();
         let owned = v.to_owned();
         assert_eq!(owned.shape(), arr.shape());

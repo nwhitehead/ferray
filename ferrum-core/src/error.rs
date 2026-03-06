@@ -1,6 +1,11 @@
 // ferrum-core: Error types (REQ-27)
 
-use std::fmt;
+use core::fmt;
+
+#[cfg(feature = "no_std")]
+extern crate alloc;
+#[cfg(feature = "no_std")]
+use alloc::{string::String, string::ToString, vec::Vec};
 
 /// The primary error type for all ferrum operations.
 ///
@@ -141,6 +146,7 @@ impl FerrumError {
     }
 }
 
+#[cfg(not(feature = "no_std"))]
 impl From<std::io::Error> for FerrumError {
     fn from(e: std::io::Error) -> Self {
         Self::IoError {

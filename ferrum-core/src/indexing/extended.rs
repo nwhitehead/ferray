@@ -209,11 +209,7 @@ pub fn choose<T: Element, D: Dimension>(
     for (pos, idx_val) in index_arr.inner.iter().enumerate() {
         let idx = *idx_val as usize;
         if idx >= n_choices {
-            return Err(FerrumError::index_out_of_bounds(
-                idx as isize,
-                0,
-                n_choices,
-            ));
+            return Err(FerrumError::index_out_of_bounds(idx as isize, 0, n_choices));
         }
         data.push(choice_iters[idx][pos].clone());
     }
@@ -517,10 +513,7 @@ pub fn triu_indices_from<T: Element, D: Dimension>(
 /// - `InvalidValue` if multi_index arrays have different lengths
 /// - `IndexOutOfBounds` if any index is out of range for its dimension
 #[allow(clippy::needless_range_loop)]
-pub fn ravel_multi_index(
-    multi_index: &[&[usize]],
-    dims: &[usize],
-) -> FerrumResult<Vec<usize>> {
+pub fn ravel_multi_index(multi_index: &[&[usize]], dims: &[usize]) -> FerrumResult<Vec<usize>> {
     if multi_index.len() != dims.len() {
         return Err(FerrumError::invalid_value(format!(
             "multi_index has {} components but dims has {} dimensions",
@@ -579,10 +572,7 @@ pub fn ravel_multi_index(
 ///
 /// # Errors
 /// - `IndexOutOfBounds` if any flat index >= product(shape)
-pub fn unravel_index(
-    flat_indices: &[usize],
-    shape: &[usize],
-) -> FerrumResult<Vec<Vec<usize>>> {
+pub fn unravel_index(flat_indices: &[usize], shape: &[usize]) -> FerrumResult<Vec<Vec<usize>>> {
     let total: usize = shape.iter().product();
     let ndim = shape.len();
     let n = flat_indices.len();
@@ -615,9 +605,7 @@ pub fn unravel_index(
 ///
 /// Equivalent to `np.flatnonzero(a)`. An element is "non-zero" if it
 /// is not equal to the type's zero value.
-pub fn flatnonzero<T: Element + PartialEq, D: Dimension>(
-    a: &Array<T, D>,
-) -> Vec<usize> {
+pub fn flatnonzero<T: Element + PartialEq, D: Dimension>(a: &Array<T, D>) -> Vec<usize> {
     let zero = T::zero();
     a.inner
         .iter()
@@ -746,11 +734,7 @@ mod tests {
 
     #[test]
     fn take_2d_axis1() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let taken = take(&arr, &[0, 2], Axis(1)).unwrap();
         assert_eq!(taken.shape(), &[3, 2]);
         let data: Vec<i32> = taken.iter().copied().collect();
@@ -771,11 +755,7 @@ mod tests {
 
     #[test]
     fn take_along_axis_basic() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let taken = take_along_axis(&arr, &[1, 3], Axis(1)).unwrap();
         assert_eq!(taken.shape(), &[3, 2]);
     }
@@ -786,24 +766,21 @@ mod tests {
 
     #[test]
     fn put_flat() {
-        let mut arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0, 0, 0, 0, 0]).unwrap();
+        let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0, 0, 0, 0, 0]).unwrap();
         arr.put(&[1, 3], &[99, 88]).unwrap();
         assert_eq!(arr.as_slice().unwrap(), &[0, 99, 0, 88, 0]);
     }
 
     #[test]
     fn put_cycling_values() {
-        let mut arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0; 5]).unwrap();
+        let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0; 5]).unwrap();
         arr.put(&[0, 1, 2, 3, 4], &[10, 20]).unwrap();
         assert_eq!(arr.as_slice().unwrap(), &[10, 20, 10, 20, 10]);
     }
 
     #[test]
     fn put_out_of_bounds() {
-        let mut arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![0, 0, 0]).unwrap();
+        let mut arr = Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![0, 0, 0]).unwrap();
         assert!(arr.put(&[5], &[1]).is_err());
     }
 
@@ -813,11 +790,7 @@ mod tests {
 
     #[test]
     fn fill_diagonal_2d() {
-        let mut arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 3]),
-            vec![0; 9],
-        )
-        .unwrap();
+        let mut arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 3]), vec![0; 9]).unwrap();
         arr.fill_diagonal(1);
         let data: Vec<i32> = arr.iter().copied().collect();
         assert_eq!(data, vec![1, 0, 0, 0, 1, 0, 0, 0, 1]);
@@ -825,11 +798,7 @@ mod tests {
 
     #[test]
     fn fill_diagonal_rectangular() {
-        let mut arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 4]),
-            vec![0; 8],
-        )
-        .unwrap();
+        let mut arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 4]), vec![0; 8]).unwrap();
         arr.fill_diagonal(5);
         let data: Vec<i32> = arr.iter().copied().collect();
         assert_eq!(data, vec![5, 0, 0, 0, 0, 5, 0, 0]);
@@ -871,11 +840,7 @@ mod tests {
 
     #[test]
     fn compress_2d_axis0() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (0..12).collect(),
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (0..12).collect()).unwrap();
         let result = compress(&[true, false, true], &arr, Axis(0)).unwrap();
         assert_eq!(result.shape(), &[2, 4]);
         let data: Vec<i32> = result.iter().copied().collect();
@@ -888,16 +853,10 @@ mod tests {
 
     #[test]
     fn select_basic() {
-        let c1 = Array::<bool, Ix1>::from_vec(
-            Ix1::new([4]),
-            vec![true, false, false, false],
-        )
-        .unwrap();
-        let c2 = Array::<bool, Ix1>::from_vec(
-            Ix1::new([4]),
-            vec![false, true, false, false],
-        )
-        .unwrap();
+        let c1 =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, false, false]).unwrap();
+        let c2 =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, false]).unwrap();
         let ch1 = Array::<i32, Ix1>::from_vec(Ix1::new([4]), vec![1, 1, 1, 1]).unwrap();
         let ch2 = Array::<i32, Ix1>::from_vec(Ix1::new([4]), vec![2, 2, 2, 2]).unwrap();
         let result = select(&[c1, c2], &[ch1, ch2], 0).unwrap();
@@ -1024,8 +983,7 @@ mod tests {
 
     #[test]
     fn ravel_multi_index_3d() {
-        let flat =
-            ravel_multi_index(&[&[0], &[1], &[2]], &[2, 3, 4]).unwrap();
+        let flat = ravel_multi_index(&[&[0], &[1], &[2]], &[2, 3, 4]).unwrap();
         assert_eq!(flat, vec![6]);
     }
 
@@ -1066,19 +1024,14 @@ mod tests {
 
     #[test]
     fn flatnonzero_basic() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0, 1, 0, 3, 0]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([5]), vec![0, 1, 0, 3, 0]).unwrap();
         let nz = flatnonzero(&arr);
         assert_eq!(nz, vec![1, 3]);
     }
 
     #[test]
     fn flatnonzero_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![0, 1, 0, 2, 0, 3],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![0, 1, 0, 2, 0, 3]).unwrap();
         let nz = flatnonzero(&arr);
         assert_eq!(nz, vec![1, 3, 5]);
     }
@@ -1133,11 +1086,8 @@ mod tests {
 
     #[test]
     fn ndenumerate_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![10, 20, 30, 40, 50, 60],
-        )
-        .unwrap();
+        let arr =
+            Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![10, 20, 30, 40, 50, 60]).unwrap();
         let items: Vec<(Vec<usize>, &i32)> = ndenumerate(&arr).collect();
         assert_eq!(items.len(), 6);
         assert_eq!(items[0], (vec![0, 0], &10));
@@ -1151,16 +1101,9 @@ mod tests {
 
     #[test]
     fn put_along_axis_basic() {
-        let mut arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            vec![0; 12],
-        )
-        .unwrap();
-        let values = Array::<i32, IxDyn>::from_vec(
-            IxDyn::new(&[8]),
-            vec![1, 2, 3, 4, 5, 6, 7, 8],
-        )
-        .unwrap();
+        let mut arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), vec![0; 12]).unwrap();
+        let values =
+            Array::<i32, IxDyn>::from_vec(IxDyn::new(&[8]), vec![1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
         arr.put_along_axis(&[0, 2], &values, Axis(0)).unwrap();
         let data: Vec<i32> = arr.iter().copied().collect();
         assert_eq!(data, vec![1, 2, 3, 4, 0, 0, 0, 0, 5, 6, 7, 8]);

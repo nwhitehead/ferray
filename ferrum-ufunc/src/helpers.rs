@@ -3,19 +3,16 @@
 // Provides generic unary/binary operation wrappers that handle contiguous
 // vs non-contiguous arrays, SIMD dispatch, and broadcasting.
 
-use ferrum_core::dimension::{Dimension, IxDyn};
+use ferrum_core::Array;
 use ferrum_core::dimension::broadcast::broadcast_shapes;
+use ferrum_core::dimension::{Dimension, IxDyn};
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 /// Apply a unary function elementwise, preserving dimension.
 /// Works for any `T: Element + Float` (or any Copy type with the given fn).
 #[inline]
-pub fn unary_float_op<T, D>(
-    input: &Array<T, D>,
-    f: impl Fn(T) -> T,
-) -> FerrumResult<Array<T, D>>
+pub fn unary_float_op<T, D>(input: &Array<T, D>, f: impl Fn(T) -> T) -> FerrumResult<Array<T, D>>
 where
     T: Element + Copy,
     D: Dimension,
@@ -26,10 +23,7 @@ where
 
 /// Apply a unary function that maps T -> U, preserving dimension.
 #[inline]
-pub fn unary_map_op<T, U, D>(
-    input: &Array<T, D>,
-    f: impl Fn(T) -> U,
-) -> FerrumResult<Array<U, D>>
+pub fn unary_map_op<T, U, D>(input: &Array<T, D>, f: impl Fn(T) -> U) -> FerrumResult<Array<U, D>>
 where
     T: Element + Copy,
     U: Element,
@@ -128,6 +122,96 @@ where
         .map(|(&x, &y)| f(x, y))
         .collect();
     Array::from_vec(IxDyn::from(&shape[..]), data)
+}
+
+// ---------------------------------------------------------------------------
+// f16 helpers — f32-promoted operations (feature-gated)
+// ---------------------------------------------------------------------------
+
+/// Apply a unary f32 function to an f16 array via promotion.
+///
+/// Each element is promoted to f32, the function is applied, and
+/// the result is converted back to f16.
+#[cfg(feature = "f16")]
+#[inline]
+pub fn unary_f16_op<D>(
+    input: &Array<half::f16, D>,
+    f: impl Fn(f32) -> f32,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    let data: Vec<half::f16> = input
+        .iter()
+        .map(|&x| half::f16::from_f32(f(x.to_f32())))
+        .collect();
+    Array::from_vec(input.dim().clone(), data)
+}
+
+/// Apply a unary f32 function to an f16 array, returning a bool array.
+#[cfg(feature = "f16")]
+#[inline]
+pub fn unary_f16_to_bool_op<D>(
+    input: &Array<half::f16, D>,
+    f: impl Fn(f32) -> bool,
+) -> FerrumResult<Array<bool, D>>
+where
+    D: Dimension,
+{
+    let data: Vec<bool> = input.iter().map(|&x| f(x.to_f32())).collect();
+    Array::from_vec(input.dim().clone(), data)
+}
+
+/// Apply a binary f32 function to two f16 arrays via promotion.
+#[cfg(feature = "f16")]
+#[inline]
+pub fn binary_f16_op<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+    f: impl Fn(f32, f32) -> f32,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    if a.shape() != b.shape() {
+        return Err(FerrumError::shape_mismatch(format!(
+            "binary op: shapes {:?} and {:?} do not match",
+            a.shape(),
+            b.shape()
+        )));
+    }
+    let data: Vec<half::f16> = a
+        .iter()
+        .zip(b.iter())
+        .map(|(&x, &y)| half::f16::from_f32(f(x.to_f32(), y.to_f32())))
+        .collect();
+    Array::from_vec(a.dim().clone(), data)
+}
+
+/// Apply a binary f32 function to two f16 arrays, returning a bool array.
+#[cfg(feature = "f16")]
+#[inline]
+pub fn binary_f16_to_bool_op<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+    f: impl Fn(f32, f32) -> bool,
+) -> FerrumResult<Array<bool, D>>
+where
+    D: Dimension,
+{
+    if a.shape() != b.shape() {
+        return Err(FerrumError::shape_mismatch(format!(
+            "binary op: shapes {:?} and {:?} do not match",
+            a.shape(),
+            b.shape()
+        )));
+    }
+    let data: Vec<bool> = a
+        .iter()
+        .zip(b.iter())
+        .map(|(&x, &y)| f(x.to_f32(), y.to_f32()))
+        .collect();
+    Array::from_vec(a.dim().clone(), data)
 }
 
 #[cfg(test)]

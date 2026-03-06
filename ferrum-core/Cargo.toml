@@ -22,10 +22,12 @@ workspace = true
 optional = true
 
 [features]
-default = []
+default = ["std"]
+std = []
 f16 = ["dep:half"]
 serde = ["dep:serde", "ndarray/serde"]
 no_std = []
+const_shapes = []
 
 [dev-dependencies]
 proptest = { workspace = true }

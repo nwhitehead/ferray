@@ -6,6 +6,11 @@
 // - `promoted_type!()` is a compile-time proc macro (in ferrum-core-macros)
 // - `result_type()` is the runtime equivalent using DType
 
+#[cfg(feature = "no_std")]
+extern crate alloc;
+#[cfg(feature = "no_std")]
+use alloc::format;
+
 use num_complex::Complex;
 
 use crate::dtype::{DType, Element};
@@ -419,9 +424,7 @@ pub fn result_type(a: DType, b: DType) -> FerrumResult<DType> {
 
     // Use a static lookup table for the promotion result.
     let result = promote_dtypes(a, b);
-    result.ok_or_else(|| {
-        FerrumError::invalid_dtype(format!("cannot promote {a} and {b}"))
-    })
+    result.ok_or_else(|| FerrumError::invalid_dtype(format!("cannot promote {a} and {b}")))
 }
 
 /// Internal promotion function returning Option.
@@ -434,7 +437,11 @@ fn promote_dtypes(a: DType, b: DType) -> Option<DType> {
 
     // Ensure canonical ordering: if b < a in our enum order, swap them
     // so we only need to handle (smaller, larger) pairs.
-    let (lo, hi) = if (a as u32) <= (b as u32) { (a, b) } else { (b, a) };
+    let (lo, hi) = if (a as u32) <= (b as u32) {
+        (a, b)
+    } else {
+        (b, a)
+    };
 
     // Bool promotes to anything
     if lo == Bool {
@@ -504,7 +511,11 @@ fn promote_dtypes(a: DType, b: DType) -> Option<DType> {
         (F32, F64) => F64,
 
         // Real + Complex
-        (U8, Complex32) | (U16, Complex32) | (I8, Complex32) | (I16, Complex32) | (F32, Complex32) => Complex32,
+        (U8, Complex32)
+        | (U16, Complex32)
+        | (I8, Complex32)
+        | (I16, Complex32)
+        | (F32, Complex32) => Complex32,
         (U32, Complex32) | (U64, Complex32) | (U128, Complex32) => Complex64,
         (I32, Complex32) | (I64, Complex32) | (I128, Complex32) => Complex64,
         (F64, Complex32) => Complex64,

@@ -2,10 +2,10 @@
 //
 // real, imag, conj, conjugate, angle, abs (returns real magnitude)
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_complex::Complex;
 use num_traits::Float;
 
@@ -96,30 +96,21 @@ mod tests {
 
     #[test]
     fn test_real() {
-        let a = arr1_c64(vec![
-            Complex64::new(1.0, 2.0),
-            Complex64::new(3.0, 4.0),
-        ]);
+        let a = arr1_c64(vec![Complex64::new(1.0, 2.0), Complex64::new(3.0, 4.0)]);
         let r = real(&a).unwrap();
         assert_eq!(r.as_slice().unwrap(), &[1.0, 3.0]);
     }
 
     #[test]
     fn test_imag() {
-        let a = arr1_c64(vec![
-            Complex64::new(1.0, 2.0),
-            Complex64::new(3.0, 4.0),
-        ]);
+        let a = arr1_c64(vec![Complex64::new(1.0, 2.0), Complex64::new(3.0, 4.0)]);
         let r = imag(&a).unwrap();
         assert_eq!(r.as_slice().unwrap(), &[2.0, 4.0]);
     }
 
     #[test]
     fn test_conj() {
-        let a = arr1_c64(vec![
-            Complex64::new(1.0, 2.0),
-            Complex64::new(3.0, -4.0),
-        ]);
+        let a = arr1_c64(vec![Complex64::new(1.0, 2.0), Complex64::new(3.0, -4.0)]);
         let r = conj(&a).unwrap();
         let s = r.as_slice().unwrap();
         assert_eq!(s[0], Complex64::new(1.0, -2.0));
@@ -149,10 +140,7 @@ mod tests {
 
     #[test]
     fn test_abs() {
-        let a = arr1_c64(vec![
-            Complex64::new(3.0, 4.0),
-            Complex64::new(0.0, 1.0),
-        ]);
+        let a = arr1_c64(vec![Complex64::new(3.0, 4.0), Complex64::new(0.0, 1.0)]);
         let r = abs(&a).unwrap();
         let s = r.as_slice().unwrap();
         assert!((s[0] - 5.0).abs() < 1e-12);

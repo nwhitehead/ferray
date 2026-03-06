@@ -2,11 +2,11 @@
 
 use num_complex::Complex;
 
+use super::arc::ArcArray;
+use super::cow::CowArray;
 use super::owned::Array;
 use super::view::ArrayView;
 use super::view_mut::ArrayViewMut;
-use super::arc::ArcArray;
-use super::cow::CowArray;
 use crate::dimension::{Ix1, Ix2, Ix3, Ix4, Ix5, Ix6, IxDyn};
 
 // ---------------------------------------------------------------------------

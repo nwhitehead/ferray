@@ -103,6 +103,42 @@ pub fn dispatch_binary_f64(
     }
 }
 
+/// Apply a unary operation on `f16` slices via f32 promotion.
+///
+/// Each input `f16` is promoted to `f32`, the scalar function is applied,
+/// and the result is converted back to `f16`.
+#[cfg(feature = "f16")]
+#[inline]
+pub fn dispatch_unary_f16(
+    input: &[half::f16],
+    output: &mut [half::f16],
+    scalar_fn: fn(f32) -> f32,
+) {
+    debug_assert_eq!(input.len(), output.len());
+    for (o, &i) in output.iter_mut().zip(input.iter()) {
+        *o = half::f16::from_f32(scalar_fn(i.to_f32()));
+    }
+}
+
+/// Apply a binary operation on `f16` slices via f32 promotion.
+///
+/// Each pair of input `f16` values is promoted to `f32`, the scalar function
+/// is applied, and the result is converted back to `f16`.
+#[cfg(feature = "f16")]
+#[inline]
+pub fn dispatch_binary_f16(
+    a: &[half::f16],
+    b: &[half::f16],
+    output: &mut [half::f16],
+    scalar_fn: fn(f32, f32) -> f32,
+) {
+    debug_assert_eq!(a.len(), b.len());
+    debug_assert_eq!(a.len(), output.len());
+    for ((o, &ai), &bi) in output.iter_mut().zip(a.iter()).zip(b.iter()) {
+        *o = half::f16::from_f32(scalar_fn(ai.to_f32(), bi.to_f32()));
+    }
+}
+
 // ---------------------------------------------------------------------------
 // WithSimd implementations for pulp dispatch
 // ---------------------------------------------------------------------------
@@ -193,12 +229,16 @@ mod tests {
     #[test]
     fn dispatch_unary_f32_scalar() {
         // SAFETY: test runs are single-threaded for this test
-        unsafe { std::env::set_var("FERRUM_FORCE_SCALAR", "1"); }
+        unsafe {
+            std::env::set_var("FERRUM_FORCE_SCALAR", "1");
+        }
         let input = [1.0f32, 4.0, 9.0, 16.0];
         let mut output = [0.0f32; 4];
         dispatch_unary_f32(&input, &mut output, f32::sqrt);
         assert_eq!(output, [1.0, 2.0, 3.0, 4.0]);
-        unsafe { std::env::remove_var("FERRUM_FORCE_SCALAR"); }
+        unsafe {
+            std::env::remove_var("FERRUM_FORCE_SCALAR");
+        }
     }
 
     #[test]
@@ -230,9 +270,51 @@ mod tests {
     #[test]
     fn force_scalar_env() {
         // SAFETY: test runs are single-threaded for this test
-        unsafe { std::env::set_var("FERRUM_FORCE_SCALAR", "1"); }
+        unsafe {
+            std::env::set_var("FERRUM_FORCE_SCALAR", "1");
+        }
         assert!(force_scalar());
-        unsafe { std::env::remove_var("FERRUM_FORCE_SCALAR"); }
+        unsafe {
+            std::env::remove_var("FERRUM_FORCE_SCALAR");
+        }
         assert!(!force_scalar());
+    }
+
+    #[cfg(feature = "f16")]
+    #[test]
+    fn dispatch_unary_f16_works() {
+        let input = [
+            half::f16::from_f32(1.0),
+            half::f16::from_f32(4.0),
+            half::f16::from_f32(9.0),
+            half::f16::from_f32(16.0),
+        ];
+        let mut output = [half::f16::ZERO; 4];
+        super::dispatch_unary_f16(&input, &mut output, f32::sqrt);
+        let expected = [1.0f32, 2.0, 3.0, 4.0];
+        for (o, &e) in output.iter().zip(expected.iter()) {
+            assert!((o.to_f32() - e).abs() < 0.01);
+        }
+    }
+
+    #[cfg(feature = "f16")]
+    #[test]
+    fn dispatch_binary_f16_works() {
+        let a = [
+            half::f16::from_f32(1.0),
+            half::f16::from_f32(2.0),
+            half::f16::from_f32(3.0),
+        ];
+        let b = [
+            half::f16::from_f32(4.0),
+            half::f16::from_f32(5.0),
+            half::f16::from_f32(6.0),
+        ];
+        let mut out = [half::f16::ZERO; 3];
+        super::dispatch_binary_f16(&a, &b, &mut out, |x, y| x + y);
+        let expected = [5.0f32, 7.0, 9.0];
+        for (o, &e) in out.iter().zip(expected.iter()) {
+            assert!((o.to_f32() - e).abs() < 0.01);
+        }
     }
 }

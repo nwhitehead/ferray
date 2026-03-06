@@ -70,8 +70,8 @@ pub fn pad_1d<T: Element>(
                 src[idx].clone()
             }
             PadMode::Wrap => {
-                let idx = ((n as isize - (before as isize - i as isize) % n as isize)
-                    % n as isize) as usize;
+                let idx = ((n as isize - (before as isize - i as isize) % n as isize) % n as isize)
+                    as usize;
                 src[idx].clone()
             }
         };
@@ -206,23 +206,20 @@ pub fn pad<T: Element, D: Dimension>(
                                 current_data[o * axis_len * inner + src_j * inner + k].clone()
                             }
                             PadMode::Reflect => {
-                                let src_j = reflect_index(
-                                    before as isize - 1 - j as isize,
-                                    axis_len,
-                                );
+                                let src_j =
+                                    reflect_index(before as isize - 1 - j as isize, axis_len);
                                 current_data[o * axis_len * inner + src_j * inner + k].clone()
                             }
                             PadMode::Symmetric => {
-                                let src_j = symmetric_index(
-                                    before as isize - 1 - j as isize,
-                                    axis_len,
-                                );
+                                let src_j =
+                                    symmetric_index(before as isize - 1 - j as isize, axis_len);
                                 current_data[o * axis_len * inner + src_j * inner + k].clone()
                             }
                             PadMode::Wrap => {
                                 let src_j = ((axis_len as isize
                                     - (before as isize - j as isize) % axis_len as isize)
-                                    % axis_len as isize) as usize;
+                                    % axis_len as isize)
+                                    as usize;
                                 current_data[o * axis_len * inner + src_j * inner + k].clone()
                             }
                         }
@@ -727,8 +724,7 @@ mod tests {
         assert_eq!(
             data,
             vec![
-                0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.0, 0.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0,
-                0.0
+                0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.0, 0.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0
             ]
         );
     }

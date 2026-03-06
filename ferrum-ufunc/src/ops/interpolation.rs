@@ -2,10 +2,10 @@
 //
 // interp — 1-D linear interpolation (like NumPy's np.interp)
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Ix1;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 use num_traits::Float;
 
 /// 1-D linear interpolation.
@@ -28,9 +28,7 @@ where
     let n = xp_data.len();
 
     if n == 0 {
-        return Err(FerrumError::invalid_value(
-            "interp: xp must be non-empty",
-        ));
+        return Err(FerrumError::invalid_value("interp: xp must be non-empty"));
     }
     if xp_data.len() != fp_data.len() {
         return Err(FerrumError::shape_mismatch(

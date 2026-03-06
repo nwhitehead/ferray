@@ -3,10 +3,10 @@
 // bitwise_and, bitwise_or, bitwise_xor, bitwise_not, invert,
 // left_shift, right_shift
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 
 use crate::helpers::{binary_float_op, unary_float_op};
 
@@ -21,7 +21,10 @@ pub trait BitwiseOps:
 }
 
 /// Trait for types that support shift operations in addition to bitwise ops.
-pub trait ShiftOps: BitwiseOps + std::ops::Shl<u32, Output = Self> + std::ops::Shr<u32, Output = Self> {}
+pub trait ShiftOps:
+    BitwiseOps + std::ops::Shl<u32, Output = Self> + std::ops::Shr<u32, Output = Self>
+{
+}
 
 macro_rules! impl_bitwise_ops {
     ($($ty:ty),*) => {
@@ -94,7 +97,8 @@ where
     if a.shape() != b.shape() {
         return Err(ferrum_core::error::FerrumError::shape_mismatch(format!(
             "left_shift: shapes {:?} and {:?} do not match",
-            a.shape(), b.shape()
+            a.shape(),
+            b.shape()
         )));
     }
     let data: Vec<T> = a.iter().zip(b.iter()).map(|(&x, &s)| x << s).collect();
@@ -112,7 +116,8 @@ where
     if a.shape() != b.shape() {
         return Err(ferrum_core::error::FerrumError::shape_mismatch(format!(
             "right_shift: shapes {:?} and {:?} do not match",
-            a.shape(), b.shape()
+            a.shape(),
+            b.shape()
         )));
     }
     let data: Vec<T> = a.iter().zip(b.iter()).map(|(&x, &s)| x >> s).collect();

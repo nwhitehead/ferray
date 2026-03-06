@@ -65,9 +65,11 @@ impl<T: Element, D: Dimension> Array<T, D> {
             return Err(FerrumError::axis_out_of_bounds(axis.index(), ndim));
         }
         let nd_axis = ndarray::Axis(axis.index());
-        Ok(self.inner.lanes(nd_axis).into_iter().map(|lane| {
-            ArrayView::from_ndarray(lane)
-        }))
+        Ok(self
+            .inner
+            .lanes(nd_axis)
+            .into_iter()
+            .map(|lane| ArrayView::from_ndarray(lane)))
     }
 
     /// Iterate over sub-arrays along the given axis.
@@ -189,16 +191,14 @@ mod tests {
 
     #[test]
     fn iter_elements() {
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let collected: Vec<f64> = arr.iter().copied().collect();
         assert_eq!(collected, vec![1.0, 2.0, 3.0, 4.0]);
     }
 
     #[test]
     fn iter_mut_elements() {
-        let mut arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
+        let mut arr = Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, 2.0, 3.0]).unwrap();
         for x in arr.iter_mut() {
             *x *= 2.0;
         }
@@ -207,19 +207,14 @@ mod tests {
 
     #[test]
     fn into_iter_consuming() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30]).unwrap();
         let collected: Vec<i32> = arr.into_iter().collect();
         assert_eq!(collected, vec![10, 20, 30]);
     }
 
     #[test]
     fn indexed_iter_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let items: Vec<_> = arr.indexed_iter().collect();
         assert_eq!(items.len(), 6);
         assert_eq!(items[0], (vec![0, 0], &1));
@@ -229,22 +224,15 @@ mod tests {
 
     #[test]
     fn flat_iterator() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let flat: Vec<f64> = arr.flat().copied().collect();
         assert_eq!(flat, vec![1.0, 2.0, 3.0, 4.0]);
     }
 
     #[test]
     fn lanes_axis1() {
-        let arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let arr = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let rows: Vec<Vec<f64>> = arr
             .lanes(Axis(1))
             .unwrap()
@@ -261,11 +249,7 @@ mod tests {
 
     #[test]
     fn axis_iter_2d() {
-        let arr = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 2]),
-            vec![1, 2, 3, 4, 5, 6],
-        )
-        .unwrap();
+        let arr = Array::<i32, Ix2>::from_vec(Ix2::new([3, 2]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let rows: Vec<Vec<i32>> = arr
             .axis_iter(Axis(0))
             .unwrap()
@@ -282,11 +266,9 @@ mod tests {
 
     #[test]
     fn axis_iter_mut_modify() {
-        let mut arr = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let mut arr =
+            Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         for mut row in arr.axis_iter_mut(Axis(0)).unwrap() {
             if let Some(s) = row.as_slice_mut() {
                 for v in s.iter_mut() {
@@ -302,8 +284,7 @@ mod tests {
 
     #[test]
     fn for_loop_borrow() {
-        let arr =
-            Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30]).unwrap();
+        let arr = Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30]).unwrap();
         let mut sum = 0;
         for &x in &arr {
             sum += x;

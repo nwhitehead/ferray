@@ -2,13 +2,13 @@
 //
 // exp, exp2, expm1, log, log2, log10, log1p, logaddexp, logaddexp2
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
-use crate::helpers::{unary_float_op, binary_float_op};
+use crate::helpers::{binary_float_op, unary_float_op};
 
 /// Elementwise exponential (e^x).
 pub fn exp<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
@@ -98,6 +98,73 @@ where
         let min = if x > y { y } else { x };
         max + ((min - max) * ln2).exp().ln_1p() / ln2
     })
+}
+
+// ---------------------------------------------------------------------------
+// f16 variants (f32-promoted)
+// ---------------------------------------------------------------------------
+
+/// Elementwise exponential for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn exp_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::exp)
+}
+
+/// Elementwise 2^x for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn exp2_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::exp2)
+}
+
+/// Elementwise exp(x)-1 for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn expm1_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, |x| x.exp_m1())
+}
+
+/// Elementwise natural logarithm for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn log_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::ln)
+}
+
+/// Elementwise base-2 logarithm for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn log2_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::log2)
+}
+
+/// Elementwise base-10 logarithm for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn log10_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::log10)
+}
+
+/// Elementwise ln(1+x) for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn log1p_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, |x| x.ln_1p())
 }
 
 #[cfg(test)]
@@ -195,5 +262,43 @@ mod tests {
         let s = r.as_slice().unwrap();
         // log2(2^0 + 2^0) = log2(2) = 1
         assert!((s[0] - 1.0).abs() < 1e-12);
+    }
+
+    #[cfg(feature = "f16")]
+    mod f16_tests {
+        use super::*;
+
+        fn arr1_f16(data: &[f32]) -> Array<half::f16, Ix1> {
+            let n = data.len();
+            let vals: Vec<half::f16> = data.iter().map(|&x| half::f16::from_f32(x)).collect();
+            Array::from_vec(Ix1::new([n]), vals).unwrap()
+        }
+
+        #[test]
+        fn test_exp_f16() {
+            let a = arr1_f16(&[0.0, 1.0]);
+            let r = exp_f16(&a).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 1.0).abs() < 0.01);
+            assert!((s[1].to_f32() - std::f32::consts::E).abs() < 0.02);
+        }
+
+        #[test]
+        fn test_log_f16() {
+            let a = arr1_f16(&[1.0, std::f32::consts::E]);
+            let r = log_f16(&a).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!(s[0].to_f32().abs() < 0.01);
+            assert!((s[1].to_f32() - 1.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_log2_f16() {
+            let a = arr1_f16(&[1.0, 8.0]);
+            let r = log2_f16(&a).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!(s[0].to_f32().abs() < 0.01);
+            assert!((s[1].to_f32() - 3.0).abs() < 0.01);
+        }
     }
 }

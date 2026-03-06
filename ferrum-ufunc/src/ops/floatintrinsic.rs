@@ -4,13 +4,13 @@
 // spacing, ldexp, frexp, signbit, copysign, float_power, fmax, fmin,
 // maximum, minimum, clip
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 use num_traits::Float;
 
-use crate::helpers::{unary_float_op, unary_map_op, binary_float_op};
+use crate::helpers::{binary_float_op, unary_float_op, unary_map_op};
 
 // ---------------------------------------------------------------------------
 // Classification
@@ -106,19 +106,13 @@ where
 }
 
 /// Clip (limit) values to [a_min, a_max].
-pub fn clip<T, D>(
-    input: &Array<T, D>,
-    a_min: T,
-    a_max: T,
-) -> FerrumResult<Array<T, D>>
+pub fn clip<T, D>(input: &Array<T, D>, a_min: T, a_max: T) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
 {
     if a_min > a_max {
-        return Err(FerrumError::invalid_value(
-            "clip: a_min must be <= a_max",
-        ));
+        return Err(FerrumError::invalid_value("clip: a_min must be <= a_max"));
     }
     unary_float_op(input, |x| {
         if x < a_min {
@@ -136,10 +130,7 @@ where
 // ---------------------------------------------------------------------------
 
 /// Return the next floating-point value after x1 towards x2.
-pub fn nextafter<T, D>(
-    x1: &Array<T, D>,
-    x2: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn nextafter<T, D>(x1: &Array<T, D>, x2: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -180,10 +171,7 @@ where
 /// Multiply x by 2^n (ldexp).
 ///
 /// `n` is provided as an integer array of same shape.
-pub fn ldexp<T, D>(
-    x: &Array<T, D>,
-    n: &Array<i32, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn ldexp<T, D>(x: &Array<T, D>, n: &Array<i32, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -191,7 +179,8 @@ where
     if x.shape() != n.shape() {
         return Err(FerrumError::shape_mismatch(format!(
             "ldexp: shapes {:?} and {:?} do not match",
-            x.shape(), n.shape()
+            x.shape(),
+            n.shape()
         )));
     }
     let two = <T as Element>::one() + <T as Element>::one();
@@ -207,9 +196,7 @@ where
 ///
 /// Returns (mantissa_array, exponent_array) where mantissa is in [0.5, 1.0).
 /// This matches C's `frexp`: for x=4.0, returns (0.5, 3) since 0.5 * 2^3 = 4.
-pub fn frexp<T, D>(
-    input: &Array<T, D>,
-) -> FerrumResult<(Array<T, D>, Array<i32, D>)>
+pub fn frexp<T, D>(input: &Array<T, D>) -> FerrumResult<(Array<T, D>, Array<i32, D>)>
 where
     T: Element + Float,
     D: Dimension,
@@ -255,10 +242,7 @@ where
 }
 
 /// Elementwise copysign: magnitude of x1, sign of x2.
-pub fn copysign<T, D>(
-    x1: &Array<T, D>,
-    x2: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn copysign<T, D>(x1: &Array<T, D>, x2: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -270,10 +254,7 @@ where
 }
 
 /// Float power: x1^x2, always returning float.
-pub fn float_power<T, D>(
-    x1: &Array<T, D>,
-    x2: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn float_power<T, D>(x1: &Array<T, D>, x2: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -282,10 +263,7 @@ where
 }
 
 /// Elementwise maximum, propagating NaN.
-pub fn maximum<T, D>(
-    a: &Array<T, D>,
-    b: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn maximum<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -302,10 +280,7 @@ where
 }
 
 /// Elementwise minimum, propagating NaN.
-pub fn minimum<T, D>(
-    a: &Array<T, D>,
-    b: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn minimum<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -322,10 +297,7 @@ where
 }
 
 /// Elementwise maximum, ignoring NaN.
-pub fn fmax<T, D>(
-    a: &Array<T, D>,
-    b: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn fmax<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -342,10 +314,7 @@ where
 }
 
 /// Elementwise minimum, ignoring NaN.
-pub fn fmin<T, D>(
-    a: &Array<T, D>,
-    b: &Array<T, D>,
-) -> FerrumResult<Array<T, D>>
+pub fn fmin<T, D>(a: &Array<T, D>, b: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -354,6 +323,128 @@ where
         if x.is_nan() {
             y
         } else if y.is_nan() || x <= y {
+            x
+        } else {
+            y
+        }
+    })
+}
+
+// ---------------------------------------------------------------------------
+// f16 variants (f32-promoted)
+// ---------------------------------------------------------------------------
+
+/// Elementwise test for NaN for f16 arrays.
+#[cfg(feature = "f16")]
+pub fn isnan_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<bool, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_to_bool_op(input, f32::is_nan)
+}
+
+/// Elementwise test for infinity for f16 arrays.
+#[cfg(feature = "f16")]
+pub fn isinf_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<bool, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_to_bool_op(input, f32::is_infinite)
+}
+
+/// Elementwise test for finiteness for f16 arrays.
+#[cfg(feature = "f16")]
+pub fn isfinite_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<bool, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_to_bool_op(input, f32::is_finite)
+}
+
+/// Clip (limit) values to [a_min, a_max] for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn clip_f16<D>(
+    input: &Array<half::f16, D>,
+    a_min: half::f16,
+    a_max: half::f16,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    let min_f32 = a_min.to_f32();
+    let max_f32 = a_max.to_f32();
+    if min_f32 > max_f32 {
+        return Err(FerrumError::invalid_value("clip: a_min must be <= a_max"));
+    }
+    crate::helpers::unary_f16_op(input, |x| {
+        if x < min_f32 {
+            min_f32
+        } else if x > max_f32 {
+            max_f32
+        } else {
+            x
+        }
+    })
+}
+
+/// Replace NaN with zero, and infinity with large finite numbers, for f16 arrays.
+#[cfg(feature = "f16")]
+pub fn nan_to_num_f16<D>(
+    input: &Array<half::f16, D>,
+    nan: Option<half::f16>,
+    posinf: Option<half::f16>,
+    neginf: Option<half::f16>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    let nan_val = nan.unwrap_or(half::f16::ZERO).to_f32();
+    let posinf_val = posinf.unwrap_or(half::f16::MAX).to_f32();
+    let neginf_val = neginf.unwrap_or(half::f16::MIN).to_f32();
+    crate::helpers::unary_f16_op(input, |x| {
+        if x.is_nan() {
+            nan_val
+        } else if x.is_infinite() {
+            if x > 0.0 { posinf_val } else { neginf_val }
+        } else {
+            x
+        }
+    })
+}
+
+/// Elementwise maximum for f16 arrays via f32 promotion, propagating NaN.
+#[cfg(feature = "f16")]
+pub fn maximum_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| {
+        if x.is_nan() || y.is_nan() {
+            f32::NAN
+        } else if x >= y {
+            x
+        } else {
+            y
+        }
+    })
+}
+
+/// Elementwise minimum for f16 arrays via f32 promotion, propagating NaN.
+#[cfg(feature = "f16")]
+pub fn minimum_f16<D>(
+    a: &Array<half::f16, D>,
+    b: &Array<half::f16, D>,
+) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::binary_f16_op(a, b, |x, y| {
+        if x.is_nan() || y.is_nan() {
+            f32::NAN
+        } else if x <= y {
             x
         } else {
             y
@@ -534,5 +625,79 @@ mod tests {
         let r = nextafter(&a, &b).unwrap();
         let s = r.as_slice().unwrap();
         assert!(s[0] > 0.0);
+    }
+
+    #[cfg(feature = "f16")]
+    mod f16_tests {
+        use super::*;
+
+        fn arr1_f16(data: &[f32]) -> Array<half::f16, Ix1> {
+            let n = data.len();
+            let vals: Vec<half::f16> = data.iter().map(|&x| half::f16::from_f32(x)).collect();
+            Array::from_vec(Ix1::new([n]), vals).unwrap()
+        }
+
+        #[test]
+        fn test_isnan_f16() {
+            let a = arr1_f16(&[1.0, f32::NAN, 3.0]);
+            let r = isnan_f16(&a).unwrap();
+            assert_eq!(r.as_slice().unwrap(), &[false, true, false]);
+        }
+
+        #[test]
+        fn test_isinf_f16() {
+            let a = arr1_f16(&[1.0, f32::INFINITY, f32::NEG_INFINITY]);
+            let r = isinf_f16(&a).unwrap();
+            assert_eq!(r.as_slice().unwrap(), &[false, true, true]);
+        }
+
+        #[test]
+        fn test_isfinite_f16() {
+            let a = arr1_f16(&[1.0, f32::INFINITY, f32::NAN]);
+            let r = isfinite_f16(&a).unwrap();
+            assert_eq!(r.as_slice().unwrap(), &[true, false, false]);
+        }
+
+        #[test]
+        fn test_clip_f16() {
+            let a = arr1_f16(&[-1.0, 0.5, 1.5, 3.0]);
+            let r = clip_f16(&a, half::f16::from_f32(0.0), half::f16::from_f32(2.0)).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 0.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 0.5).abs() < 0.01);
+            assert!((s[2].to_f32() - 1.5).abs() < 0.01);
+            assert!((s[3].to_f32() - 2.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_nan_to_num_f16() {
+            let a = arr1_f16(&[f32::NAN, 1.0]);
+            let r = nan_to_num_f16(&a, None, None, None).unwrap();
+            let s = r.as_slice().unwrap();
+            assert_eq!(s[0].to_f32(), 0.0);
+            assert!((s[1].to_f32() - 1.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_maximum_f16() {
+            let a = arr1_f16(&[1.0, 5.0, 3.0]);
+            let b = arr1_f16(&[4.0, 2.0, 3.0]);
+            let r = maximum_f16(&a, &b).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 4.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 5.0).abs() < 0.01);
+            assert!((s[2].to_f32() - 3.0).abs() < 0.01);
+        }
+
+        #[test]
+        fn test_minimum_f16() {
+            let a = arr1_f16(&[1.0, 5.0, 3.0]);
+            let b = arr1_f16(&[4.0, 2.0, 3.0]);
+            let r = minimum_f16(&a, &b).unwrap();
+            let s = r.as_slice().unwrap();
+            assert!((s[0].to_f32() - 1.0).abs() < 0.01);
+            assert!((s[1].to_f32() - 2.0).abs() < 0.01);
+            assert!((s[2].to_f32() - 3.0).abs() < 0.01);
+        }
     }
 }

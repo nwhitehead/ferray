@@ -2,10 +2,10 @@
 //
 // round (banker's rounding!), floor, ceil, trunc, fix, rint, around
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
 use crate::helpers::unary_float_op;
@@ -110,6 +110,65 @@ where
     trunc(input)
 }
 
+// ---------------------------------------------------------------------------
+// f16 variants (f32-promoted)
+// ---------------------------------------------------------------------------
+
+/// Elementwise floor for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn floor_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::floor)
+}
+
+/// Elementwise ceiling for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn ceil_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::ceil)
+}
+
+/// Elementwise truncation for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn trunc_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, f32::trunc)
+}
+
+/// Elementwise banker's rounding for f16 arrays via f32 promotion.
+#[cfg(feature = "f16")]
+pub fn round_f16<D>(input: &Array<half::f16, D>) -> FerrumResult<Array<half::f16, D>>
+where
+    D: Dimension,
+{
+    crate::helpers::unary_f16_op(input, bankers_round_f32)
+}
+
+/// f32 version of banker's round for f16 promotion.
+#[cfg(feature = "f16")]
+fn bankers_round_f32(x: f32) -> f32 {
+    let floored = x.floor();
+    let frac = x - floored;
+    if frac == 0.5 {
+        let ceiled = x.ceil();
+        if (floored / 2.0).floor() * 2.0 == floored {
+            floored
+        } else {
+            ceiled
+        }
+    } else if frac == -0.5 {
+        x.ceil()
+    } else {
+        x.round()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -126,11 +185,11 @@ mod tests {
         let a = arr1(vec![0.5, 1.5, 2.5, 3.5, -0.5, -1.5]);
         let r = round(&a).unwrap();
         let s = r.as_slice().unwrap();
-        assert_eq!(s[0], 0.0);  // 0.5 -> 0 (even)
-        assert_eq!(s[1], 2.0);  // 1.5 -> 2 (even)
-        assert_eq!(s[2], 2.0);  // 2.5 -> 2 (even)
-        assert_eq!(s[3], 4.0);  // 3.5 -> 4 (even)
-        assert_eq!(s[4], 0.0);  // -0.5 -> 0 (even)
+        assert_eq!(s[0], 0.0); // 0.5 -> 0 (even)
+        assert_eq!(s[1], 2.0); // 1.5 -> 2 (even)
+        assert_eq!(s[2], 2.0); // 2.5 -> 2 (even)
+        assert_eq!(s[3], 4.0); // 3.5 -> 4 (even)
+        assert_eq!(s[4], 0.0); // -0.5 -> 0 (even)
         assert_eq!(s[5], -2.0); // -1.5 -> -2 (even)
     }
 
