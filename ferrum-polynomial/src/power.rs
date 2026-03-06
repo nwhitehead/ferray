@@ -26,9 +26,7 @@ impl Polynomial {
     /// An empty coefficient slice produces the zero polynomial `[0.0]`.
     pub fn new(coeffs: &[f64]) -> Self {
         if coeffs.is_empty() {
-            Self {
-                coeffs: vec![0.0],
-            }
+            Self { coeffs: vec![0.0] }
         } else {
             Self {
                 coeffs: coeffs.to_vec(),
@@ -154,9 +152,7 @@ impl Poly for Polynomial {
 
     fn mul(&self, other: &Self) -> Result<Self, FerrumError> {
         if self.coeffs.is_empty() || other.coeffs.is_empty() {
-            return Ok(Self {
-                coeffs: vec![0.0],
-            });
+            return Ok(Self { coeffs: vec![0.0] });
         }
         let len = self.coeffs.len() + other.coeffs.len() - 1;
         let mut result = vec![0.0; len];
@@ -170,9 +166,7 @@ impl Poly for Polynomial {
 
     fn pow(&self, n: usize) -> Result<Self, FerrumError> {
         if n == 0 {
-            return Ok(Self {
-                coeffs: vec![1.0],
-            });
+            return Ok(Self { coeffs: vec![1.0] });
         }
         let mut result = self.clone();
         for _ in 1..n {
@@ -193,12 +187,7 @@ impl Poly for Polynomial {
 
         if n < m {
             // Quotient is zero, remainder is self
-            return Ok((
-                Self {
-                    coeffs: vec![0.0],
-                },
-                self_trimmed,
-            ));
+            return Ok((Self { coeffs: vec![0.0] }, self_trimmed));
         }
 
         let mut remainder = self_trimmed.coeffs.clone();

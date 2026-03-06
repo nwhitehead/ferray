@@ -11,25 +11,25 @@ pub mod prelude;
 // ---------------------------------------------------------------------------
 
 // Core types
+pub use ferrum_core::ArcArray;
 pub use ferrum_core::Array;
+pub use ferrum_core::ArrayFlags;
 pub use ferrum_core::ArrayView;
 pub use ferrum_core::ArrayViewMut;
-pub use ferrum_core::ArcArray;
-pub use ferrum_core::CowArray;
-pub use ferrum_core::ArrayFlags;
-pub use ferrum_core::DynArray;
-pub use ferrum_core::FieldDescriptor;
-pub use ferrum_core::FerrumRecord;
 pub use ferrum_core::AsRawBuffer;
+pub use ferrum_core::CowArray;
+pub use ferrum_core::DynArray;
+pub use ferrum_core::FerrumRecord;
+pub use ferrum_core::FieldDescriptor;
 
 // Dimension types
 pub use ferrum_core::dimension::{self, Axis, Dimension, Ix0, Ix1, Ix2, Ix3, Ix4, Ix5, Ix6, IxDyn};
 
 // Dtype system
-pub use ferrum_core::{DType, Element, SliceInfoElem};
 pub use ferrum_core::dtype::casting;
-pub use ferrum_core::dtype::promotion;
 pub use ferrum_core::dtype::finfo;
+pub use ferrum_core::dtype::promotion;
+pub use ferrum_core::{DType, Element, SliceInfoElem};
 
 // Error handling
 pub use ferrum_core::{FerrumError, FerrumResult};
@@ -38,31 +38,28 @@ pub use ferrum_core::{FerrumError, FerrumResult};
 pub use ferrum_core::MemoryLayout;
 
 // Macros
-pub use ferrum_core::{s, promoted_type, FerrumRecord as DeriveFerrumRecord};
+pub use ferrum_core::{FerrumRecord as DeriveFerrumRecord, promoted_type, s};
 
 // Type aliases
 pub use ferrum_core::aliases;
 
 // Display configuration
-pub use ferrum_core::array::display::{set_print_options, get_print_options};
+pub use ferrum_core::array::display::{get_print_options, set_print_options};
 
 // ---------------------------------------------------------------------------
 // REQ-3a: Constants (ferrum::PI, ferrum::INF, etc.)
 // ---------------------------------------------------------------------------
 
-pub use ferrum_core::constants::{PI, E, INF, NEG_INF, NAN, EULER_GAMMA, PZERO, NZERO, NEWAXIS};
+pub use ferrum_core::constants::{E, EULER_GAMMA, INF, NAN, NEG_INF, NEWAXIS, NZERO, PI, PZERO};
 
 // ---------------------------------------------------------------------------
 // REQ-1: Array creation functions at top level
 // ---------------------------------------------------------------------------
 
 pub use ferrum_core::creation::{
-    array, asarray, zeros, ones, full,
-    zeros_like, ones_like, full_like,
-    empty, frombuffer, fromiter,
-    arange, linspace, logspace, geomspace,
-    eye, identity, diag, diagflat, tri, tril, triu,
-    meshgrid, mgrid, ogrid,
+    arange, array, asarray, diag, diagflat, empty, eye, frombuffer, fromiter, full, full_like,
+    geomspace, identity, linspace, logspace, meshgrid, mgrid, ogrid, ones, ones_like, tri, tril,
+    triu, zeros, zeros_like,
 };
 
 // ---------------------------------------------------------------------------
@@ -70,16 +67,13 @@ pub use ferrum_core::creation::{
 // ---------------------------------------------------------------------------
 
 pub use ferrum_core::manipulation::{
-    reshape, ravel, flatten, transpose, swapaxes, moveaxis,
-    expand_dims, squeeze, concatenate, stack, split,
-    vstack, hstack, dstack, block, array_split, vsplit, hsplit, dsplit,
-    flip, flipud, fliplr, rot90, roll, rollaxis,
-    broadcast_to,
+    array_split, block, broadcast_to, concatenate, dsplit, dstack, expand_dims, flatten, flip,
+    fliplr, flipud, hsplit, hstack, moveaxis, ravel, reshape, roll, rollaxis, rot90, split,
+    squeeze, stack, swapaxes, transpose, vsplit, vstack,
 };
 
 pub use ferrum_core::manipulation::extended::{
-    pad, tile, repeat, resize,
-    append, insert, delete, trim_zeros,
+    append, delete, insert, pad, repeat, resize, tile, trim_zeros,
 };
 
 // ---------------------------------------------------------------------------
@@ -88,74 +82,58 @@ pub use ferrum_core::manipulation::extended::{
 
 // Trigonometric
 pub use ferrum_ufunc::{
-    sin, cos, tan, arcsin, arccos, arctan, arctan2,
-    sinh, cosh, tanh, arcsinh, arccosh, arctanh,
-    deg2rad, rad2deg, degrees, radians, hypot, unwrap,
+    arccos, arccosh, arcsin, arcsinh, arctan, arctan2, arctanh, cos, cosh, deg2rad, degrees, hypot,
+    rad2deg, radians, sin, sinh, tan, tanh, unwrap,
 };
 
 // Exponential and logarithmic
-pub use ferrum_ufunc::{
-    exp, exp2, expm1, log, log2, log10, log1p,
-    logaddexp, logaddexp2,
-};
+pub use ferrum_ufunc::{exp, exp2, expm1, log, log1p, log2, log10, logaddexp, logaddexp2};
 
 // Rounding
-pub use ferrum_ufunc::{round, floor, ceil, trunc, fix, rint, around};
+pub use ferrum_ufunc::{around, ceil, fix, floor, rint, round, trunc};
 
 // Arithmetic
 pub use ferrum_ufunc::{
-    add, subtract, multiply, divide, power, sqrt, square,
-    absolute, negative, positive, sign, remainder, mod_, fmod,
-    floor_divide, true_divide, divmod, reciprocal,
-    cumsum, cumprod, diff, gradient, ediff1d,
-    cross, trapezoid, heaviside,
-    gcd, lcm, cbrt, fabs,
-    nancumsum, nancumprod,
-    add_reduce, add_accumulate, add_broadcast,
-    subtract_broadcast, multiply_broadcast, multiply_outer,
-    divide_broadcast,
+    absolute, add, add_accumulate, add_broadcast, add_reduce, cbrt, cross, cumprod, cumsum, diff,
+    divide, divide_broadcast, divmod, ediff1d, fabs, floor_divide, fmod, gcd, gradient, heaviside,
+    lcm, mod_, multiply, multiply_broadcast, multiply_outer, nancumprod, nancumsum, negative,
+    positive, power, reciprocal, remainder, sign, sqrt, square, subtract, subtract_broadcast,
+    trapezoid, true_divide,
 };
 
 // Float intrinsics
 pub use ferrum_ufunc::{
-    isnan, isinf, isfinite, isposinf, isneginf, signbit,
-    clip, nan_to_num, nextafter, spacing, copysign,
-    maximum, minimum, fmax, fmin,
-    float_power, frexp, ldexp,
+    clip, copysign, float_power, fmax, fmin, frexp, isfinite, isinf, isnan, isneginf, isposinf,
+    ldexp, maximum, minimum, nan_to_num, nextafter, signbit, spacing,
 };
 
 // Complex
-pub use ferrum_ufunc::{abs, real, imag, conj, conjugate, angle};
+pub use ferrum_ufunc::{abs, angle, conj, conjugate, imag, real};
 
 // Bitwise
 pub use ferrum_ufunc::{
-    bitwise_and, bitwise_or, bitwise_xor, bitwise_not, invert,
-    left_shift, right_shift,
+    bitwise_and, bitwise_not, bitwise_or, bitwise_xor, invert, left_shift, right_shift,
 };
 
 // Comparison
 pub use ferrum_ufunc::{
-    equal, not_equal, less, less_equal, greater, greater_equal,
-    allclose, isclose, array_equal, array_equiv,
+    allclose, array_equal, array_equiv, equal, greater, greater_equal, isclose, less, less_equal,
+    not_equal,
 };
 
 // Logical
-pub use ferrum_ufunc::{
-    logical_and, logical_or, logical_xor, logical_not,
-    all, any,
-};
+pub use ferrum_ufunc::{all, any, logical_and, logical_not, logical_or, logical_xor};
 
 // Special
-pub use ferrum_ufunc::{sinc, i0};
+pub use ferrum_ufunc::{i0, sinc};
 
 // Convolution and interpolation
-pub use ferrum_ufunc::{convolve, ConvolveMode, interp, interp_one};
+pub use ferrum_ufunc::{ConvolveMode, convolve, interp, interp_one};
 
 // Operator-style functions
 pub use ferrum_ufunc::{
-    array_add, array_sub, array_mul, array_div, array_rem, array_neg,
-    array_bitand, array_bitor, array_bitxor, array_bitnot,
-    array_shl, array_shr,
+    array_add, array_bitand, array_bitnot, array_bitor, array_bitxor, array_div, array_mul,
+    array_neg, array_rem, array_shl, array_shr, array_sub,
 };
 
 // ---------------------------------------------------------------------------
@@ -164,8 +142,8 @@ pub use ferrum_ufunc::{
 
 // Reductions
 pub use ferrum_stats::{
-    sum, prod, min, max, argmin, argmax, mean, var, std_,
-    cumsum as stats_cumsum, cumprod as stats_cumprod,
+    argmax, argmin, cumprod as stats_cumprod, cumsum as stats_cumsum, max, mean, min, prod, std_,
+    sum, var,
 };
 
 // Quantile-based
@@ -173,23 +151,22 @@ pub use ferrum_stats::{median, percentile, quantile};
 
 // NaN-aware reductions
 pub use ferrum_stats::{
-    nansum, nanprod, nanmin, nanmax, nanmean, nanvar, nanstd,
-    nanmedian, nanpercentile,
-    nancumsum as stats_nancumsum, nancumprod as stats_nancumprod,
+    nancumprod as stats_nancumprod, nancumsum as stats_nancumsum, nanmax, nanmean, nanmedian,
+    nanmin, nanpercentile, nanprod, nanstd, nansum, nanvar,
 };
 
 // Correlation and covariance
-pub use ferrum_stats::{correlate, corrcoef, cov, CorrelateMode};
+pub use ferrum_stats::{CorrelateMode, corrcoef, correlate, cov};
 
 // Histogram
-pub use ferrum_stats::{histogram, histogram2d, histogramdd, bincount, digitize, Bins};
+pub use ferrum_stats::{Bins, bincount, digitize, histogram, histogram2d, histogramdd};
 
 // Sorting and searching
-pub use ferrum_stats::{sort, argsort, searchsorted, SortKind, Side};
-pub use ferrum_stats::{unique, nonzero, where_, count_nonzero, UniqueResult};
+pub use ferrum_stats::{Side, SortKind, argsort, searchsorted, sort};
+pub use ferrum_stats::{UniqueResult, count_nonzero, nonzero, unique, where_};
 
 // Set operations
-pub use ferrum_stats::{union1d, intersect1d, setdiff1d, setxor1d, in1d, isin};
+pub use ferrum_stats::{in1d, intersect1d, isin, setdiff1d, setxor1d, union1d};
 
 // ---------------------------------------------------------------------------
 // REQ-2: Submodule namespaces
@@ -248,9 +225,7 @@ pub use config::{set_num_threads, with_num_threads};
 /// Parallel threshold configuration constants.
 pub mod threshold {
     pub use crate::config::{
-        PARALLEL_THRESHOLD_ELEMENTWISE,
-        PARALLEL_THRESHOLD_COMPUTE,
-        PARALLEL_THRESHOLD_REDUCTION,
+        PARALLEL_THRESHOLD_COMPUTE, PARALLEL_THRESHOLD_ELEMENTWISE, PARALLEL_THRESHOLD_REDUCTION,
         PARALLEL_THRESHOLD_SORT,
     };
 }

@@ -60,17 +60,11 @@ fn vector_norm(a: &Array<f64, IxDyn>, ord: NormOrder) -> FerrumResult<f64> {
             Ok(sum)
         }
         NormOrder::Inf => {
-            let max = data
-                .iter()
-                .map(|x| x.abs())
-                .fold(0.0f64, f64::max);
+            let max = data.iter().map(|x| x.abs()).fold(0.0f64, f64::max);
             Ok(max)
         }
         NormOrder::NegInf => {
-            let min = data
-                .iter()
-                .map(|x| x.abs())
-                .fold(f64::INFINITY, f64::min);
+            let min = data.iter().map(|x| x.abs()).fold(f64::INFINITY, f64::min);
             Ok(min)
         }
         NormOrder::Nuc => {
@@ -84,16 +78,10 @@ fn vector_norm(a: &Array<f64, IxDyn>, ord: NormOrder) -> FerrumResult<f64> {
                 let count = data.iter().filter(|&&x| x != 0.0).count() as f64;
                 Ok(count)
             } else if p == f64::INFINITY {
-                let max = data
-                    .iter()
-                    .map(|x| x.abs())
-                    .fold(0.0f64, f64::max);
+                let max = data.iter().map(|x| x.abs()).fold(0.0f64, f64::max);
                 Ok(max)
             } else if p == f64::NEG_INFINITY {
-                let min = data
-                    .iter()
-                    .map(|x| x.abs())
-                    .fold(f64::INFINITY, f64::min);
+                let min = data.iter().map(|x| x.abs()).fold(f64::INFINITY, f64::min);
                 Ok(min)
             } else {
                 let sum: f64 = data.iter().map(|x| x.abs().powf(p)).sum();
@@ -194,10 +182,8 @@ pub fn cond(a: &Array<f64, Ix2>, p: NormOrder) -> FerrumResult<f64> {
             }
         }
         _ => {
-            let a_dyn = Array::<f64, IxDyn>::from_vec(
-                IxDyn::new(shape),
-                a.iter().copied().collect(),
-            )?;
+            let a_dyn =
+                Array::<f64, IxDyn>::from_vec(IxDyn::new(shape), a.iter().copied().collect())?;
             let norm_a = norm(&a_dyn, p)?;
             let inv_a = crate::solve::inv(a)?;
             let inv_dyn = Array::<f64, IxDyn>::from_vec(
@@ -327,11 +313,7 @@ mod tests {
 
     #[test]
     fn det_2x2() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let d = det(&a).unwrap();
         assert!((d - (-2.0)).abs() < 1e-10);
     }
@@ -344,11 +326,7 @@ mod tests {
 
     #[test]
     fn slogdet_positive() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![2.0, 0.0, 0.0, 3.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![2.0, 0.0, 0.0, 3.0]).unwrap();
         let (sign, logdet) = slogdet(&a).unwrap();
         assert!((sign - 1.0).abs() < 1e-10);
         assert!((logdet - (6.0f64).ln()).abs() < 1e-10);
@@ -356,11 +334,7 @@ mod tests {
 
     #[test]
     fn slogdet_negative() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let (sign, logdet) = slogdet(&a).unwrap();
         assert!((sign - (-1.0)).abs() < 1e-10);
         assert!((logdet - (2.0f64).ln()).abs() < 1e-10);
@@ -399,22 +373,15 @@ mod tests {
 
     #[test]
     fn norm_vector_l2() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[3]),
-            vec![3.0, 4.0, 0.0],
-        )
-        .unwrap();
+        let a = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3]), vec![3.0, 4.0, 0.0]).unwrap();
         let n = norm(&a, NormOrder::L2).unwrap();
         assert!((n - 5.0).abs() < 1e-10);
     }
 
     #[test]
     fn norm_matrix_fro() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let n = norm(&a, NormOrder::Fro).unwrap();
         assert!((n - 30.0f64.sqrt()).abs() < 1e-10);
     }

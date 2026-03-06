@@ -6,7 +6,7 @@ use ferrum_core::array::owned::Array;
 use ferrum_core::dimension::{Ix2, IxDyn};
 use ferrum_core::error::{FerrumError, FerrumResult};
 
-use crate::batch::{self, slice_to_faer, faer_to_vec};
+use crate::batch::{self, faer_to_vec, slice_to_faer};
 use crate::faer_bridge;
 
 /// Compute the Cholesky decomposition of a symmetric positive-definite matrix.
@@ -79,11 +79,7 @@ mod tests {
     fn cholesky_2x2() {
         // A = [[4, 2], [2, 3]]
         // L = [[2, 0], [1, sqrt(2)]]
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![4.0, 2.0, 2.0, 3.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![4.0, 2.0, 2.0, 3.0]).unwrap();
         let l = cholesky(&a).unwrap();
         let ld = l.as_slice().unwrap();
 
@@ -99,7 +95,10 @@ mod tests {
                 assert!(
                     (sum - expected).abs() < 1e-10,
                     "L*L^T[{},{}] = {} != {}",
-                    i, j, sum, expected
+                    i,
+                    j,
+                    sum,
+                    expected
                 );
             }
         }
@@ -108,22 +107,14 @@ mod tests {
     #[test]
     fn cholesky_not_positive_definite() {
         // Not positive definite
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![-1.0, 0.0, 0.0, -1.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![-1.0, 0.0, 0.0, -1.0]).unwrap();
         let result = cholesky(&a);
         assert!(result.is_err());
     }
 
     #[test]
     fn cholesky_non_square() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0; 6],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
         assert!(cholesky(&a).is_err());
     }
 }

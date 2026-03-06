@@ -9,8 +9,9 @@ static GLOBAL_POOL: OnceLock<ThreadPool> = OnceLock::new();
 
 /// Pool cache for `with_num_threads`. Keyed by thread count.
 /// Uses a simple mutex-protected HashMap since pool creation is rare.
-static POOL_CACHE: std::sync::LazyLock<std::sync::Mutex<std::collections::HashMap<usize, std::sync::Arc<ThreadPool>>>> =
-    std::sync::LazyLock::new(|| std::sync::Mutex::new(std::collections::HashMap::new()));
+static POOL_CACHE: std::sync::LazyLock<
+    std::sync::Mutex<std::collections::HashMap<usize, std::sync::Arc<ThreadPool>>>,
+> = std::sync::LazyLock::new(|| std::sync::Mutex::new(std::collections::HashMap::new()));
 
 /// Configure the global ferrum Rayon thread pool.
 ///

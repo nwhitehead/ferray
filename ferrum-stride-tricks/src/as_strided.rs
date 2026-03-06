@@ -200,8 +200,7 @@ mod tests {
     #[test]
     fn as_strided_contiguous_reshape() {
         let a =
-            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
-                .unwrap();
+            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let v = as_strided(&a, &[2, 3], &[3, 1]).unwrap();
         assert_eq!(v.shape(), &[2, 3]);
         let data: Vec<f64> = v.iter().copied().collect();
@@ -211,8 +210,7 @@ mod tests {
     #[test]
     fn as_strided_non_contiguous() {
         // Take every other element: shape (3,), stride (2,) from buffer of 6
-        let a =
-            Array::<i32, Ix1>::from_vec(Ix1::new([6]), vec![1, 2, 3, 4, 5, 6]).unwrap();
+        let a = Array::<i32, Ix1>::from_vec(Ix1::new([6]), vec![1, 2, 3, 4, 5, 6]).unwrap();
         let v = as_strided(&a, &[3], &[2]).unwrap();
         assert_eq!(v.shape(), &[3]);
         let data: Vec<i32> = v.iter().copied().collect();
@@ -253,8 +251,7 @@ mod tests {
     #[test]
     fn as_strided_zero_copy() {
         let a =
-            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
-                .unwrap();
+            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let v = as_strided(&a, &[2, 3], &[3, 1]).unwrap();
         assert_eq!(v.as_ptr(), a.as_ptr());
     }

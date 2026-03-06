@@ -26,9 +26,7 @@ impl Chebyshev {
     /// `coeffs[i]` is the coefficient of T_i(x).
     pub fn new(coeffs: &[f64]) -> Self {
         if coeffs.is_empty() {
-            Self {
-                coeffs: vec![0.0],
-            }
+            Self { coeffs: vec![0.0] }
         } else {
             Self {
                 coeffs: coeffs.to_vec(),
@@ -297,13 +295,7 @@ impl Poly for Chebyshev {
                 .iter()
                 .enumerate()
                 .filter(|(i, _)| i % 2 == 0)
-                .map(|(i, &c)| {
-                    if (i / 2) % 2 == 0 {
-                        c
-                    } else {
-                        -c
-                    }
-                })
+                .map(|(i, &c)| if (i / 2) % 2 == 0 { c } else { -c })
                 .sum();
             new_coeffs[0] += constant - current_at_zero;
 
@@ -387,9 +379,7 @@ impl Poly for Chebyshev {
 
     fn pow(&self, n: usize) -> Result<Self, FerrumError> {
         if n == 0 {
-            return Ok(Self {
-                coeffs: vec![1.0],
-            });
+            return Ok(Self { coeffs: vec![1.0] });
         }
         let mut result = self.clone();
         for _ in 1..n {
@@ -604,7 +594,12 @@ mod tests {
         let power: crate::power::Polynomial = original.convert().unwrap();
         let recovered: Chebyshev = power.convert().unwrap();
 
-        for (i, (&orig, &rec)) in original.coeffs.iter().zip(recovered.coeffs.iter()).enumerate() {
+        for (i, (&orig, &rec)) in original
+            .coeffs
+            .iter()
+            .zip(recovered.coeffs.iter())
+            .enumerate()
+        {
             assert!(
                 (orig - rec).abs() < 1e-10,
                 "index {}: expected {}, got {}",

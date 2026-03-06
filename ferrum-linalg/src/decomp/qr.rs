@@ -82,7 +82,9 @@ mod tests {
             assert!(
                 (reconstructed[i] - orig[i]).abs() < 1e-10,
                 "Q*R[{}] = {} != {}",
-                i, reconstructed[i], orig[i]
+                i,
+                reconstructed[i],
+                orig[i]
             );
         }
     }
@@ -119,7 +121,10 @@ mod tests {
                 assert!(
                     (dot - expected).abs() < 1e-10,
                     "Q^T*Q[{},{}] = {} != {}",
-                    i, j, dot, expected
+                    i,
+                    j,
+                    dot,
+                    expected
                 );
             }
         }

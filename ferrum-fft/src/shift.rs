@@ -3,10 +3,10 @@
 // fftshift moves the zero-frequency component to the center of the spectrum.
 // ifftshift undoes this operation.
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, IxDyn};
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 /// Shift the zero-frequency component to the center of the spectrum.
 ///
@@ -60,10 +60,7 @@ pub fn ifftshift<T: Element, D: Dimension>(
     let axes = resolve_axes(ndim, axes)?;
 
     // Compute shift amounts: -(n//2) for each axis
-    let shifts: Vec<isize> = axes
-        .iter()
-        .map(|&ax| -((shape[ax] / 2) as isize))
-        .collect();
+    let shifts: Vec<isize> = axes.iter().map(|&ax| -((shape[ax] / 2) as isize)).collect();
 
     roll_along_axes(a, &axes, &shifts)
 }
@@ -173,11 +170,7 @@ mod tests {
     #[test]
     fn fftshift_odd() {
         // [0, 1, 2, 3, 4] -> [3, 4, 0, 1, 2]  (shift by 5//2 = 2)
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![0.0, 1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![0.0, 1.0, 2.0, 3.0, 4.0]).unwrap();
         let shifted = fftshift(&a, None).unwrap();
         let data: Vec<f64> = shifted.iter().copied().collect();
         assert_eq!(data, vec![3.0, 4.0, 0.0, 1.0, 2.0]);
@@ -199,11 +192,7 @@ mod tests {
     #[test]
     fn ifftshift_odd() {
         // Inverse of fftshift for odd length
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![3.0, 4.0, 0.0, 1.0, 2.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![3.0, 4.0, 0.0, 1.0, 2.0]).unwrap();
         let unshifted = ifftshift(&a, None).unwrap();
         let data: Vec<f64> = unshifted.iter().copied().collect();
         assert_eq!(data, vec![0.0, 1.0, 2.0, 3.0, 4.0]);
@@ -226,11 +215,7 @@ mod tests {
     #[test]
     fn fftshift_ifftshift_roundtrip_odd() {
         // AC-5: roundtrip for odd-length
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![0.0, 1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![0.0, 1.0, 2.0, 3.0, 4.0]).unwrap();
         let shifted = fftshift(&a, None).unwrap();
         let recovered = ifftshift(&shifted, None).unwrap();
         let data: Vec<f64> = recovered.iter().copied().collect();

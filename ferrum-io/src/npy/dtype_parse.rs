@@ -139,27 +139,66 @@ mod tests {
 
     #[test]
     fn parse_common_dtypes() {
-        assert_eq!(parse_dtype_str("<f8").unwrap(), (DType::F64, Endianness::Little));
-        assert_eq!(parse_dtype_str("<f4").unwrap(), (DType::F32, Endianness::Little));
-        assert_eq!(parse_dtype_str(">i4").unwrap(), (DType::I32, Endianness::Big));
-        assert_eq!(parse_dtype_str("<i8").unwrap(), (DType::I64, Endianness::Little));
-        assert_eq!(parse_dtype_str("|b1").unwrap(), (DType::Bool, Endianness::Native));
-        assert_eq!(parse_dtype_str("<u1").unwrap(), (DType::U8, Endianness::Little));
-        assert_eq!(parse_dtype_str("<c8").unwrap(), (DType::Complex32, Endianness::Little));
-        assert_eq!(parse_dtype_str("<c16").unwrap(), (DType::Complex64, Endianness::Little));
+        assert_eq!(
+            parse_dtype_str("<f8").unwrap(),
+            (DType::F64, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("<f4").unwrap(),
+            (DType::F32, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str(">i4").unwrap(),
+            (DType::I32, Endianness::Big)
+        );
+        assert_eq!(
+            parse_dtype_str("<i8").unwrap(),
+            (DType::I64, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("|b1").unwrap(),
+            (DType::Bool, Endianness::Native)
+        );
+        assert_eq!(
+            parse_dtype_str("<u1").unwrap(),
+            (DType::U8, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("<c8").unwrap(),
+            (DType::Complex32, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("<c16").unwrap(),
+            (DType::Complex64, Endianness::Little)
+        );
     }
 
     #[test]
     fn parse_unsigned_types() {
-        assert_eq!(parse_dtype_str("<u2").unwrap(), (DType::U16, Endianness::Little));
-        assert_eq!(parse_dtype_str("<u4").unwrap(), (DType::U32, Endianness::Little));
-        assert_eq!(parse_dtype_str("<u8").unwrap(), (DType::U64, Endianness::Little));
+        assert_eq!(
+            parse_dtype_str("<u2").unwrap(),
+            (DType::U16, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("<u4").unwrap(),
+            (DType::U32, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("<u8").unwrap(),
+            (DType::U64, Endianness::Little)
+        );
     }
 
     #[test]
     fn parse_128bit_types() {
-        assert_eq!(parse_dtype_str("<i16").unwrap(), (DType::I128, Endianness::Little));
-        assert_eq!(parse_dtype_str("<u16").unwrap(), (DType::U128, Endianness::Little));
+        assert_eq!(
+            parse_dtype_str("<i16").unwrap(),
+            (DType::I128, Endianness::Little)
+        );
+        assert_eq!(
+            parse_dtype_str("<u16").unwrap(),
+            (DType::U128, Endianness::Little)
+        );
     }
 
     #[test]
@@ -172,14 +211,27 @@ mod tests {
     #[test]
     fn roundtrip_descr() {
         let dtypes = [
-            DType::Bool, DType::U8, DType::U16, DType::U32, DType::U64,
-            DType::I8, DType::I16, DType::I32, DType::I64,
-            DType::F32, DType::F64, DType::Complex32, DType::Complex64,
+            DType::Bool,
+            DType::U8,
+            DType::U16,
+            DType::U32,
+            DType::U64,
+            DType::I8,
+            DType::I16,
+            DType::I32,
+            DType::I64,
+            DType::F32,
+            DType::F64,
+            DType::Complex32,
+            DType::Complex64,
         ];
         for dt in dtypes {
             let descr = dtype_to_native_descr(dt).unwrap();
             let (parsed_dt, _) = parse_dtype_str(&descr).unwrap();
-            assert_eq!(parsed_dt, dt, "roundtrip failed for {dt:?}: descr='{descr}'");
+            assert_eq!(
+                parsed_dt, dt,
+                "roundtrip failed for {dt:?}: descr='{descr}'"
+            );
         }
     }
 

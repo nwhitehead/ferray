@@ -54,33 +54,22 @@ mod tests {
             FftNorm::Backward.scale_factor(n, FftDirection::Forward),
             1.0
         );
-        assert!(
-            (FftNorm::Backward.scale_factor(n, FftDirection::Inverse) - 0.125).abs() < 1e-15
-        );
+        assert!((FftNorm::Backward.scale_factor(n, FftDirection::Inverse) - 0.125).abs() < 1e-15);
     }
 
     #[test]
     fn forward_norm_factors() {
         let n = 8;
-        assert!(
-            (FftNorm::Forward.scale_factor(n, FftDirection::Forward) - 0.125).abs() < 1e-15
-        );
-        assert_eq!(
-            FftNorm::Forward.scale_factor(n, FftDirection::Inverse),
-            1.0
-        );
+        assert!((FftNorm::Forward.scale_factor(n, FftDirection::Forward) - 0.125).abs() < 1e-15);
+        assert_eq!(FftNorm::Forward.scale_factor(n, FftDirection::Inverse), 1.0);
     }
 
     #[test]
     fn ortho_norm_factors() {
         let n = 4;
         let expected = 1.0 / 2.0; // 1/sqrt(4)
-        assert!(
-            (FftNorm::Ortho.scale_factor(n, FftDirection::Forward) - expected).abs() < 1e-15
-        );
-        assert!(
-            (FftNorm::Ortho.scale_factor(n, FftDirection::Inverse) - expected).abs() < 1e-15
-        );
+        assert!((FftNorm::Ortho.scale_factor(n, FftDirection::Forward) - expected).abs() < 1e-15);
+        assert!((FftNorm::Ortho.scale_factor(n, FftDirection::Inverse) - expected).abs() < 1e-15);
     }
 
     #[test]

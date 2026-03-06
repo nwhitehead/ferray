@@ -41,11 +41,7 @@ pub enum Side {
 /// Returns a new sorted array with the same shape.
 ///
 /// Equivalent to `numpy.sort`.
-pub fn sort<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-    kind: SortKind,
-) -> FerrumResult<Array<T, D>>
+pub fn sort<T, D>(a: &Array<T, D>, axis: Option<usize>, kind: SortKind) -> FerrumResult<Array<T, D>>
 where
     T: Element + PartialOrd + Copy + Send + Sync,
     D: Dimension,
@@ -67,11 +63,17 @@ where
             let strides = compute_strides(&shape);
 
             let axis_len = shape[ax];
-            let out_shape: Vec<usize> = shape.iter().enumerate()
+            let out_shape: Vec<usize> = shape
+                .iter()
+                .enumerate()
                 .filter(|&(i, _)| i != ax)
                 .map(|(_, &s)| s)
                 .collect();
-            let out_size: usize = if out_shape.is_empty() { 1 } else { out_shape.iter().product() };
+            let out_size: usize = if out_shape.is_empty() {
+                1
+            } else {
+                out_shape.iter().product()
+            };
 
             let mut out_multi = vec![0usize; out_shape.len()];
             let ndim = shape.len();
@@ -137,10 +139,7 @@ fn sort_slice<T: PartialOrd + Copy + Send + Sync>(data: &mut [T], kind: SortKind
 /// Returns u64 indices.
 ///
 /// Equivalent to `numpy.argsort`.
-pub fn argsort<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<u64, D>>
+pub fn argsort<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<u64, D>>
 where
     T: Element + PartialOrd + Copy,
     D: Dimension,
@@ -150,7 +149,9 @@ where
             let data: Vec<T> = a.iter().copied().collect();
             let mut indices: Vec<usize> = (0..data.len()).collect();
             indices.sort_by(|&i, &j| {
-                data[i].partial_cmp(&data[j]).unwrap_or(std::cmp::Ordering::Equal)
+                data[i]
+                    .partial_cmp(&data[j])
+                    .unwrap_or(std::cmp::Ordering::Equal)
             });
             let result: Vec<u64> = indices.into_iter().map(|i| i as u64).collect();
             Array::from_vec(a.dim().clone(), result)
@@ -165,11 +166,17 @@ where
             let ndim = shape.len();
             let axis_len = shape[ax];
 
-            let out_shape: Vec<usize> = shape.iter().enumerate()
+            let out_shape: Vec<usize> = shape
+                .iter()
+                .enumerate()
                 .filter(|&(i, _)| i != ax)
                 .map(|(_, &s)| s)
                 .collect();
-            let out_size: usize = if out_shape.is_empty() { 1 } else { out_shape.iter().product() };
+            let out_size: usize = if out_shape.is_empty() {
+                1
+            } else {
+                out_shape.iter().product()
+            };
 
             let mut result = vec![0u64; data.len()];
             let mut out_multi = vec![0usize; out_shape.len()];
@@ -197,9 +204,7 @@ where
                 }
 
                 // Sort by value, tracking original axis-local index
-                lane.sort_by(|a, b| {
-                    a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal)
-                });
+                lane.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
 
                 // Scatter the original axis-local indices into the result
                 for (k, &flat_idx) in lane_flat_indices.iter().enumerate() {
@@ -240,18 +245,13 @@ where
     let mut result = Vec::with_capacity(values.len());
     for &val in &values {
         let idx = match side {
-            Side::Left => {
-                sorted.partition_point(|x| {
-                    x.partial_cmp(&val).unwrap_or(std::cmp::Ordering::Less)
-                        == std::cmp::Ordering::Less
-                })
-            }
-            Side::Right => {
-                sorted.partition_point(|x| {
-                    x.partial_cmp(&val).unwrap_or(std::cmp::Ordering::Less)
-                        != std::cmp::Ordering::Greater
-                })
-            }
+            Side::Left => sorted.partition_point(|x| {
+                x.partial_cmp(&val).unwrap_or(std::cmp::Ordering::Less) == std::cmp::Ordering::Less
+            }),
+            Side::Right => sorted.partition_point(|x| {
+                x.partial_cmp(&val).unwrap_or(std::cmp::Ordering::Less)
+                    != std::cmp::Ordering::Greater
+            }),
         };
         result.push(idx as u64);
     }
@@ -281,10 +281,8 @@ mod tests {
 
     #[test]
     fn test_sort_2d_axis1() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![3.0, 1.0, 2.0, 6.0, 4.0, 5.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![3.0, 1.0, 2.0, 6.0, 4.0, 5.0])
+            .unwrap();
         let s = sort(&a, Some(1), SortKind::Quick).unwrap();
         let data: Vec<f64> = s.iter().copied().collect();
         assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
@@ -292,10 +290,8 @@ mod tests {
 
     #[test]
     fn test_sort_2d_axis0() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![4.0, 5.0, 6.0, 1.0, 2.0, 3.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![4.0, 5.0, 6.0, 1.0, 2.0, 3.0])
+            .unwrap();
         let s = sort(&a, Some(0), SortKind::Quick).unwrap();
         let data: Vec<f64> = s.iter().copied().collect();
         assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
@@ -311,10 +307,8 @@ mod tests {
 
     #[test]
     fn test_argsort_2d_axis1() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![3.0, 1.0, 2.0, 6.0, 4.0, 5.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![3.0, 1.0, 2.0, 6.0, 4.0, 5.0])
+            .unwrap();
         let idx = argsort(&a, Some(1)).unwrap();
         let data: Vec<u64> = idx.iter().copied().collect();
         assert_eq!(data, vec![1, 2, 0, 1, 2, 0]);

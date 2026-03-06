@@ -131,8 +131,7 @@ pub fn hermite_e_vandermonde(x: &[f64], deg: usize) -> Vec<f64> {
         for j in 2..ncols {
             // He_n(x) = x*He_{n-1}(x) - (n-1)*He_{n-2}(x)
             let jf = j as f64;
-            v[i * ncols + j] =
-                x[i] * v[i * ncols + (j - 1)] - (jf - 1.0) * v[i * ncols + (j - 2)];
+            v[i * ncols + j] = x[i] * v[i * ncols + (j - 1)] - (jf - 1.0) * v[i * ncols + (j - 2)];
         }
     }
     v

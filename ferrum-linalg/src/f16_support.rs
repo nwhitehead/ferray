@@ -35,10 +35,7 @@ fn demote_to_f16(arr: &Array<f64, IxDyn>) -> FerrumResult<Array<f16, IxDyn>> {
 ///
 /// # Errors
 /// - `FerrumError::ShapeMismatch` if inner dimensions don't match.
-pub fn matmul_f16(
-    a: &Array<f16, IxDyn>,
-    b: &Array<f16, IxDyn>,
-) -> FerrumResult<Array<f16, IxDyn>> {
+pub fn matmul_f16(a: &Array<f16, IxDyn>, b: &Array<f16, IxDyn>) -> FerrumResult<Array<f16, IxDyn>> {
     let a_f64 = promote_to_f64(a)?;
     let b_f64 = promote_to_f64(b)?;
     let result = crate::matmul(&a_f64, &b_f64)?;
@@ -48,10 +45,7 @@ pub fn matmul_f16(
 /// Dot product for f16 arrays.
 ///
 /// Promotes to f64 internally, delegates to [`crate::dot`].
-pub fn dot_f16(
-    a: &Array<f16, IxDyn>,
-    b: &Array<f16, IxDyn>,
-) -> FerrumResult<Array<f16, IxDyn>> {
+pub fn dot_f16(a: &Array<f16, IxDyn>, b: &Array<f16, IxDyn>) -> FerrumResult<Array<f16, IxDyn>> {
     let a_f64 = promote_to_f64(a)?;
     let b_f64 = promote_to_f64(b)?;
     let result = crate::dot(&a_f64, &b_f64)?;
@@ -71,10 +65,7 @@ pub fn vdot_f16(a: &Array<f16, IxDyn>, b: &Array<f16, IxDyn>) -> FerrumResult<f1
 /// Outer product for f16 arrays.
 ///
 /// Promotes to f64 internally, delegates to [`crate::outer`].
-pub fn outer_f16(
-    a: &Array<f16, IxDyn>,
-    b: &Array<f16, IxDyn>,
-) -> FerrumResult<Array<f16, IxDyn>> {
+pub fn outer_f16(a: &Array<f16, IxDyn>, b: &Array<f16, IxDyn>) -> FerrumResult<Array<f16, IxDyn>> {
     let a_f64 = promote_to_f64(a)?;
     let b_f64 = promote_to_f64(b)?;
     let result = crate::outer(&a_f64, &b_f64)?;
@@ -84,10 +75,7 @@ pub fn outer_f16(
 /// Matrix norm for f16 arrays, returning f16.
 ///
 /// Promotes to f64 internally, delegates to [`crate::norm`].
-pub fn norm_f16(
-    a: &Array<f16, IxDyn>,
-    order: crate::NormOrder,
-) -> FerrumResult<f64> {
+pub fn norm_f16(a: &Array<f16, IxDyn>, order: crate::NormOrder) -> FerrumResult<f64> {
     let a_f64 = promote_to_f64(a)?;
     crate::norm(&a_f64, order)
 }

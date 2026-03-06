@@ -106,8 +106,7 @@ fn qr_eigenvalues(mat: &[f64], n: usize) -> Result<Vec<Complex<f64>>, FerrumErro
 
         // Check for deflation: if h[p-1, p-2] is small, deflate
         let sub = h[(p - 1) * n + (p - 2)].abs();
-        let diag_sum =
-            h[(p - 1) * n + (p - 1)].abs() + h[(p - 2) * n + (p - 2)].abs();
+        let diag_sum = h[(p - 1) * n + (p - 1)].abs() + h[(p - 2) * n + (p - 2)].abs();
         let tol = f64::EPSILON * diag_sum.max(1e-300);
 
         if sub <= tol {
@@ -119,8 +118,7 @@ fn qr_eigenvalues(mat: &[f64], n: usize) -> Result<Vec<Complex<f64>>, FerrumErro
         // Check for 2x2 block deflation
         if p >= 3 {
             let sub2 = h[(p - 2) * n + (p - 3)].abs();
-            let diag_sum2 =
-                h[(p - 2) * n + (p - 2)].abs() + h[(p - 3) * n + (p - 3)].abs();
+            let diag_sum2 = h[(p - 2) * n + (p - 2)].abs() + h[(p - 3) * n + (p - 3)].abs();
             let tol2 = f64::EPSILON * diag_sum2.max(1e-300);
             if sub2 <= tol2 {
                 // Deflate 2x2 block
@@ -166,12 +164,7 @@ fn qr_eigenvalues(mat: &[f64], n: usize) -> Result<Vec<Complex<f64>>, FerrumErro
     }
 
     if p == 2 {
-        let eigs = eigenvalues_2x2(
-            h[0],
-            h[1],
-            h[n],
-            h[n + 1],
-        );
+        let eigs = eigenvalues_2x2(h[0], h[1], h[n], h[n + 1]);
         eigenvalues.push(eigs.0);
         eigenvalues.push(eigs.1);
     } else if p == 1 {
@@ -308,10 +301,7 @@ mod tests {
         roots.sort_by(|a, b| {
             a.re.partial_cmp(&b.re)
                 .unwrap_or(std::cmp::Ordering::Equal)
-                .then_with(|| {
-                    a.im.partial_cmp(&b.im)
-                        .unwrap_or(std::cmp::Ordering::Equal)
-                })
+                .then_with(|| a.im.partial_cmp(&b.im).unwrap_or(std::cmp::Ordering::Equal))
         });
     }
 
@@ -363,29 +353,16 @@ mod tests {
         let mut roots = find_roots_from_power_coeffs(&[-6.0, 11.0, -6.0, 1.0]).unwrap();
         assert_eq!(roots.len(), 3);
         sort_roots(&mut roots);
-        assert!(
-            (roots[0].re - 1.0).abs() < 1e-8,
-            "root[0] = {:?}",
-            roots[0]
-        );
-        assert!(
-            (roots[1].re - 2.0).abs() < 1e-8,
-            "root[1] = {:?}",
-            roots[1]
-        );
-        assert!(
-            (roots[2].re - 3.0).abs() < 1e-8,
-            "root[2] = {:?}",
-            roots[2]
-        );
+        assert!((roots[0].re - 1.0).abs() < 1e-8, "root[0] = {:?}", roots[0]);
+        assert!((roots[1].re - 2.0).abs() < 1e-8, "root[1] = {:?}", roots[1]);
+        assert!((roots[2].re - 3.0).abs() < 1e-8, "root[2] = {:?}", roots[2]);
     }
 
     #[test]
     fn roots_quartic() {
         // (x-1)(x-2)(x-3)(x-4) = x^4 - 10x^3 + 35x^2 - 50x + 24
         // coefficients [24, -50, 35, -10, 1]
-        let mut roots =
-            find_roots_from_power_coeffs(&[24.0, -50.0, 35.0, -10.0, 1.0]).unwrap();
+        let mut roots = find_roots_from_power_coeffs(&[24.0, -50.0, 35.0, -10.0, 1.0]).unwrap();
         assert_eq!(roots.len(), 4);
         sort_roots(&mut roots);
         for (i, &expected) in [1.0, 2.0, 3.0, 4.0].iter().enumerate() {

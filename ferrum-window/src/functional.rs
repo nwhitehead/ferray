@@ -3,10 +3,10 @@
 // Implements NumPy-equivalent functional utilities: vectorize, piecewise,
 // apply_along_axis, and apply_over_axes.
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Axis, Dimension, Ix1, IxDyn};
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 /// Wrap a scalar function to operate elementwise on arrays.
 ///
@@ -223,10 +223,7 @@ pub fn apply_over_axes(
 ///
 /// # Errors
 /// Returns `FerrumError::AxisOutOfBounds` if `axis >= ndim`.
-pub fn sum_axis_keepdims(
-    a: &Array<f64, IxDyn>,
-    axis: Axis,
-) -> FerrumResult<Array<f64, IxDyn>> {
+pub fn sum_axis_keepdims(a: &Array<f64, IxDyn>, axis: Axis) -> FerrumResult<Array<f64, IxDyn>> {
     let ndim = a.ndim();
     let ax = axis.index();
     if ax >= ndim {
@@ -285,11 +282,9 @@ mod tests {
     #[test]
     fn vectorize_nd_2d() {
         let square = vectorize_nd(|x: f64| x * x);
-        let input = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let input =
+            Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let result = square(&input).unwrap();
         assert_eq!(result.shape(), &[2, 3]);
         let expected = vec![1.0, 4.0, 9.0, 16.0, 25.0, 36.0];
@@ -317,7 +312,7 @@ mod tests {
             &x,
             &[cond_neg, cond_pos],
             &[
-                Box::new(|v: f64| -v),   // negate for negatives
+                Box::new(|v: f64| -v),      // negate for negatives
                 Box::new(|v: f64| v * 2.0), // double for positives
             ],
             0.0, // default for zero
@@ -338,10 +333,7 @@ mod tests {
         let result = piecewise(
             &x,
             &[cond1, cond2],
-            &[
-                Box::new(|v: f64| v * 10.0),
-                Box::new(|v: f64| v * 100.0),
-            ],
+            &[Box::new(|v: f64| v * 10.0), Box::new(|v: f64| v * 100.0)],
             0.0,
         )
         .unwrap();
@@ -356,13 +348,7 @@ mod tests {
         let x = arr1(vec![1.0, 2.0, 3.0]);
         let cond = arr1_bool(vec![false, false, false]);
 
-        let result = piecewise(
-            &x,
-            &[cond],
-            &[Box::new(|v: f64| v * 10.0)],
-            -999.0,
-        )
-        .unwrap();
+        let result = piecewise(&x, &[cond], &[Box::new(|v: f64| v * 10.0)], -999.0).unwrap();
 
         let s = result.as_slice().unwrap();
         assert_eq!(s, &[-999.0, -999.0, -999.0]);
@@ -372,26 +358,22 @@ mod tests {
     fn piecewise_length_mismatch() {
         let x = arr1(vec![1.0, 2.0]);
         let cond = arr1_bool(vec![true, false]);
-        assert!(piecewise(
-            &x,
-            &[cond],
-            &[Box::new(|v: f64| v), Box::new(|v: f64| v)],
-            0.0
-        )
-        .is_err());
+        assert!(
+            piecewise(
+                &x,
+                &[cond],
+                &[Box::new(|v: f64| v), Box::new(|v: f64| v)],
+                0.0
+            )
+            .is_err()
+        );
     }
 
     #[test]
     fn piecewise_shape_mismatch() {
         let x = arr1(vec![1.0, 2.0]);
         let cond = arr1_bool(vec![true, false, true]); // wrong shape
-        assert!(piecewise(
-            &x,
-            &[cond],
-            &[Box::new(|v: f64| v)],
-            0.0
-        )
-        .is_err());
+        assert!(piecewise(&x, &[cond], &[Box::new(|v: f64| v)], 0.0).is_err());
     }
 
     // -----------------------------------------------------------------------
@@ -399,11 +381,8 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn apply_along_axis_col_sums_ac5() {
-        let m = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let m = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
 
         let result = apply_along_axis(
             |col| {
@@ -424,11 +403,8 @@ mod tests {
 
     #[test]
     fn apply_along_axis_row_sums() {
-        let m = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let m = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
 
         let result = apply_along_axis(
             |row| {
@@ -466,11 +442,8 @@ mod tests {
 
     #[test]
     fn apply_along_axis_out_of_bounds() {
-        let m = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let m = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         assert!(apply_along_axis(|_| Ok(0.0), Axis(5), &m).is_err());
     }
 
@@ -480,11 +453,9 @@ mod tests {
     #[test]
     fn apply_over_axes_sum() {
         // 2x3 array, sum over axis 0 then axis 1
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
 
         let result = apply_over_axes(sum_axis_keepdims, &a, &[0, 1]).unwrap();
 
@@ -497,11 +468,9 @@ mod tests {
 
     #[test]
     fn apply_over_axes_single_axis() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
 
         let result = apply_over_axes(sum_axis_keepdims, &a, &[0]).unwrap();
         assert_eq!(result.shape(), &[1, 3]);
@@ -511,11 +480,9 @@ mod tests {
 
     #[test]
     fn apply_over_axes_out_of_bounds() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         assert!(apply_over_axes(sum_axis_keepdims, &a, &[5]).is_err());
     }
 
@@ -524,11 +491,9 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn sum_axis_keepdims_basic() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
 
         let result = sum_axis_keepdims(&a, Axis(0)).unwrap();
         assert_eq!(result.shape(), &[1, 3]);
@@ -538,11 +503,9 @@ mod tests {
 
     #[test]
     fn sum_axis_keepdims_axis1() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
 
         let result = sum_axis_keepdims(&a, Axis(1)).unwrap();
         assert_eq!(result.shape(), &[2, 1]);

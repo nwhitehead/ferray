@@ -83,14 +83,26 @@ pub fn tensordot(
         out_shape.push(b_shape[ax]);
     }
 
-    let out_size: usize = if out_shape.is_empty() { 1 } else { out_shape.iter().product() };
+    let out_size: usize = if out_shape.is_empty() {
+        1
+    } else {
+        out_shape.iter().product()
+    };
 
     // Contracted dimension sizes
     let contract_size: usize = axes_a.iter().map(|&ax| a_shape[ax]).product();
 
     // Reshape a into (free_a_size, contract_size) and b into (contract_size, free_b_size)
-    let free_a_size: usize = a_free.iter().map(|&ax| a_shape[ax]).product::<usize>().max(1);
-    let free_b_size: usize = b_free.iter().map(|&ax| b_shape[ax]).product::<usize>().max(1);
+    let free_a_size: usize = a_free
+        .iter()
+        .map(|&ax| a_shape[ax])
+        .product::<usize>()
+        .max(1);
+    let free_b_size: usize = b_free
+        .iter()
+        .map(|&ax| b_shape[ax])
+        .product::<usize>()
+        .max(1);
 
     // Build permutation for a: free axes first, then contracted
     let mut a_perm: Vec<usize> = Vec::with_capacity(a_shape.len());
@@ -177,11 +189,9 @@ mod tests {
     fn tensordot_scalar_2() {
         // Equivalent to matmul for 2D arrays with axes=1
         // a: (2,3), b: (3,2) -> (2,2)
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
@@ -199,22 +209,15 @@ mod tests {
 
     #[test]
     fn tensordot_explicit_axes() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
         )
         .unwrap();
-        let c = tensordot(
-            &a,
-            &b,
-            TensordotAxes::Pairs(vec![1], vec![0]),
-        )
-        .unwrap();
+        let c = tensordot(&a, &b, TensordotAxes::Pairs(vec![1], vec![0])).unwrap();
         assert_eq!(c.shape(), &[2, 2]);
     }
 }

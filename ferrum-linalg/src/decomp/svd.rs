@@ -69,11 +69,8 @@ mod tests {
 
     #[test]
     fn svd_thin_reconstructs() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([3, 2]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([3, 2]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let (u, s, vt) = svd(&a, false).unwrap();
 
         let us = u.as_slice().unwrap();
@@ -95,7 +92,10 @@ mod tests {
                 assert!(
                     (val - expected).abs() < 1e-10,
                     "U*S*Vt[{},{}] = {} != {}",
-                    i, j, val, expected
+                    i,
+                    j,
+                    val,
+                    expected
                 );
             }
         }
@@ -103,11 +103,8 @@ mod tests {
 
     #[test]
     fn svd_full_shapes() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([3, 2]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([3, 2]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let (u, s, vt) = svd(&a, true).unwrap();
         assert_eq!(u.shape(), &[3, 3]);
         assert_eq!(s.shape(), &[2]);

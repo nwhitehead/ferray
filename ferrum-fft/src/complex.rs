@@ -2,9 +2,9 @@
 
 use num_complex::Complex;
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, IxDyn};
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use crate::nd::{fft_1d_along_axis, fft_along_axes};
 use crate::norm::FftNorm;
@@ -280,8 +280,7 @@ fn fftn_impl<D: Dimension>(
     let sizes = resolve_shapes(&shape, axes, s)?;
     let data = to_complex_flat(a);
 
-    let axes_and_sizes: Vec<(usize, Option<usize>)> =
-        axes.iter().copied().zip(sizes).collect();
+    let axes_and_sizes: Vec<(usize, Option<usize>)> = axes.iter().copied().zip(sizes).collect();
 
     let (new_shape, result) = fft_along_axes(&data, &shape, &axes_and_sizes, inverse, norm)?;
 
@@ -398,10 +397,7 @@ mod tests {
     #[test]
     fn fft2_basic() {
         use ferrum_core::dimension::Ix2;
-        let data = vec![
-            c(1.0, 0.0), c(2.0, 0.0),
-            c(3.0, 0.0), c(4.0, 0.0),
-        ];
+        let data = vec![c(1.0, 0.0), c(2.0, 0.0), c(3.0, 0.0), c(4.0, 0.0)];
         let a = Array::from_vec(Ix2::new([2, 2]), data).unwrap();
         let result = fft2(&a, None, None, FftNorm::Backward).unwrap();
         assert_eq!(result.shape(), &[2, 2]);

@@ -2,10 +2,10 @@
 
 use std::ops::{Add, Div, Mul, Sub};
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use crate::MaskedArray;
 

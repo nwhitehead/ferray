@@ -1,8 +1,8 @@
 // ferrum-fft: Frequency generation — fftfreq, rfftfreq (REQ-9, REQ-10)
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Ix1;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 /// Return the Discrete Fourier Transform sample frequencies.
 ///

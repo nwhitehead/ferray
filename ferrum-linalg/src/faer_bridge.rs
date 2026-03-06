@@ -3,9 +3,9 @@
 // Zero-copy where memory layouts match (both C-contiguous), otherwise copies
 // into a contiguous buffer before calling faer.
 
-use ferrum_core::error::{FerrumError, FerrumResult};
 use ferrum_core::array::owned::Array;
 use ferrum_core::dimension::{Dimension, Ix1, Ix2, IxDyn};
+use ferrum_core::error::{FerrumError, FerrumResult};
 
 /// Convert a 2D ferrum Array<f64, Ix2> to a faer::Mat<f64>.
 ///
@@ -113,11 +113,8 @@ mod tests {
 
     #[test]
     fn roundtrip_array2_faer() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let mat = array2_to_faer(&a);
         assert_eq!(mat.nrows(), 2);
         assert_eq!(mat.ncols(), 3);

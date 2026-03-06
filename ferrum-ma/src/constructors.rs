@@ -4,10 +4,10 @@
 // masked_not_equal, masked_greater_equal, masked_less_equal,
 // masked_inside, masked_outside
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
 use crate::MaskedArray;

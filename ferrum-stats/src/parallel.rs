@@ -16,9 +16,7 @@ where
     T: Copy + Send + Sync + std::ops::Add<Output = T>,
 {
     if data.len() >= PARALLEL_REDUCTION_THRESHOLD {
-        data.par_iter()
-            .copied()
-            .reduce(|| identity, |a, b| a + b)
+        data.par_iter().copied().reduce(|| identity, |a, b| a + b)
     } else {
         data.iter().copied().fold(identity, |a, b| a + b)
     }
@@ -30,9 +28,7 @@ where
     T: Copy + Send + Sync + std::ops::Mul<Output = T>,
 {
     if data.len() >= PARALLEL_REDUCTION_THRESHOLD {
-        data.par_iter()
-            .copied()
-            .reduce(|| identity, |a, b| a * b)
+        data.par_iter().copied().reduce(|| identity, |a, b| a * b)
     } else {
         data.iter().copied().fold(identity, |a, b| a * b)
     }

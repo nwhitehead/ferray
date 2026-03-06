@@ -4,10 +4,10 @@
 // operations on the data, then propagate masks. Masked elements are skipped
 // (their output positions retain zero/default values).
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 use num_traits::Float;
 
 use crate::MaskedArray;
@@ -305,10 +305,7 @@ where
 ///
 /// # Errors
 /// Returns `FerrumError::ShapeMismatch` if shapes differ.
-pub fn add<T, D>(
-    a: &MaskedArray<T, D>,
-    b: &MaskedArray<T, D>,
-) -> FerrumResult<MaskedArray<T, D>>
+pub fn add<T, D>(a: &MaskedArray<T, D>, b: &MaskedArray<T, D>) -> FerrumResult<MaskedArray<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -350,10 +347,7 @@ where
 ///
 /// # Errors
 /// Returns `FerrumError::ShapeMismatch` if shapes differ.
-pub fn divide<T, D>(
-    a: &MaskedArray<T, D>,
-    b: &MaskedArray<T, D>,
-) -> FerrumResult<MaskedArray<T, D>>
+pub fn divide<T, D>(a: &MaskedArray<T, D>, b: &MaskedArray<T, D>) -> FerrumResult<MaskedArray<T, D>>
 where
     T: Element + Float,
     D: Dimension,
@@ -365,10 +359,7 @@ where
 ///
 /// # Errors
 /// Returns `FerrumError::ShapeMismatch` if shapes differ.
-pub fn power<T, D>(
-    a: &MaskedArray<T, D>,
-    b: &MaskedArray<T, D>,
-) -> FerrumResult<MaskedArray<T, D>>
+pub fn power<T, D>(a: &MaskedArray<T, D>, b: &MaskedArray<T, D>) -> FerrumResult<MaskedArray<T, D>>
 where
     T: Element + Float,
     D: Dimension,

@@ -17,7 +17,9 @@ use crate::faer_bridge;
 ///
 /// # Errors
 /// - `FerrumError::ShapeMismatch` if the matrix is not at least 1x1.
-pub fn lu(a: &Array<f64, Ix2>) -> FerrumResult<(Array<f64, Ix2>, Array<f64, Ix2>, Array<f64, Ix2>)> {
+pub fn lu(
+    a: &Array<f64, Ix2>,
+) -> FerrumResult<(Array<f64, Ix2>, Array<f64, Ix2>, Array<f64, Ix2>)> {
     let shape = a.shape();
     let (m, n) = (shape[0], shape[1]);
     if m == 0 || n == 0 {
@@ -85,7 +87,10 @@ mod tests {
             assert!(
                 (pa[i] - lu_result[i]).abs() < 1e-10,
                 "PA[{}] = {} != LU[{}] = {}",
-                i, pa[i], i, lu_result[i]
+                i,
+                pa[i],
+                i,
+                lu_result[i]
             );
         }
     }

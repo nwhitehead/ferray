@@ -141,8 +141,7 @@ mod tests {
 
     #[test]
     fn broadcast_shapes_three() {
-        let result =
-            broadcast_shapes(&[&[2, 1][..], &[3][..], &[1, 3][..]]).unwrap();
+        let result = broadcast_shapes(&[&[2, 1][..], &[3][..], &[1, 3][..]]).unwrap();
         assert_eq!(result, vec![2, 3]);
     }
 

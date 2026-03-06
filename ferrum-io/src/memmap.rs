@@ -10,14 +10,14 @@ use std::path::Path;
 
 use memmap2::{Mmap, MmapMut, MmapOptions};
 
+use ferrum_core::Array;
 use ferrum_core::dimension::IxDyn;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use crate::format::MemmapMode;
-use crate::npy::header::{self, NpyHeader};
 use crate::npy::NpyElement;
+use crate::npy::header::{self, NpyHeader};
 
 /// A read-only memory-mapped array backed by a `.npy` file.
 ///
@@ -203,9 +203,7 @@ pub fn memmap_mut<T: Element + NpyElement, P: AsRef<Path>>(
                     .offset(data_offset as u64)
                     .len(data_bytes)
                     .map_copy(&file)
-                    .map_err(|e| {
-                        FerrumError::io_error(format!("mmap copy-on-write failed: {e}"))
-                    })?
+                    .map_err(|e| FerrumError::io_error(format!("mmap copy-on-write failed: {e}")))?
             }
         }
         MemmapMode::ReadOnly => unreachable!(),
@@ -326,8 +324,7 @@ mod tests {
     #[test]
     fn memmap_readonly_f64() {
         let data = vec![1.0_f64, 2.0, 3.0, 4.0, 5.0];
-        let arr =
-            Array::<f64, Ix1>::from_vec(Ix1::new([5]), data.clone()).unwrap();
+        let arr = Array::<f64, Ix1>::from_vec(Ix1::new([5]), data.clone()).unwrap();
 
         let path = test_file("mm_ro_f64.npy");
         npy::save(&path, &arr).unwrap();
@@ -386,8 +383,7 @@ mod tests {
 
         // Modify via copy-on-write mmap
         {
-            let mut mapped =
-                memmap_mut::<f64, _>(&path, MemmapMode::CopyOnWrite).unwrap();
+            let mut mapped = memmap_mut::<f64, _>(&path, MemmapMode::CopyOnWrite).unwrap();
             mapped.as_slice_mut()[0] = 999.0;
             assert_eq!(mapped.as_slice()[0], 999.0);
         }

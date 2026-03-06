@@ -13,11 +13,11 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::path::Path;
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, IxDyn};
 use ferrum_core::dtype::{DType, Element};
 use ferrum_core::dynarray::DynArray;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use self::dtype_parse::Endianness;
 
@@ -222,7 +222,9 @@ fn load_complex32_dynamic<R: Read>(
 
     // Verify length
     if data.len() != total * 8 {
-        return Err(FerrumError::io_error("unexpected data length for complex32"));
+        return Err(FerrumError::io_error(
+            "unexpected data length for complex32",
+        ));
     }
 
     // Use ptr::cast and Vec::from_raw_parts to reinterpret.
@@ -262,12 +264,8 @@ fn load_complex32_from_bytes_copy(
     if let DynArray::Complex32(ref mut arr) = arr_dyn {
         if let Some(slice) = arr.as_slice_mut() {
             // slice is &mut [Complex<f32>], each 8 bytes
-            let dst = unsafe {
-                std::slice::from_raw_parts_mut(
-                    slice.as_mut_ptr() as *mut u8,
-                    total * 8,
-                )
-            };
+            let dst =
+                unsafe { std::slice::from_raw_parts_mut(slice.as_mut_ptr() as *mut u8, total * 8) };
             dst.copy_from_slice(bytes);
         }
 
@@ -316,10 +314,7 @@ fn load_complex64_from_bytes_copy(
     if let DynArray::Complex64(ref mut arr) = arr_dyn {
         if let Some(slice) = arr.as_slice_mut() {
             let dst = unsafe {
-                std::slice::from_raw_parts_mut(
-                    slice.as_mut_ptr() as *mut u8,
-                    total * 16,
-                )
+                std::slice::from_raw_parts_mut(slice.as_mut_ptr() as *mut u8, total * 16)
             };
             dst.copy_from_slice(bytes);
         }
@@ -397,8 +392,7 @@ fn save_complex_raw<T, W: Write>(
     let slice = slice_opt
         .ok_or_else(|| FerrumError::io_error("cannot save non-contiguous complex array"))?;
     let byte_len = slice.len() * elem_size;
-    let bytes =
-        unsafe { std::slice::from_raw_parts(slice.as_ptr() as *const u8, byte_len) };
+    let bytes = unsafe { std::slice::from_raw_parts(slice.as_ptr() as *const u8, byte_len) };
     writer.write_all(bytes)?;
     Ok(())
 }

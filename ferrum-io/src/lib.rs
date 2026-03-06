@@ -16,6 +16,6 @@ pub mod text;
 
 // Re-export the most commonly used items at crate root for convenience.
 pub use format::MemmapMode;
-pub use npy::{load, load_dynamic, save, NpyElement};
-pub use npz::{savez, savez_compressed, NpzFile};
-pub use text::{genfromtxt, loadtxt, savetxt, SaveTxtOptions};
+pub use npy::{NpyElement, load, load_dynamic, save};
+pub use npz::{NpzFile, savez, savez_compressed};
+pub use text::{SaveTxtOptions, genfromtxt, loadtxt, savetxt};

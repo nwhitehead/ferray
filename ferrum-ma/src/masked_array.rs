@@ -1,9 +1,9 @@
 // ferrum-ma: MaskedArray<T, D> type (REQ-1, REQ-2, REQ-3)
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 /// A masked array that pairs data with a boolean mask.
 ///
@@ -114,11 +114,7 @@ impl<T: Element, D: Dimension> MaskedArray<T, D> {
     pub fn set_mask_flat(&mut self, flat_idx: usize, value: bool) -> FerrumResult<()> {
         let size = self.size();
         if flat_idx >= size {
-            return Err(FerrumError::index_out_of_bounds(
-                flat_idx as isize,
-                0,
-                size,
-            ));
+            return Err(FerrumError::index_out_of_bounds(flat_idx as isize, 0, size));
         }
         if self.hard_mask && !value {
             // Hard mask: cannot clear mask bits

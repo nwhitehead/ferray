@@ -85,3 +85,7 @@ pub use record::FieldDescriptor;
 // Both are re-exported: the derive macro lives in macro namespace, the trait in type namespace.
 pub use ferrum_core_macros::{FerrumRecord, promoted_type, s};
 pub use record::FerrumRecord;
+
+// Kani formal verification harnesses (only compiled during `cargo kani`)
+#[cfg(kani)]
+mod verification_kani;

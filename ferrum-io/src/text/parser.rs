@@ -253,8 +253,7 @@ mod tests {
     fn parse_missing_values() {
         let content = "1,2,3\n4,,6\n7,8,\n";
         let opts = TextParseOptions::default();
-        let (cells, nrows, ncols) =
-            parse_text_grid_with_missing(content, &opts, &[]).unwrap();
+        let (cells, nrows, ncols) = parse_text_grid_with_missing(content, &opts, &[]).unwrap();
         assert_eq!(nrows, 3);
         assert_eq!(ncols, 3);
         assert_eq!(cells[0], Some("1".to_string()));
@@ -266,8 +265,7 @@ mod tests {
     fn parse_custom_missing_marker() {
         let content = "1,NA,3\n4,5,NA\n";
         let opts = TextParseOptions::default();
-        let (cells, _, _) =
-            parse_text_grid_with_missing(content, &opts, &["NA"]).unwrap();
+        let (cells, _, _) = parse_text_grid_with_missing(content, &opts, &["NA"]).unwrap();
         assert_eq!(cells[1], None);
         assert_eq!(cells[5], None);
         assert_eq!(cells[0], Some("1".to_string()));

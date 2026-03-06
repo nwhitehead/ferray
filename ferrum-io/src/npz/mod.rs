@@ -52,9 +52,9 @@ pub fn savez<P: AsRef<Path>>(path: P, arrays: &[(&str, &DynArray)]) -> FerrumRes
         })?;
     }
 
-    zip_writer.finish().map_err(|e| {
-        FerrumError::io_error(format!("failed to finalize .npz file: {e}"))
-    })?;
+    zip_writer
+        .finish()
+        .map_err(|e| FerrumError::io_error(format!("failed to finalize .npz file: {e}")))?;
 
     Ok(())
 }
@@ -65,10 +65,7 @@ pub fn savez<P: AsRef<Path>>(path: P, arrays: &[(&str, &DynArray)]) -> FerrumRes
 ///
 /// # Errors
 /// Returns `FerrumError::IoError` on file creation or write failures.
-pub fn savez_compressed<P: AsRef<Path>>(
-    path: P,
-    arrays: &[(&str, &DynArray)],
-) -> FerrumResult<()> {
+pub fn savez_compressed<P: AsRef<Path>>(path: P, arrays: &[(&str, &DynArray)]) -> FerrumResult<()> {
     let file = File::create(path.as_ref()).map_err(|e| {
         FerrumError::io_error(format!(
             "failed to create .npz file '{}': {e}",
@@ -100,9 +97,9 @@ pub fn savez_compressed<P: AsRef<Path>>(
         })?;
     }
 
-    zip_writer.finish().map_err(|e| {
-        FerrumError::io_error(format!("failed to finalize .npz file: {e}"))
-    })?;
+    zip_writer
+        .finish()
+        .map_err(|e| FerrumError::io_error(format!("failed to finalize .npz file: {e}")))?;
 
     Ok(())
 }
@@ -131,9 +128,8 @@ impl NpzFile {
 
     /// Read a `.npz` from a reader.
     pub fn from_reader<R: Read + std::io::Seek>(reader: R) -> FerrumResult<Self> {
-        let mut archive = zip::ZipArchive::new(reader).map_err(|e| {
-            FerrumError::io_error(format!("failed to read .npz archive: {e}"))
-        })?;
+        let mut archive = zip::ZipArchive::new(reader)
+            .map_err(|e| FerrumError::io_error(format!("failed to read .npz archive: {e}")))?;
 
         let mut entries = Vec::new();
         for i in 0..archive.len() {
@@ -195,9 +191,9 @@ impl NpzFile {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ferrum_core::Array;
     use ferrum_core::dimension::IxDyn;
     use ferrum_core::dtype::DType;
-    use ferrum_core::Array;
 
     fn test_dir() -> std::path::PathBuf {
         let dir = std::env::temp_dir().join(format!("ferrum_io_npz_{}", std::process::id()));

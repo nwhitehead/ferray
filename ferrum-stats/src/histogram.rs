@@ -45,16 +45,23 @@ where
     let (lo, hi) = match range {
         Some((l, h)) => {
             if l >= h {
-                return Err(FerrumError::invalid_value("range lower bound must be less than upper"));
+                return Err(FerrumError::invalid_value(
+                    "range lower bound must be less than upper",
+                ));
             }
             (l, h)
         }
         None => {
             if data.is_empty() {
-                return Err(FerrumError::invalid_value("cannot compute histogram of empty array without range"));
+                return Err(FerrumError::invalid_value(
+                    "cannot compute histogram of empty array without range",
+                ));
             }
             let lo = data.iter().copied().fold(T::infinity(), |a, b| a.min(b));
-            let hi = data.iter().copied().fold(T::neg_infinity(), |a, b| a.max(b));
+            let hi = data
+                .iter()
+                .copied()
+                .fold(T::neg_infinity(), |a, b| a.max(b));
             if lo == hi {
                 (lo - <T as Element>::one(), hi + <T as Element>::one())
             } else {
@@ -79,7 +86,9 @@ where
         }
         Bins::Edges(e) => {
             if e.len() < 2 {
-                return Err(FerrumError::invalid_value("bin edges must have at least 2 elements"));
+                return Err(FerrumError::invalid_value(
+                    "bin edges must have at least 2 elements",
+                ));
             }
             e
         }
@@ -96,9 +105,9 @@ where
             continue;
         }
         // Binary search for bin
-        let bin = match edges[..nbins].binary_search_by(|e| {
-            e.partial_cmp(&x).unwrap_or(std::cmp::Ordering::Equal)
-        }) {
+        let bin = match edges[..nbins]
+            .binary_search_by(|e| e.partial_cmp(&x).unwrap_or(std::cmp::Ordering::Equal))
+        {
             Ok(i) => i,
             Err(i) => i.saturating_sub(1),
         };
@@ -142,10 +151,14 @@ where
     let ydata: Vec<T> = y.iter().copied().collect();
 
     if xdata.len() != ydata.len() {
-        return Err(FerrumError::shape_mismatch("x and y must have the same length"));
+        return Err(FerrumError::shape_mismatch(
+            "x and y must have the same length",
+        ));
     }
     if xdata.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute histogram2d of empty arrays"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute histogram2d of empty arrays",
+        ));
     }
 
     let (nx, ny) = bins;
@@ -154,9 +167,15 @@ where
     }
 
     let x_min = xdata.iter().copied().fold(T::infinity(), |a, b| a.min(b));
-    let x_max = xdata.iter().copied().fold(T::neg_infinity(), |a, b| a.max(b));
+    let x_max = xdata
+        .iter()
+        .copied()
+        .fold(T::neg_infinity(), |a, b| a.max(b));
     let y_min = ydata.iter().copied().fold(T::infinity(), |a, b| a.min(b));
-    let y_max = ydata.iter().copied().fold(T::neg_infinity(), |a, b| a.max(b));
+    let y_max = ydata
+        .iter()
+        .copied()
+        .fold(T::neg_infinity(), |a, b| a.max(b));
 
     let (x_lo, x_hi) = if x_min == x_max {
         (x_min - <T as Element>::one(), x_max + <T as Element>::one())
@@ -211,7 +230,7 @@ fn bin_index<T: Float>(val: T, lo: T, step: T, nbins: usize) -> Option<usize> {
     }
     let idx = ((val - lo) / step).floor().to_usize().unwrap_or(nbins);
     if idx >= nbins {
-        Some(nbins - 1)  // Right edge is included in last bin
+        Some(nbins - 1) // Right edge is included in last bin
     } else {
         Some(idx)
     }
@@ -243,7 +262,9 @@ where
 
     if bins.len() != ndims {
         return Err(FerrumError::shape_mismatch(format!(
-            "bins length {} does not match sample dimensions {}", bins.len(), ndims
+            "bins length {} does not match sample dimensions {}",
+            bins.len(),
+            ndims
         )));
     }
     for &b in bins {
@@ -259,8 +280,12 @@ where
         for j in 0..ndims {
             let v = data[i * ndims + j];
             if !v.is_nan() {
-                if v < lo[j] { lo[j] = v; }
-                if v > hi[j] { hi[j] = v; }
+                if v < lo[j] {
+                    lo[j] = v;
+                }
+                if v > hi[j] {
+                    hi[j] = v;
+                }
             }
         }
     }
@@ -304,7 +329,10 @@ where
             }
             match bin_index(v, lo[j], steps[j], bins[j]) {
                 Some(bi) => flat_idx += bi * out_strides[j],
-                None => { valid = false; break; }
+                None => {
+                    valid = false;
+                    break;
+                }
             }
         }
         if valid {
@@ -313,7 +341,8 @@ where
     }
 
     let counts_arr = Array::from_vec(IxDyn::new(bins), counts)?;
-    let edge_arrs: Vec<Array<T, Ix1>> = all_edges.into_iter()
+    let edge_arrs: Vec<Array<T, Ix1>> = all_edges
+        .into_iter()
         .map(|e| {
             let n = e.len();
             Array::from_vec(Ix1::new([n]), e).unwrap()
@@ -344,7 +373,9 @@ pub fn bincount(
 
     if let Some(w) = weights {
         if w.size() != x.size() {
-            return Err(FerrumError::shape_mismatch("x and weights must have the same length"));
+            return Err(FerrumError::shape_mismatch(
+                "x and weights must have the same length",
+            ));
         }
     }
 
@@ -412,9 +443,19 @@ where
         } else {
             // Decreasing bins: search reversed
             if right {
-                bdata.len() - bdata.iter().rev().position(|b| b < &v).unwrap_or(bdata.len())
+                bdata.len()
+                    - bdata
+                        .iter()
+                        .rev()
+                        .position(|b| b < &v)
+                        .unwrap_or(bdata.len())
             } else {
-                bdata.len() - bdata.iter().rev().position(|b| b <= &v).unwrap_or(bdata.len())
+                bdata.len()
+                    - bdata
+                        .iter()
+                        .rev()
+                        .position(|b| b <= &v)
+                        .unwrap_or(bdata.len())
             }
         };
         result.push(idx as u64);
@@ -430,10 +471,8 @@ mod tests {
 
     #[test]
     fn test_histogram_basic() {
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([6]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        ).unwrap();
+        let a =
+            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         let (counts, edges) = histogram(&a, Bins::Count(3), None, false).unwrap();
         assert_eq!(counts.shape(), &[3]);
         assert_eq!(edges.shape(), &[4]);
@@ -443,10 +482,7 @@ mod tests {
 
     #[test]
     fn test_histogram_with_range() {
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0],
-        ).unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
         let (counts, edges) = histogram(&a, Bins::Count(5), Some((0.0, 5.0)), false).unwrap();
         assert_eq!(counts.shape(), &[5]);
         assert_eq!(edges.shape(), &[6]);
@@ -454,16 +490,14 @@ mod tests {
 
     #[test]
     fn test_histogram_explicit_edges() {
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![0.5, 1.5, 2.5, 3.5, 4.5],
-        ).unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![0.5, 1.5, 2.5, 3.5, 4.5]).unwrap();
         let (counts, _) = histogram(
             &a,
             Bins::Edges(vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0]),
             None,
             false,
-        ).unwrap();
+        )
+        .unwrap();
         let c: Vec<u64> = counts.iter().copied().collect();
         assert_eq!(c, vec![1, 1, 1, 1, 1]);
     }
@@ -535,7 +569,8 @@ mod tests {
         let sample = Array::<f64, Ix2>::from_vec(
             Ix2::new([4, 2]),
             vec![0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0],
-        ).unwrap();
+        )
+        .unwrap();
         let (counts, edges) = histogramdd(&sample, &[2, 2]).unwrap();
         assert_eq!(counts.shape(), &[2, 2]);
         let c: Vec<u64> = counts.iter().copied().collect();

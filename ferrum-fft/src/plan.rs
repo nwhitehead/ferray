@@ -1,7 +1,7 @@
 // ferrum-fft: FftPlan type and global plan cache (REQ-12, REQ-13)
 
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex, LazyLock};
+use std::sync::{Arc, LazyLock, Mutex};
 
 use num_complex::Complex;
 use rustfft::{Fft, FftPlanner};
@@ -22,8 +22,7 @@ struct CacheKey {
 ///
 /// Thread-safe via `Mutex`. Plans are `Arc`-wrapped so they can be
 /// shared across threads without copying.
-static GLOBAL_CACHE: LazyLock<Mutex<PlanCache>> =
-    LazyLock::new(|| Mutex::new(PlanCache::new()));
+static GLOBAL_CACHE: LazyLock<Mutex<PlanCache>> = LazyLock::new(|| Mutex::new(PlanCache::new()));
 
 struct PlanCache {
     planner: FftPlanner<f64>,
@@ -212,9 +211,7 @@ impl FftPlan {
 
 impl std::fmt::Debug for FftPlan {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("FftPlan")
-            .field("size", &self.size)
-            .finish()
+        f.debug_struct("FftPlan").field("size", &self.size).finish()
     }
 }
 
@@ -256,11 +253,9 @@ mod tests {
     #[test]
     fn plan_size_mismatch() {
         let plan = FftPlan::new(8).unwrap();
-        let signal = Array::<Complex<f64>, Ix1>::from_vec(
-            Ix1::new([4]),
-            vec![Complex::new(0.0, 0.0); 4],
-        )
-        .unwrap();
+        let signal =
+            Array::<Complex<f64>, Ix1>::from_vec(Ix1::new([4]), vec![Complex::new(0.0, 0.0); 4])
+                .unwrap();
         assert!(plan.execute(&signal).is_err());
     }
 

@@ -89,7 +89,10 @@ pub fn parse_subscripts(subscripts: &str, operand_shapes: &[&[usize]]) -> Ferrum
     for (idx, labels) in inputs.iter().enumerate() {
         let shape = operand_shapes[idx];
         let mut expanded = Vec::new();
-        let n_explicit = labels.iter().filter(|l| !matches!(l, Label::Ellipsis(_))).count();
+        let n_explicit = labels
+            .iter()
+            .filter(|l| !matches!(l, Label::Ellipsis(_)))
+            .count();
         let n_ellipsis_here = shape.len().saturating_sub(n_explicit);
 
         for label in labels {
@@ -177,7 +180,12 @@ fn parse_input_labels(s: &str, has_ellipsis: bool) -> FerrumResult<(Vec<Label>, 
     let chars: Vec<char> = s.chars().collect();
     let mut i = 0;
     while i < chars.len() {
-        if chars[i] == '.' && has_ellipsis && i + 2 < chars.len() && chars[i + 1] == '.' && chars[i + 2] == '.' {
+        if chars[i] == '.'
+            && has_ellipsis
+            && i + 2 < chars.len()
+            && chars[i + 1] == '.'
+            && chars[i + 2] == '.'
+        {
             labels.push(Label::Ellipsis(0)); // placeholder, will be expanded
             i += 3;
         } else if chars[i].is_ascii_lowercase() {
@@ -239,11 +247,7 @@ mod tests {
 
     #[test]
     fn parse_ellipsis() {
-        let expr = parse_subscripts(
-            "...ij,...jk->...ik",
-            &[&[2, 3, 4], &[2, 4, 5]],
-        )
-        .unwrap();
+        let expr = parse_subscripts("...ij,...jk->...ik", &[&[2, 3, 4], &[2, 4, 5]]).unwrap();
         assert!(expr.has_ellipsis);
     }
 

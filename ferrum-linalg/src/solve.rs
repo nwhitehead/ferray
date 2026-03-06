@@ -67,9 +67,7 @@ pub fn solve(a: &Array<f64, Ix2>, b: &Array<f64, IxDyn>) -> FerrumResult<Array<f
             }
             Array::from_vec(IxDyn::new(&[n, nrhs]), result)
         }
-        _ => Err(FerrumError::shape_mismatch(
-            "solve: b must be 1D or 2D",
-        )),
+        _ => Err(FerrumError::shape_mismatch("solve: b must be 1D or 2D")),
     }
 }
 
@@ -87,12 +85,7 @@ pub fn lstsq(
     a: &Array<f64, Ix2>,
     b: &Array<f64, IxDyn>,
     rcond: Option<f64>,
-) -> FerrumResult<(
-    Array<f64, IxDyn>,
-    Array<f64, Ix1>,
-    usize,
-    Array<f64, Ix1>,
-)> {
+) -> FerrumResult<(Array<f64, IxDyn>, Array<f64, Ix1>, usize, Array<f64, Ix1>)> {
     let a_shape = a.shape();
     let b_shape = b.shape();
     let (m, n) = (a_shape[0], a_shape[1]);
@@ -190,9 +183,7 @@ pub fn lstsq(
             let residuals_arr = Array::from_vec(Ix1::new([residuals.len()]), residuals)?;
             Ok((x, residuals_arr, rank, sv))
         }
-        _ => Err(FerrumError::shape_mismatch(
-            "lstsq: b must be 1D or 2D",
-        )),
+        _ => Err(FerrumError::shape_mismatch("lstsq: b must be 1D or 2D")),
     }
 }
 
@@ -410,11 +401,7 @@ mod tests {
     fn solve_2x2() {
         // A = [[1, 2], [3, 4]], b = [5, 11]
         // x = [1, 2]
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let b = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2]), vec![5.0, 11.0]).unwrap();
         let x = solve(&a, &b).unwrap();
         let xs = x.iter().copied().collect::<Vec<f64>>();
@@ -444,7 +431,10 @@ mod tests {
             assert!(
                 (ax_i - b_i).abs() < 1e-10,
                 "Ax[{}] = {} != b[{}] = {}",
-                i, ax_i, i, b_i
+                i,
+                ax_i,
+                i,
+                b_i
             );
         }
     }
@@ -464,7 +454,10 @@ mod tests {
                 assert!(
                     (d[i * 3 + j] - expected).abs() < 1e-10,
                     "inv(I)[{},{}] = {} != {}",
-                    i, j, d[i * 3 + j], expected
+                    i,
+                    j,
+                    d[i * 3 + j],
+                    expected
                 );
             }
         }
@@ -472,32 +465,21 @@ mod tests {
 
     #[test]
     fn inv_singular_error() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 2.0, 2.0, 4.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 2.0, 2.0, 4.0]).unwrap();
         assert!(inv(&a).is_err());
     }
 
     #[test]
     fn pinv_basic() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([3, 2]),
-            vec![1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([3, 2]), vec![1.0, 0.0, 0.0, 1.0, 0.0, 0.0])
+            .unwrap();
         let pi = pinv(&a, None).unwrap();
         assert_eq!(pi.shape(), &[2, 3]);
     }
 
     #[test]
     fn matrix_power_positive() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 1.0, 0.0, 1.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 1.0, 0.0, 1.0]).unwrap();
         let a3 = matrix_power(&a, 3).unwrap();
         // [[1,1],[0,1]]^3 = [[1,3],[0,1]]
         let d = a3.as_slice().unwrap();
@@ -509,11 +491,7 @@ mod tests {
 
     #[test]
     fn matrix_power_zero() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![5.0, 6.0, 7.0, 8.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![5.0, 6.0, 7.0, 8.0]).unwrap();
         let a0 = matrix_power(&a, 0).unwrap();
         let d = a0.as_slice().unwrap();
         assert!((d[0] - 1.0).abs() < 1e-10);
@@ -524,11 +502,7 @@ mod tests {
 
     #[test]
     fn matrix_power_negative() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![1.0, 1.0, 0.0, 1.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![1.0, 1.0, 0.0, 1.0]).unwrap();
         let am1 = matrix_power(&a, -1).unwrap();
         let inv_a = inv(&a).unwrap();
         let d1 = am1.as_slice().unwrap();
@@ -537,7 +511,10 @@ mod tests {
             assert!(
                 (d1[i] - d2[i]).abs() < 1e-10,
                 "matrix_power(-1)[{}] = {} != inv[{}] = {}",
-                i, d1[i], i, d2[i]
+                i,
+                d1[i],
+                i,
+                d2[i]
             );
         }
     }
@@ -546,11 +523,8 @@ mod tests {
     fn lstsq_overdetermined() {
         // A = [[1,1],[1,2],[1,3]], b = [1,2,3]
         // Least squares solution
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([3, 2]),
-            vec![1.0, 1.0, 1.0, 2.0, 1.0, 3.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([3, 2]), vec![1.0, 1.0, 1.0, 2.0, 1.0, 3.0])
+            .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3]), vec![1.0, 2.0, 3.0]).unwrap();
         let (x, _residuals, rank, _sv) = lstsq(&a, &b, None).unwrap();
         assert_eq!(rank, 2);

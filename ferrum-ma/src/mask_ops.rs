@@ -2,10 +2,10 @@
 //
 // harden_mask, soften_mask, getmask, getdata, is_masked, count_masked
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Dimension;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 
 use crate::MaskedArray;
 
@@ -42,9 +42,7 @@ impl<T: Element, D: Dimension> MaskedArray<T, D> {
 /// # Errors
 /// This function does not currently error but returns `Result` for API
 /// consistency.
-pub fn getmask<T: Element, D: Dimension>(
-    ma: &MaskedArray<T, D>,
-) -> FerrumResult<Array<bool, D>> {
+pub fn getmask<T: Element, D: Dimension>(ma: &MaskedArray<T, D>) -> FerrumResult<Array<bool, D>> {
     Ok(ma.mask().clone())
 }
 
@@ -67,9 +65,7 @@ pub fn getdata<T: Element + Copy, D: Dimension>(
 /// # Errors
 /// This function does not currently error but returns `Result` for API
 /// consistency.
-pub fn is_masked<T: Element, D: Dimension>(
-    ma: &MaskedArray<T, D>,
-) -> FerrumResult<bool> {
+pub fn is_masked<T: Element, D: Dimension>(ma: &MaskedArray<T, D>) -> FerrumResult<bool> {
     Ok(ma.mask().iter().any(|m| *m))
 }
 

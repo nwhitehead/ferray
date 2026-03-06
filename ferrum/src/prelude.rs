@@ -1,19 +1,18 @@
 // ferrum: Prelude — `use ferrum::prelude::*` covers 95% of use cases (REQ-3)
 
 // Core array types
+pub use ferrum_core::ArcArray;
 pub use ferrum_core::Array;
+pub use ferrum_core::ArrayFlags;
 pub use ferrum_core::ArrayView;
 pub use ferrum_core::ArrayViewMut;
-pub use ferrum_core::ArcArray;
 pub use ferrum_core::CowArray;
-pub use ferrum_core::ArrayFlags;
 
 // Common aliases
 pub use ferrum_core::aliases::{
-    Array1, Array2, Array3, Array4, Array5, Array6, ArrayD,
-    ArrayView1, ArrayView2, ArrayView3, ArrayViewD,
-    ArrayViewMut1, ArrayViewMut2, ArrayViewMut3, ArrayViewMutD,
-    F32Array1, F32Array2, F64Array1, F64Array2,
+    Array1, Array2, Array3, Array4, Array5, Array6, ArrayD, ArrayView1, ArrayView2, ArrayView3,
+    ArrayViewD, ArrayViewMut1, ArrayViewMut2, ArrayViewMut3, ArrayViewMutD, F32Array1, F32Array2,
+    F64Array1, F64Array2,
 };
 
 // Dimension types
@@ -26,7 +25,7 @@ pub use ferrum_core::{DType, Element, SliceInfoElem};
 pub use ferrum_core::{FerrumError, FerrumResult};
 
 // Macros
-pub use ferrum_core::{s, promoted_type};
+pub use ferrum_core::{promoted_type, s};
 
 // Memory layout
 pub use ferrum_core::MemoryLayout;
@@ -36,42 +35,95 @@ pub use ferrum_core::DynArray;
 
 // Array creation functions
 pub use ferrum_core::creation::{
-    array, asarray, zeros, ones, full,
-    zeros_like, ones_like, full_like,
-    arange, linspace, logspace, geomspace,
-    eye, identity, fromiter,
+    arange, array, asarray, eye, fromiter, full, full_like, geomspace, identity, linspace,
+    logspace, ones, ones_like, zeros, zeros_like,
 };
 
 // Common math functions (ufuncs)
 pub use ferrum_ufunc::{
-    // Trig
-    sin, cos, tan, arcsin, arccos, arctan, arctan2,
-    sinh, cosh, tanh, arcsinh, arccosh, arctanh,
-    deg2rad, rad2deg, degrees, radians, hypot,
-    // Exp/log
-    exp, exp2, expm1, log, log2, log10, log1p,
-    // Rounding
-    round, floor, ceil, trunc, fix, rint, around,
+    absolute,
     // Arithmetic
-    add, subtract, multiply, divide, power, sqrt, square,
-    absolute, negative, sign, remainder, mod_, fmod,
-    cumsum, cumprod, diff, gradient,
-    // Float
-    isnan, isinf, isfinite, clip, nan_to_num,
-    maximum, minimum,
+    add,
+    all,
+    allclose,
+    any,
+    arccos,
+    arccosh,
+    arcsin,
+    arcsinh,
+    arctan,
+    arctan2,
+    arctanh,
+    around,
+    array_equal,
+    ceil,
+    clip,
+    cos,
+    cosh,
+    cumprod,
+    cumsum,
+    deg2rad,
+    degrees,
+    diff,
+    divide,
     // Comparison
-    equal, not_equal, less, greater, less_equal, greater_equal,
-    allclose, isclose, array_equal,
+    equal,
+    // Exp/log
+    exp,
+    exp2,
+    expm1,
+    fix,
+    floor,
+    fmod,
+    gradient,
+    greater,
+    greater_equal,
+    hypot,
+    isclose,
+    isfinite,
+    isinf,
+    // Float
+    isnan,
+    less,
+    less_equal,
+    log,
+    log1p,
+    log2,
+    log10,
     // Logical
-    logical_and, logical_or, logical_xor, logical_not,
-    all, any,
+    logical_and,
+    logical_not,
+    logical_or,
+    logical_xor,
+    maximum,
+    minimum,
+    mod_,
+    multiply,
+    nan_to_num,
+    negative,
+    not_equal,
+    power,
+    rad2deg,
+    radians,
+    remainder,
+    rint,
+    // Rounding
+    round,
+    sign,
+    // Trig
+    sin,
     // Special
     sinc,
+    sinh,
+    sqrt,
+    square,
+    subtract,
+    tan,
+    tanh,
+    trunc,
 };
 
 // Stats (reductions)
 pub use ferrum_stats::{
-    sum, prod, min, max, argmin, argmax,
-    mean, var, std_, median,
-    nansum, nanmean, nanmin, nanmax,
+    argmax, argmin, max, mean, median, min, nanmax, nanmean, nanmin, nansum, prod, std_, sum, var,
 };

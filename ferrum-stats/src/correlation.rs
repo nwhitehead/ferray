@@ -40,7 +40,9 @@ where
     let lv = v_data.len();
 
     if la == 0 || lv == 0 {
-        return Err(FerrumError::invalid_value("correlate requires non-empty arrays"));
+        return Err(FerrumError::invalid_value(
+            "correlate requires non-empty arrays",
+        ));
     }
 
     // Full correlation length
@@ -92,11 +94,7 @@ where
 /// the number of observations.
 ///
 /// Equivalent to `numpy.cov`.
-pub fn cov<T, D>(
-    m: &Array<T, D>,
-    rowvar: bool,
-    ddof: Option<usize>,
-) -> FerrumResult<Array<T, Ix2>>
+pub fn cov<T, D>(m: &Array<T, D>, rowvar: bool, ddof: Option<usize>) -> FerrumResult<Array<T, Ix2>>
 where
     T: Element + Float,
     D: Dimension,
@@ -135,16 +133,20 @@ where
     let ddof_val = ddof.unwrap_or(1);
     if nobs <= ddof_val {
         return Err(FerrumError::invalid_value(
-            "number of observations must be greater than ddof"
+            "number of observations must be greater than ddof",
         ));
     }
     let nf = T::from(nobs).unwrap();
     let denom = T::from(nobs - ddof_val).unwrap();
 
     // Compute means
-    let means: Vec<T> = matrix.iter()
+    let means: Vec<T> = matrix
+        .iter()
         .map(|row| {
-            row.iter().copied().fold(<T as Element>::zero(), |a, b| a + b) / nf
+            row.iter()
+                .copied()
+                .fold(<T as Element>::zero(), |a, b| a + b)
+                / nf
         })
         .collect();
 
@@ -175,10 +177,7 @@ where
 /// If 1-D, treated as a single variable.
 ///
 /// Equivalent to `numpy.corrcoef`.
-pub fn corrcoef<T, D>(
-    x: &Array<T, D>,
-    rowvar: bool,
-) -> FerrumResult<Array<T, Ix2>>
+pub fn corrcoef<T, D>(x: &Array<T, D>, rowvar: bool) -> FerrumResult<Array<T, Ix2>>
 where
     T: Element + Float,
     D: Dimension,
@@ -254,10 +253,8 @@ mod tests {
 
     #[test]
     fn test_cov_2d() {
-        let m = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        ).unwrap();
+        let m = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let c = cov(&m, true, None).unwrap();
         assert_eq!(c.shape(), &[2, 2]);
         let data: Vec<f64> = c.iter().copied().collect();
@@ -268,10 +265,8 @@ mod tests {
 
     #[test]
     fn test_corrcoef() {
-        let m = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        ).unwrap();
+        let m = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let c = corrcoef(&m, true).unwrap();
         assert_eq!(c.shape(), &[2, 2]);
         let data: Vec<f64> = c.iter().copied().collect();
@@ -283,10 +278,8 @@ mod tests {
 
     #[test]
     fn test_corrcoef_negative() {
-        let m = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 6.0, 5.0, 4.0],
-        ).unwrap();
+        let m = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 6.0, 5.0, 4.0])
+            .unwrap();
         let c = corrcoef(&m, true).unwrap();
         let data: Vec<f64> = c.iter().copied().collect();
         assert!((data[0] - 1.0).abs() < 1e-12);

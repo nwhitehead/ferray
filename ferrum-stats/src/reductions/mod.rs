@@ -54,11 +54,17 @@ pub(crate) fn reduce_axis_general<T: Copy, F: Fn(&[T]) -> T>(
     let strides = compute_strides(shape);
 
     // Output shape: shape with axis removed
-    let out_shape: Vec<usize> = shape.iter().enumerate()
+    let out_shape: Vec<usize> = shape
+        .iter()
+        .enumerate()
         .filter(|&(i, _)| i != axis)
         .map(|(_, &s)| s)
         .collect();
-    let out_size: usize = if out_shape.is_empty() { 1 } else { out_shape.iter().product() };
+    let out_size: usize = if out_shape.is_empty() {
+        1
+    } else {
+        out_shape.iter().product()
+    };
 
     let mut result = Vec::with_capacity(out_size);
     let mut out_multi = vec![0usize; out_shape.len()];
@@ -110,13 +116,18 @@ pub(crate) fn collect_data<T: Element + Copy, D: Dimension>(a: &Array<T, D>) -> 
 }
 
 /// Build an IxDyn result array from output shape and data.
-pub(crate) fn make_result<T: Element>(out_shape: &[usize], data: Vec<T>) -> FerrumResult<Array<T, IxDyn>> {
+pub(crate) fn make_result<T: Element>(
+    out_shape: &[usize],
+    data: Vec<T>,
+) -> FerrumResult<Array<T, IxDyn>> {
     Array::from_vec(IxDyn::new(out_shape), data)
 }
 
 /// Compute the output shape when reducing along an axis.
 pub(crate) fn output_shape(shape: &[usize], axis: usize) -> Vec<usize> {
-    shape.iter().enumerate()
+    shape
+        .iter()
+        .enumerate()
         .filter(|&(i, _)| i != axis)
         .map(|(_, &s)| s)
         .collect()
@@ -136,10 +147,7 @@ pub(crate) fn output_shape(shape: &[usize], axis: usize) -> Vec<usize> {
 /// let s = sum(&a, None).unwrap();
 /// assert_eq!(s.iter().next(), Some(&10.0));
 /// ```
-pub fn sum<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn sum<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + std::ops::Add<Output = T> + Copy + Send + Sync,
     D: Dimension,
@@ -155,7 +163,9 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                lane.iter().copied().fold(<T as Element>::zero(), |acc, x| acc + x)
+                lane.iter()
+                    .copied()
+                    .fold(<T as Element>::zero(), |acc, x| acc + x)
             });
             make_result(&out_s, result)
         }
@@ -169,10 +179,7 @@ where
 /// Product of array elements over a given axis.
 ///
 /// Equivalent to `numpy.prod`.
-pub fn prod<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn prod<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + std::ops::Mul<Output = T> + Copy + Send + Sync,
     D: Dimension,
@@ -188,7 +195,9 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                lane.iter().copied().fold(<T as Element>::one(), |acc, x| acc * x)
+                lane.iter()
+                    .copied()
+                    .fold(<T as Element>::one(), |acc, x| acc * x)
             });
             make_result(&out_s, result)
         }
@@ -202,21 +211,24 @@ where
 /// Minimum value of array elements over a given axis.
 ///
 /// Equivalent to `numpy.min` / `numpy.amin`.
-pub fn min<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn min<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + PartialOrd + Copy,
     D: Dimension,
 {
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute min of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute min of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
         None => {
-            let m = data.iter().copied().reduce(|a, b| if a <= b { a } else { b }).unwrap();
+            let m = data
+                .iter()
+                .copied()
+                .reduce(|a, b| if a <= b { a } else { b })
+                .unwrap();
             make_result(&[], vec![m])
         }
         Some(ax) => {
@@ -224,7 +236,10 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                lane.iter().copied().reduce(|a, b| if a <= b { a } else { b }).unwrap()
+                lane.iter()
+                    .copied()
+                    .reduce(|a, b| if a <= b { a } else { b })
+                    .unwrap()
             });
             make_result(&out_s, result)
         }
@@ -234,21 +249,24 @@ where
 /// Maximum value of array elements over a given axis.
 ///
 /// Equivalent to `numpy.max` / `numpy.amax`.
-pub fn max<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn max<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + PartialOrd + Copy,
     D: Dimension,
 {
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute max of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute max of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
         None => {
-            let m = data.iter().copied().reduce(|a, b| if a >= b { a } else { b }).unwrap();
+            let m = data
+                .iter()
+                .copied()
+                .reduce(|a, b| if a >= b { a } else { b })
+                .unwrap();
             make_result(&[], vec![m])
         }
         Some(ax) => {
@@ -256,7 +274,10 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                lane.iter().copied().reduce(|a, b| if a >= b { a } else { b }).unwrap()
+                lane.iter()
+                    .copied()
+                    .reduce(|a, b| if a >= b { a } else { b })
+                    .unwrap()
             });
             make_result(&out_s, result)
         }
@@ -271,23 +292,25 @@ where
 /// For axis=Some(ax), returns indices along that axis.
 ///
 /// Equivalent to `numpy.argmin`.
-pub fn argmin<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<u64, IxDyn>>
+pub fn argmin<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<u64, IxDyn>>
 where
     T: Element + PartialOrd + Copy,
     D: Dimension,
 {
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute argmin of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute argmin of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
         None => {
-            let idx = data.iter().enumerate()
+            let idx = data
+                .iter()
+                .enumerate()
                 .reduce(|(ai, av), (bi, bv)| if av <= bv { (ai, av) } else { (bi, bv) })
-                .unwrap().0 as u64;
+                .unwrap()
+                .0 as u64;
             make_result(&[], vec![idx])
         }
         Some(ax) => {
@@ -295,9 +318,11 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general_u64(&data, shape, ax, |lane| {
-                lane.iter().enumerate()
+                lane.iter()
+                    .enumerate()
                     .reduce(|(ai, av), (bi, bv)| if av <= bv { (ai, av) } else { (bi, bv) })
-                    .unwrap().0 as u64
+                    .unwrap()
+                    .0 as u64
             });
             make_result(&out_s, result)
         }
@@ -307,23 +332,25 @@ where
 /// Index of the maximum value.
 ///
 /// Equivalent to `numpy.argmax`.
-pub fn argmax<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<u64, IxDyn>>
+pub fn argmax<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<u64, IxDyn>>
 where
     T: Element + PartialOrd + Copy,
     D: Dimension,
 {
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute argmax of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute argmax of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
         None => {
-            let idx = data.iter().enumerate()
+            let idx = data
+                .iter()
+                .enumerate()
                 .reduce(|(ai, av), (bi, bv)| if av >= bv { (ai, av) } else { (bi, bv) })
-                .unwrap().0 as u64;
+                .unwrap()
+                .0 as u64;
             make_result(&[], vec![idx])
         }
         Some(ax) => {
@@ -331,9 +358,11 @@ where
             let shape = a.shape();
             let out_s = output_shape(shape, ax);
             let result = reduce_axis_general_u64(&data, shape, ax, |lane| {
-                lane.iter().enumerate()
+                lane.iter()
+                    .enumerate()
                     .reduce(|(ai, av), (bi, bv)| if av >= bv { (ai, av) } else { (bi, bv) })
-                    .unwrap().0 as u64
+                    .unwrap()
+                    .0 as u64
             });
             make_result(&out_s, result)
         }
@@ -351,11 +380,17 @@ pub(crate) fn reduce_axis_general_u64<T: Copy, F: Fn(&[T]) -> u64>(
     let axis_len = shape[axis];
     let strides = compute_strides(shape);
 
-    let out_shape: Vec<usize> = shape.iter().enumerate()
+    let out_shape: Vec<usize> = shape
+        .iter()
+        .enumerate()
         .filter(|&(i, _)| i != axis)
         .map(|(_, &s)| s)
         .collect();
-    let out_size: usize = if out_shape.is_empty() { 1 } else { out_shape.iter().product() };
+    let out_size: usize = if out_shape.is_empty() {
+        1
+    } else {
+        out_shape.iter().product()
+    };
 
     let mut result = Vec::with_capacity(out_size);
     let mut out_multi = vec![0usize; out_shape.len()];
@@ -396,22 +431,24 @@ pub(crate) fn reduce_axis_general_u64<T: Copy, F: Fn(&[T]) -> u64>(
 /// Mean of array elements over a given axis.
 ///
 /// Equivalent to `numpy.mean`. The result is always floating-point.
-pub fn mean<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn mean<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float + Send + Sync,
     D: Dimension,
 {
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute mean of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute mean of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
         None => {
             let n = T::from(data.len()).unwrap();
-            let total: T = data.iter().copied().fold(<T as Element>::zero(), |a, b| a + b);
+            let total: T = data
+                .iter()
+                .copied()
+                .fold(<T as Element>::zero(), |a, b| a + b);
             make_result(&[], vec![total / n])
         }
         Some(ax) => {
@@ -421,7 +458,10 @@ where
             let axis_len = shape[ax];
             let n = T::from(axis_len).unwrap();
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                let total: T = lane.iter().copied().fold(<T as Element>::zero(), |a, b| a + b);
+                let total: T = lane
+                    .iter()
+                    .copied()
+                    .fold(<T as Element>::zero(), |a, b| a + b);
                 total / n
             });
             make_result(&out_s, result)
@@ -437,17 +477,15 @@ where
 ///
 /// `ddof` is the delta degrees of freedom (0 for population variance, 1 for sample).
 /// Equivalent to `numpy.var`.
-pub fn var<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-    ddof: usize,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn var<T, D>(a: &Array<T, D>, axis: Option<usize>, ddof: usize) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float + Send + Sync,
     D: Dimension,
 {
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute variance of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute variance of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
@@ -455,13 +493,22 @@ where
             let n = data.len();
             if n <= ddof {
                 return Err(FerrumError::invalid_value(
-                    "ddof >= number of elements, variance undefined"
+                    "ddof >= number of elements, variance undefined",
                 ));
             }
             let nf = T::from(n).unwrap();
-            let mean_val: T = data.iter().copied().fold(<T as Element>::zero(), |a, b| a + b) / nf;
-            let var_val: T = data.iter().copied()
-                .map(|x| { let d = x - mean_val; d * d })
+            let mean_val: T = data
+                .iter()
+                .copied()
+                .fold(<T as Element>::zero(), |a, b| a + b)
+                / nf;
+            let var_val: T = data
+                .iter()
+                .copied()
+                .map(|x| {
+                    let d = x - mean_val;
+                    d * d
+                })
                 .fold(<T as Element>::zero(), |a, b| a + b)
                 / T::from(n - ddof).unwrap();
             make_result(&[], vec![var_val])
@@ -473,16 +520,23 @@ where
             let axis_len = shape[ax];
             if axis_len <= ddof {
                 return Err(FerrumError::invalid_value(
-                    "ddof >= axis length, variance undefined"
+                    "ddof >= axis length, variance undefined",
                 ));
             }
             let nf = T::from(axis_len).unwrap();
             let denom = T::from(axis_len - ddof).unwrap();
             let result = reduce_axis_general(&data, shape, ax, |lane| {
-                let mean_val: T = lane.iter().copied()
-                    .fold(<T as Element>::zero(), |a, b| a + b) / nf;
-                lane.iter().copied()
-                    .map(|x| { let d = x - mean_val; d * d })
+                let mean_val: T = lane
+                    .iter()
+                    .copied()
+                    .fold(<T as Element>::zero(), |a, b| a + b)
+                    / nf;
+                lane.iter()
+                    .copied()
+                    .map(|x| {
+                        let d = x - mean_val;
+                        d * d
+                    })
                     .fold(<T as Element>::zero(), |a, b| a + b)
                     / denom
             });
@@ -520,10 +574,7 @@ where
 /// Cumulative sum along an axis (or flattened if axis is None).
 ///
 /// Re-exported from `ferrum_ufunc::cumsum` for convenience.
-pub fn cumsum<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, D>>
+pub fn cumsum<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, D>>
 where
     T: Element + std::ops::Add<Output = T> + Copy,
     D: Dimension,
@@ -534,10 +585,7 @@ where
 /// Cumulative product along an axis (or flattened if axis is None).
 ///
 /// Re-exported from `ferrum_ufunc::cumprod` for convenience.
-pub fn cumprod<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, D>>
+pub fn cumprod<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, D>>
 where
     T: Element + std::ops::Mul<Output = T> + Copy,
     D: Dimension,
@@ -560,10 +608,8 @@ mod tests {
 
     #[test]
     fn test_sum_2d_axis0() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let s = sum(&a, Some(0)).unwrap();
         assert_eq!(s.shape(), &[3]);
         let data: Vec<f64> = s.iter().copied().collect();
@@ -572,10 +618,8 @@ mod tests {
 
     #[test]
     fn test_sum_2d_axis1() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let s = sum(&a, Some(1)).unwrap();
         assert_eq!(s.shape(), &[2]);
         let data: Vec<f64> = s.iter().copied().collect();
@@ -660,10 +704,8 @@ mod tests {
 
     #[test]
     fn test_min_2d_axis0() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![3.0, 1.0, 4.0, 1.0, 5.0, 2.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![3.0, 1.0, 4.0, 1.0, 5.0, 2.0])
+            .unwrap();
         let m = min(&a, Some(0)).unwrap();
         let data: Vec<f64> = m.iter().copied().collect();
         assert_eq!(data, vec![1.0, 1.0, 2.0]);
@@ -671,10 +713,8 @@ mod tests {
 
     #[test]
     fn test_argmin_2d_axis1() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![3.0, 1.0, 4.0, 1.0, 5.0, 2.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![3.0, 1.0, 4.0, 1.0, 5.0, 2.0])
+            .unwrap();
         let ami = argmin(&a, Some(1)).unwrap();
         let data: Vec<u64> = ami.iter().copied().collect();
         assert_eq!(data, vec![1, 0]);
@@ -682,10 +722,8 @@ mod tests {
 
     #[test]
     fn test_mean_2d_axis0() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        ).unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            .unwrap();
         let m = mean(&a, Some(0)).unwrap();
         let data: Vec<f64> = m.iter().copied().collect();
         assert_eq!(data, vec![2.5, 3.5, 4.5]);

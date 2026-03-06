@@ -2,10 +2,10 @@
 //
 // Sorting unmasked elements while pushing masked elements to the end.
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, Ix1};
 use ferrum_core::dtype::Element;
 use ferrum_core::error::FerrumResult;
-use ferrum_core::Array;
 
 use crate::MaskedArray;
 

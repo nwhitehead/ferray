@@ -85,13 +85,17 @@ where
             .map(|(v, _)| *v)
             .fold(None, |acc: Option<T>, v| {
                 Some(match acc {
-                    Some(a) => if v < a { v } else { a },
+                    Some(a) => {
+                        if v < a {
+                            v
+                        } else {
+                            a
+                        }
+                    }
                     None => v,
                 })
             })
-            .ok_or_else(|| {
-                FerrumError::invalid_value("min: all elements are masked")
-            })
+            .ok_or_else(|| FerrumError::invalid_value("min: all elements are masked"))
     }
 
     /// Compute the maximum of unmasked elements.
@@ -106,13 +110,17 @@ where
             .map(|(v, _)| *v)
             .fold(None, |acc: Option<T>, v| {
                 Some(match acc {
-                    Some(a) => if v > a { v } else { a },
+                    Some(a) => {
+                        if v > a {
+                            v
+                        } else {
+                            a
+                        }
+                    }
                     None => v,
                 })
             })
-            .ok_or_else(|| {
-                FerrumError::invalid_value("max: all elements are masked")
-            })
+            .ok_or_else(|| FerrumError::invalid_value("max: all elements are masked"))
     }
 
     /// Compute the variance of unmasked elements (population variance, ddof=0).

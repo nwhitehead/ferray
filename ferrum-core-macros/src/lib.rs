@@ -9,7 +9,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Data, Fields};
+use syn::{Data, DeriveInput, Fields, parse_macro_input};
 
 // ---------------------------------------------------------------------------
 // #[derive(FerrumRecord)]
@@ -234,7 +234,10 @@ fn parse_slice_component(s: &str) -> syn::Result<proc_macro2::TokenStream> {
 
     let step_expr = if let Some(step_str) = step_part {
         let step_tokens: proc_macro2::TokenStream = step_str.parse().map_err(|_| {
-            syn::Error::new(proc_macro2::Span::call_site(), format!("invalid step expression: {step_str}"))
+            syn::Error::new(
+                proc_macro2::Span::call_site(),
+                format!("invalid step expression: {step_str}"),
+            )
         })?;
         quote! { #step_tokens }
     } else {
@@ -256,7 +259,10 @@ fn parse_slice_component(s: &str) -> syn::Result<proc_macro2::TokenStream> {
     if let Some(rest) = range_part.strip_prefix("..") {
         // RangeTo: ..end
         let end_tokens: proc_macro2::TokenStream = rest.parse().map_err(|_| {
-            syn::Error::new(proc_macro2::Span::call_site(), format!("invalid end expression: {rest}"))
+            syn::Error::new(
+                proc_macro2::Span::call_site(),
+                format!("invalid end expression: {rest}"),
+            )
         })?;
         return Ok(quote! {
             ferrum_core::dtype::SliceInfoElem::Slice {
@@ -272,7 +278,10 @@ fn parse_slice_component(s: &str) -> syn::Result<proc_macro2::TokenStream> {
         let end_str = range_part[idx + 2..].trim();
 
         let start_tokens: proc_macro2::TokenStream = start_str.parse().map_err(|_| {
-            syn::Error::new(proc_macro2::Span::call_site(), format!("invalid start expression: {start_str}"))
+            syn::Error::new(
+                proc_macro2::Span::call_site(),
+                format!("invalid start expression: {start_str}"),
+            )
         })?;
 
         if end_str.is_empty() {
@@ -287,7 +296,10 @@ fn parse_slice_component(s: &str) -> syn::Result<proc_macro2::TokenStream> {
         }
 
         let end_tokens: proc_macro2::TokenStream = end_str.parse().map_err(|_| {
-            syn::Error::new(proc_macro2::Span::call_site(), format!("invalid end expression: {end_str}"))
+            syn::Error::new(
+                proc_macro2::Span::call_site(),
+                format!("invalid end expression: {end_str}"),
+            )
         })?;
 
         return Ok(quote! {
@@ -308,7 +320,10 @@ fn parse_slice_component(s: &str) -> syn::Result<proc_macro2::TokenStream> {
     }
 
     let idx_tokens: proc_macro2::TokenStream = range_part.parse().map_err(|_| {
-        syn::Error::new(proc_macro2::Span::call_site(), format!("invalid index expression: {range_part}"))
+        syn::Error::new(
+            proc_macro2::Span::call_site(),
+            format!("invalid index expression: {range_part}"),
+        )
     })?;
 
     Ok(quote! {
@@ -417,21 +432,66 @@ struct TypeRank {
 
 fn type_rank(s: &str) -> Option<TypeRank> {
     let result = match s {
-        "bool" => TypeRank { kind: TypeKind::Bool, bits: 1 },
-        "u8" => TypeRank { kind: TypeKind::Unsigned, bits: 8 },
-        "u16" => TypeRank { kind: TypeKind::Unsigned, bits: 16 },
-        "u32" => TypeRank { kind: TypeKind::Unsigned, bits: 32 },
-        "u64" => TypeRank { kind: TypeKind::Unsigned, bits: 64 },
-        "u128" => TypeRank { kind: TypeKind::Unsigned, bits: 128 },
-        "i8" => TypeRank { kind: TypeKind::Signed, bits: 8 },
-        "i16" => TypeRank { kind: TypeKind::Signed, bits: 16 },
-        "i32" => TypeRank { kind: TypeKind::Signed, bits: 32 },
-        "i64" => TypeRank { kind: TypeKind::Signed, bits: 64 },
-        "i128" => TypeRank { kind: TypeKind::Signed, bits: 128 },
-        "f32" => TypeRank { kind: TypeKind::Float, bits: 32 },
-        "f64" => TypeRank { kind: TypeKind::Float, bits: 64 },
-        "Complex<f32>" | "num_complex::Complex<f32>" => TypeRank { kind: TypeKind::Complex, bits: 32 },
-        "Complex<f64>" | "num_complex::Complex<f64>" => TypeRank { kind: TypeKind::Complex, bits: 64 },
+        "bool" => TypeRank {
+            kind: TypeKind::Bool,
+            bits: 1,
+        },
+        "u8" => TypeRank {
+            kind: TypeKind::Unsigned,
+            bits: 8,
+        },
+        "u16" => TypeRank {
+            kind: TypeKind::Unsigned,
+            bits: 16,
+        },
+        "u32" => TypeRank {
+            kind: TypeKind::Unsigned,
+            bits: 32,
+        },
+        "u64" => TypeRank {
+            kind: TypeKind::Unsigned,
+            bits: 64,
+        },
+        "u128" => TypeRank {
+            kind: TypeKind::Unsigned,
+            bits: 128,
+        },
+        "i8" => TypeRank {
+            kind: TypeKind::Signed,
+            bits: 8,
+        },
+        "i16" => TypeRank {
+            kind: TypeKind::Signed,
+            bits: 16,
+        },
+        "i32" => TypeRank {
+            kind: TypeKind::Signed,
+            bits: 32,
+        },
+        "i64" => TypeRank {
+            kind: TypeKind::Signed,
+            bits: 64,
+        },
+        "i128" => TypeRank {
+            kind: TypeKind::Signed,
+            bits: 128,
+        },
+        "f32" => TypeRank {
+            kind: TypeKind::Float,
+            bits: 32,
+        },
+        "f64" => TypeRank {
+            kind: TypeKind::Float,
+            bits: 64,
+        },
+        "Complex<f32>" | "num_complex::Complex<f32>" => TypeRank {
+            kind: TypeKind::Complex,
+            bits: 32,
+        },
+        "Complex<f64>" | "num_complex::Complex<f64>" => TypeRank {
+            kind: TypeKind::Complex,
+            bits: 64,
+        },
         _ => return None,
     };
     Some(result)
@@ -458,7 +518,11 @@ fn promote_ranks(a: TypeRank, b: TypeRank) -> &'static str {
         let float_bits_a = to_float_bits(a);
         let float_bits_b = to_float_bits(b);
         let bits = float_bits_a.max(float_bits_b);
-        return if bits <= 32 { "num_complex::Complex<f32>" } else { "num_complex::Complex<f64>" };
+        return if bits <= 32 {
+            "num_complex::Complex<f32>"
+        } else {
+            "num_complex::Complex<f64>"
+        };
     }
 
     // Float + anything -> Float with enough precision
@@ -543,10 +607,18 @@ fn rank_to_type(r: TypeRank) -> &'static str {
         TypeKind::Unsigned => uint_type(r.bits),
         TypeKind::Signed => int_type(r.bits),
         TypeKind::Float => {
-            if r.bits <= 32 { "f32" } else { "f64" }
+            if r.bits <= 32 {
+                "f32"
+            } else {
+                "f64"
+            }
         }
         TypeKind::Complex => {
-            if r.bits <= 32 { "num_complex::Complex<f32>" } else { "num_complex::Complex<f64>" }
+            if r.bits <= 32 {
+                "num_complex::Complex<f32>"
+            } else {
+                "num_complex::Complex<f64>"
+            }
         }
     }
 }

@@ -41,19 +41,20 @@ pub fn generic_contraction(
         .output
         .iter()
         .map(|l| {
-            label_sizes
-                .get(l)
-                .copied()
-                .ok_or_else(|| {
-                    FerrumError::invalid_value(format!(
-                        "einsum: output label {:?} not found in any input",
-                        l
-                    ))
-                })
+            label_sizes.get(l).copied().ok_or_else(|| {
+                FerrumError::invalid_value(format!(
+                    "einsum: output label {:?} not found in any input",
+                    l
+                ))
+            })
         })
         .collect::<FerrumResult<Vec<_>>>()?;
 
-    let out_size: usize = if out_shape.is_empty() { 1 } else { out_shape.iter().product() };
+    let out_size: usize = if out_shape.is_empty() {
+        1
+    } else {
+        out_shape.iter().product()
+    };
 
     // Determine summation labels: labels in inputs but not in output
     let output_set: std::collections::HashSet<Label> = expr.output.iter().copied().collect();
@@ -66,14 +67,18 @@ pub fn generic_contraction(
         }
     }
 
-    let sum_shape: Vec<usize> = sum_labels
-        .iter()
-        .map(|l| label_sizes[l])
-        .collect();
-    let _sum_size: usize = if sum_shape.is_empty() { 1 } else { sum_shape.iter().product() };
+    let sum_shape: Vec<usize> = sum_labels.iter().map(|l| label_sizes[l]).collect();
+    let _sum_size: usize = if sum_shape.is_empty() {
+        1
+    } else {
+        sum_shape.iter().product()
+    };
 
     // Collect operand data and strides
-    let operand_data: Vec<Vec<f64>> = operands.iter().map(|o| o.iter().copied().collect()).collect();
+    let operand_data: Vec<Vec<f64>> = operands
+        .iter()
+        .map(|o| o.iter().copied().collect())
+        .collect();
 
     // Compute strides for each operand
     let operand_strides: Vec<Vec<usize>> = operands
@@ -92,9 +97,18 @@ pub fn generic_contraction(
     let mut result = vec![0.0; out_size];
 
     // Build all labels = output_labels ++ sum_labels
-    let all_labels: Vec<Label> = expr.output.iter().chain(sum_labels.iter()).copied().collect();
+    let all_labels: Vec<Label> = expr
+        .output
+        .iter()
+        .chain(sum_labels.iter())
+        .copied()
+        .collect();
     let all_shape: Vec<usize> = out_shape.iter().chain(sum_shape.iter()).copied().collect();
-    let total_iters: usize = if all_shape.is_empty() { 1 } else { all_shape.iter().product() };
+    let total_iters: usize = if all_shape.is_empty() {
+        1
+    } else {
+        all_shape.iter().product()
+    };
 
     // Precompute label-to-dim mapping for each operand
     let op_label_dims: Vec<Vec<(usize, usize)>> = expr
@@ -200,11 +214,9 @@ mod tests {
 
     #[test]
     fn matmul_via_contraction() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],

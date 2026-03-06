@@ -6,9 +6,9 @@
 
 use num_complex::Complex;
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, IxDyn};
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use crate::nd::fft_along_axis;
 use crate::norm::FftNorm;
@@ -238,13 +238,14 @@ pub fn irfft<D: Dimension>(
     let half_len = shape[ax];
     let output_len = n.unwrap_or(2 * (half_len - 1));
     if output_len == 0 {
-        return Err(FerrumError::invalid_value("irfft output length must be > 0"));
+        return Err(FerrumError::invalid_value(
+            "irfft output length must be > 0",
+        ));
     }
 
     // Extend Hermitian-symmetric data to full length
     let complex_data: Vec<Complex<f64>> = a.iter().copied().collect();
-    let (extended_shape, extended_data) =
-        extend_hermitian(&complex_data, &shape, ax, output_len);
+    let (extended_shape, extended_data) = extend_hermitian(&complex_data, &shape, ax, output_len);
 
     // Compute inverse FFT on the full-length data
     let (result_shape, result_data) =
@@ -423,8 +424,14 @@ fn rfftn_impl<D: Dimension>(
         } else {
             // Last axis: full FFT then truncate
             let fft_len = n.unwrap_or(current_shape[ax]);
-            let (full_shape, full_data) =
-                fft_along_axis(&current_data, &current_shape, ax, Some(fft_len), false, norm)?;
+            let (full_shape, full_data) = fft_along_axis(
+                &current_data,
+                &current_shape,
+                ax,
+                Some(fft_len),
+                false,
+                norm,
+            )?;
             let (out_shape, out_data) = truncate_hermitian(&full_data, &full_shape, ax);
             current_shape = out_shape;
             current_data = out_data;

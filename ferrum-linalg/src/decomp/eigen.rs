@@ -159,11 +159,7 @@ mod tests {
     fn eigh_symmetric_2x2() {
         // Symmetric matrix [[2, 1], [1, 2]]
         // Eigenvalues: 1, 3
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 2]),
-            vec![2.0, 1.0, 1.0, 2.0],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 2]), vec![2.0, 1.0, 1.0, 2.0]).unwrap();
         let (vals, vecs) = eigh(&a).unwrap();
 
         let vs = vals.as_slice().unwrap();
@@ -207,11 +203,7 @@ mod tests {
 
     #[test]
     fn eig_non_square_error() {
-        let a = Array::<f64, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![1.0; 6],
-        )
-        .unwrap();
+        let a = Array::<f64, Ix2>::from_vec(Ix2::new([2, 3]), vec![1.0; 6]).unwrap();
         assert!(eig(&a).is_err());
     }
 }

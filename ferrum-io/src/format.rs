@@ -48,7 +48,11 @@ mod tests {
 
     #[test]
     fn memmap_mode_variants() {
-        let modes = [MemmapMode::ReadOnly, MemmapMode::ReadWrite, MemmapMode::CopyOnWrite];
+        let modes = [
+            MemmapMode::ReadOnly,
+            MemmapMode::ReadWrite,
+            MemmapMode::CopyOnWrite,
+        ];
         assert_eq!(modes.len(), 3);
         assert_ne!(MemmapMode::ReadOnly, MemmapMode::ReadWrite);
     }

@@ -3,7 +3,9 @@
 use ferrum_core::error::{FerrumError, FerrumResult};
 use ferrum_core::{Array, Dimension, Element, Ix1, IxDyn};
 
-use crate::reductions::{collect_data, make_result, output_shape, reduce_axis_general_u64, validate_axis};
+use crate::reductions::{
+    collect_data, make_result, output_shape, reduce_axis_general_u64, validate_axis,
+};
 
 // ---------------------------------------------------------------------------
 // unique
@@ -38,7 +40,12 @@ where
     let data: Vec<T> = a.iter().copied().collect();
 
     // Create (value, original_index) pairs, then sort by value
-    let mut pairs: Vec<(T, usize)> = data.iter().copied().enumerate().map(|(i, v)| (v, i)).collect();
+    let mut pairs: Vec<(T, usize)> = data
+        .iter()
+        .copied()
+        .enumerate()
+        .map(|(i, v)| (v, i))
+        .collect();
     pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
 
     // Deduplicate
@@ -87,7 +94,11 @@ where
         None
     };
 
-    Ok(UniqueResult { values, indices, counts })
+    Ok(UniqueResult {
+        values,
+        indices,
+        counts,
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -100,9 +111,7 @@ where
 /// returns a single array of indices.
 ///
 /// Equivalent to `numpy.nonzero`.
-pub fn nonzero<T, D>(
-    a: &Array<T, D>,
-) -> FerrumResult<Vec<Array<u64, Ix1>>>
+pub fn nonzero<T, D>(a: &Array<T, D>) -> FerrumResult<Vec<Array<u64, Ix1>>>
 where
     T: Element + PartialEq + Copy,
     D: Dimension,
@@ -163,11 +172,14 @@ where
     if condition.shape() != x.shape() || condition.shape() != y.shape() {
         return Err(FerrumError::shape_mismatch(format!(
             "condition, x, y shapes must match: {:?}, {:?}, {:?}",
-            condition.shape(), x.shape(), y.shape()
+            condition.shape(),
+            x.shape(),
+            y.shape()
         )));
     }
 
-    let result: Vec<T> = condition.iter()
+    let result: Vec<T> = condition
+        .iter()
         .zip(x.iter())
         .zip(y.iter())
         .map(|((&c, &xv), &yv)| if c { xv } else { yv })
@@ -183,10 +195,7 @@ where
 /// Count the number of non-zero elements along a given axis.
 ///
 /// Equivalent to `numpy.count_nonzero`.
-pub fn count_nonzero<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<u64, IxDyn>>
+pub fn count_nonzero<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<u64, IxDyn>>
 where
     T: Element + PartialEq + Copy,
     D: Dimension,
@@ -254,10 +263,7 @@ mod tests {
 
     #[test]
     fn test_nonzero_2d() {
-        let a = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![0, 1, 0, 3, 0, 5],
-        ).unwrap();
+        let a = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![0, 1, 0, 3, 0, 5]).unwrap();
         let nz = nonzero(&a).unwrap();
         assert_eq!(nz.len(), 2);
         let rows: Vec<u64> = nz[0].iter().copied().collect();
@@ -268,7 +274,8 @@ mod tests {
 
     #[test]
     fn test_where_basic() {
-        let cond = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
+        let cond =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
         let x = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
         let y = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![10.0, 20.0, 30.0, 40.0]).unwrap();
         let r = where_(&cond, &x, &y).unwrap();
@@ -293,10 +300,7 @@ mod tests {
 
     #[test]
     fn test_count_nonzero_axis() {
-        let a = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![0, 1, 0, 3, 0, 5],
-        ).unwrap();
+        let a = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![0, 1, 0, 3, 0, 5]).unwrap();
         let c = count_nonzero(&a, Some(0)).unwrap();
         let data: Vec<u64> = c.iter().copied().collect();
         assert_eq!(data, vec![1, 1, 1]);
@@ -304,10 +308,7 @@ mod tests {
 
     #[test]
     fn test_count_nonzero_axis1() {
-        let a = Array::<i32, Ix2>::from_vec(
-            Ix2::new([2, 3]),
-            vec![0, 1, 0, 3, 0, 5],
-        ).unwrap();
+        let a = Array::<i32, Ix2>::from_vec(Ix2::new([2, 3]), vec![0, 1, 0, 3, 0, 5]).unwrap();
         let c = count_nonzero(&a, Some(1)).unwrap();
         let data: Vec<u64> = c.iter().copied().collect();
         assert_eq!(data, vec![1, 2]);

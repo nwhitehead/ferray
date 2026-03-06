@@ -12,10 +12,10 @@ use std::io::Write;
 use std::path::Path;
 use std::str::FromStr;
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Ix2;
 use ferrum_core::dtype::Element;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use self::parser::{TextParseOptions, parse_text_grid, parse_text_grid_with_missing};
 
@@ -84,9 +84,9 @@ pub fn savetxt_to_writer<T: Element + Display, W: Write>(
             .map_err(|e| FerrumError::io_error(e.to_string()))?;
     }
 
-    let slice = array.as_slice().ok_or_else(|| {
-        FerrumError::io_error("cannot save non-contiguous array as text")
-    })?;
+    let slice = array
+        .as_slice()
+        .ok_or_else(|| FerrumError::io_error("cannot save non-contiguous array as text"))?;
 
     for row in 0..nrows {
         for col in 0..ncols {
@@ -99,11 +99,9 @@ pub fn savetxt_to_writer<T: Element + Display, W: Write>(
                 // Use the format string with the value
                 // We support a simple subset: if fmt contains "{}", use it directly
                 let formatted = fmt_str.replace("{}", &val.to_string());
-                write!(writer, "{formatted}")
-                    .map_err(|e| FerrumError::io_error(e.to_string()))?;
+                write!(writer, "{formatted}").map_err(|e| FerrumError::io_error(e.to_string()))?;
             } else {
-                write!(writer, "{val}")
-                    .map_err(|e| FerrumError::io_error(e.to_string()))?;
+                write!(writer, "{val}").map_err(|e| FerrumError::io_error(e.to_string()))?;
             }
         }
         writer
@@ -151,7 +149,11 @@ where
 }
 
 /// Load delimited text from a string into a 2D array.
-pub fn loadtxt_from_str<T>(content: &str, delimiter: char, skiprows: usize) -> FerrumResult<Array<T, Ix2>>
+pub fn loadtxt_from_str<T>(
+    content: &str,
+    delimiter: char,
+    skiprows: usize,
+) -> FerrumResult<Array<T, Ix2>>
 where
     T: Element + FromStr,
     T::Err: Display,
@@ -235,8 +237,7 @@ pub fn genfromtxt_from_str(
         }
     }
 
-    let (cells, nrows, ncols) =
-        parse_text_grid_with_missing(content, &opts, &all_missing)?;
+    let (cells, nrows, ncols) = parse_text_grid_with_missing(content, &opts, &all_missing)?;
 
     if nrows == 0 {
         return Array::from_vec(Ix2::new([0, 0]), vec![]);

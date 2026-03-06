@@ -12,7 +12,7 @@ use ferrum_core::dimension::{Ix2, IxDyn};
 use ferrum_core::error::{FerrumError, FerrumResult};
 
 pub use einsum::einsum;
-pub use tensordot::{tensordot, TensordotAxes};
+pub use tensordot::{TensordotAxes, tensordot};
 
 /// Generalized dot product matching `np.dot` semantics.
 ///
@@ -96,7 +96,8 @@ pub fn vdot(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<f64> {
     if a_flat.len() != b_flat.len() {
         return Err(FerrumError::shape_mismatch(format!(
             "vdot: arrays have different sizes {} and {}",
-            a_flat.len(), b_flat.len()
+            a_flat.len(),
+            b_flat.len()
         )));
     }
     Ok(a_flat.iter().zip(b_flat.iter()).map(|(&x, &y)| x * y).sum())
@@ -322,8 +323,16 @@ fn broadcast_shapes(a: &[usize], b: &[usize]) -> FerrumResult<Vec<usize>> {
     let max_len = a.len().max(b.len());
     let mut result = Vec::with_capacity(max_len);
     for i in 0..max_len {
-        let da = if i < max_len - a.len() { 1 } else { a[i - (max_len - a.len())] };
-        let db = if i < max_len - b.len() { 1 } else { b[i - (max_len - b.len())] };
+        let da = if i < max_len - a.len() {
+            1
+        } else {
+            a[i - (max_len - a.len())]
+        };
+        let db = if i < max_len - b.len() {
+            1
+        } else {
+            b[i - (max_len - b.len())]
+        };
         if da == db {
             result.push(da);
         } else if da == 1 {
@@ -347,9 +356,7 @@ pub fn kron(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<Array<
     let a_shape = a.shape();
     let b_shape = b.shape();
     if a_shape.len() != 2 || b_shape.len() != 2 {
-        return Err(FerrumError::shape_mismatch(
-            "kron: both arrays must be 2D",
-        ));
+        return Err(FerrumError::shape_mismatch("kron: both arrays must be 2D"));
     }
 
     let (m, n) = (a_shape[0], a_shape[1]);
@@ -430,11 +437,18 @@ pub fn multi_dot(arrays: &[&Array<f64, IxDyn>]) -> FerrumResult<Array<f64, IxDyn
         let prev_shape = arrays[i - 1].shape();
         let curr_shape = arrays[i].shape();
         let prev_cols = prev_shape.last().copied().unwrap_or(0);
-        let curr_rows = if curr_shape.len() == 1 { curr_shape[0] } else { curr_shape[0] };
+        let curr_rows = if curr_shape.len() == 1 {
+            curr_shape[0]
+        } else {
+            curr_shape[0]
+        };
         if prev_cols != curr_rows {
             return Err(FerrumError::shape_mismatch(format!(
                 "multi_dot: shapes of matrices {} and {} not aligned ({} != {})",
-                i - 1, i, prev_cols, curr_rows
+                i - 1,
+                i,
+                prev_cols,
+                curr_rows
             )));
         }
     }
@@ -506,12 +520,18 @@ pub fn vecdot(
     let ax = match axis {
         None => {
             if ndim == 0 {
-                return Err(FerrumError::shape_mismatch("vecdot: 0D arrays not supported"));
+                return Err(FerrumError::shape_mismatch(
+                    "vecdot: 0D arrays not supported",
+                ));
             }
             ndim - 1
         }
         Some(ax) => {
-            let ax = if ax < 0 { (ndim as isize + ax) as usize } else { ax as usize };
+            let ax = if ax < 0 {
+                (ndim as isize + ax) as usize
+            } else {
+                ax as usize
+            };
             if ax >= ndim {
                 return Err(FerrumError::axis_out_of_bounds(ax, ndim));
             }
@@ -593,11 +613,9 @@ mod tests {
 
     #[test]
     fn dot_2d() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
@@ -627,11 +645,9 @@ mod tests {
 
     #[test]
     fn matmul_2d_test() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
@@ -649,22 +665,18 @@ mod tests {
     #[test]
     fn matmul_vec_mat() {
         let a = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3]), vec![1.0, 2.0, 3.0]).unwrap();
-        let b = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[3, 2]),
-            vec![1.0, 0.0, 0.0, 1.0, 1.0, 1.0],
-        )
-        .unwrap();
+        let b =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3, 2]), vec![1.0, 0.0, 0.0, 1.0, 1.0, 1.0])
+                .unwrap();
         let c = matmul(&a, &b).unwrap();
         assert_eq!(c.shape(), &[2]);
     }
 
     #[test]
     fn matmul_mat_vec() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3]), vec![1.0, 1.0, 1.0]).unwrap();
         let c = matmul(&a, &b).unwrap();
         assert_eq!(c.shape(), &[2]);
@@ -675,37 +687,21 @@ mod tests {
 
     #[test]
     fn kron_test() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 2]),
-            vec![1.0, 2.0, 3.0, 4.0],
-        )
-        .unwrap();
-        let b = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 2]),
-            vec![0.0, 5.0, 6.0, 7.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+        let b =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 2]), vec![0.0, 5.0, 6.0, 7.0]).unwrap();
         let c = kron(&a, &b).unwrap();
         assert_eq!(c.shape(), &[4, 4]);
     }
 
     #[test]
     fn multi_dot_test() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
-        let b = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[3, 4]),
-            vec![1.0; 12],
-        )
-        .unwrap();
-        let c = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[4, 2]),
-            vec![1.0; 8],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
+        let b = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3, 4]), vec![1.0; 12]).unwrap();
+        let c = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[4, 2]), vec![1.0; 8]).unwrap();
 
         let result = multi_dot(&[&a, &b, &c]).unwrap();
         // Compare with naive left-to-right
@@ -719,23 +715,22 @@ mod tests {
             assert!(
                 (r1[i] - r2[i]).abs() < 1e-10,
                 "multi_dot[{}] = {} != naive[{}] = {}",
-                i, r1[i], i, r2[i]
+                i,
+                r1[i],
+                i,
+                r2[i]
             );
         }
     }
 
     #[test]
     fn vecdot_test() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
-        let b = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
+        let b =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+                .unwrap();
         let c = vecdot(&a, &b, None).unwrap();
         assert_eq!(c.shape(), &[2]);
         let data: Vec<f64> = c.iter().copied().collect();
@@ -768,7 +763,10 @@ mod tests {
                 assert!(
                     ulps < 4.0 || diff < 1e-10,
                     "matmul[{},{}]: diff={}, ulps={}",
-                    check_i, check_j, diff, ulps
+                    check_i,
+                    check_j,
+                    diff,
+                    ulps
                 );
             }
         }

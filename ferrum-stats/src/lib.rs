@@ -28,34 +28,27 @@ pub mod sorting;
 // ---------------------------------------------------------------------------
 
 // Reductions
-pub use reductions::{
-    sum, prod, min, max, argmin, argmax, mean, var, std_,
-    cumsum, cumprod,
-};
+pub use reductions::{argmax, argmin, cumprod, cumsum, max, mean, min, prod, std_, sum, var};
 
 // Quantile-based
-pub use reductions::quantile::{
-    median, percentile, quantile,
-    nanmedian, nanpercentile,
-};
+pub use reductions::quantile::{median, nanmedian, nanpercentile, percentile, quantile};
 
 // NaN-aware reductions
 pub use reductions::nan_aware::{
-    nansum, nanprod, nanmin, nanmax, nanmean, nanvar, nanstd,
-    nancumsum, nancumprod,
+    nancumprod, nancumsum, nanmax, nanmean, nanmin, nanprod, nanstd, nansum, nanvar,
 };
 
 // Correlation and covariance
-pub use correlation::{correlate, corrcoef, cov, CorrelateMode};
+pub use correlation::{CorrelateMode, corrcoef, correlate, cov};
 
 // Histogram
-pub use histogram::{histogram, histogram2d, histogramdd, bincount, digitize, Bins};
+pub use histogram::{Bins, bincount, digitize, histogram, histogram2d, histogramdd};
 
 // Sorting
-pub use sorting::{sort, argsort, searchsorted, SortKind, Side};
+pub use sorting::{Side, SortKind, argsort, searchsorted, sort};
 
 // Searching
-pub use searching::{unique, nonzero, where_, count_nonzero, UniqueResult};
+pub use searching::{UniqueResult, count_nonzero, nonzero, unique, where_};
 
 // Set operations
-pub use set_ops::{union1d, intersect1d, setdiff1d, setxor1d, in1d, isin};
+pub use set_ops::{in1d, intersect1d, isin, setdiff1d, setxor1d, union1d};

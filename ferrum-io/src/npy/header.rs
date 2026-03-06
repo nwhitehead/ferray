@@ -60,27 +60,26 @@ pub fn read_header<R: std::io::Read>(reader: &mut R) -> FerrumResult<NpyHeader> 
     // Read header length
     let header_len = if major == 1 {
         let mut buf = [0u8; 2];
-        reader.read_exact(&mut buf).map_err(|e| {
-            FerrumError::io_error(format!("failed to read header length: {e}"))
-        })?;
+        reader
+            .read_exact(&mut buf)
+            .map_err(|e| FerrumError::io_error(format!("failed to read header length: {e}")))?;
         u16::from_le_bytes(buf) as usize
     } else {
         let mut buf = [0u8; 4];
-        reader.read_exact(&mut buf).map_err(|e| {
-            FerrumError::io_error(format!("failed to read header length: {e}"))
-        })?;
+        reader
+            .read_exact(&mut buf)
+            .map_err(|e| FerrumError::io_error(format!("failed to read header length: {e}")))?;
         u32::from_le_bytes(buf) as usize
     };
 
     // Read header string
     let mut header_bytes = vec![0u8; header_len];
-    reader.read_exact(&mut header_bytes).map_err(|e| {
-        FerrumError::io_error(format!("failed to read header: {e}"))
-    })?;
+    reader
+        .read_exact(&mut header_bytes)
+        .map_err(|e| FerrumError::io_error(format!("failed to read header: {e}")))?;
 
-    let header_str = std::str::from_utf8(&header_bytes).map_err(|e| {
-        FerrumError::io_error(format!("header is not valid UTF-8: {e}"))
-    })?;
+    let header_str = std::str::from_utf8(&header_bytes)
+        .map_err(|e| FerrumError::io_error(format!("header is not valid UTF-8: {e}")))?;
 
     // Parse the header dict
     let (descr, fortran_order, shape) = parse_header_dict(header_str)?;
@@ -108,9 +107,8 @@ pub fn write_header<W: std::io::Write>(
 
     let shape_str = format_shape(shape);
 
-    let dict = format!(
-        "{{'descr': '{descr}', 'fortran_order': {fortran_str}, 'shape': {shape_str}, }}"
-    );
+    let dict =
+        format!("{{'descr': '{descr}', 'fortran_order': {fortran_str}, 'shape': {shape_str}, }}");
 
     // Try version 1.0 first (header length fits in u16)
     // Preamble: magic(6) + version(2) + header_len(2) = 10 for v1
@@ -203,16 +201,17 @@ fn parse_header_dict(header: &str) -> FerrumResult<(String, bool, Vec<usize>)> {
 fn extract_string_value(dict_body: &str, key: &str) -> FerrumResult<String> {
     // Look for 'key': 'value'
     let pattern = format!("'{key}':");
-    let pos = dict_body.find(&pattern).ok_or_else(|| {
-        FerrumError::io_error(format!("header missing key '{key}'"))
-    })?;
+    let pos = dict_body
+        .find(&pattern)
+        .ok_or_else(|| FerrumError::io_error(format!("header missing key '{key}'")))?;
 
     let after_key = &dict_body[pos + pattern.len()..].trim_start();
 
     // Find the opening quote
-    let quote_char = after_key.as_bytes().first().ok_or_else(|| {
-        FerrumError::io_error(format!("missing value for key '{key}'"))
-    })?;
+    let quote_char = after_key
+        .as_bytes()
+        .first()
+        .ok_or_else(|| FerrumError::io_error(format!("missing value for key '{key}'")))?;
 
     if *quote_char != b'\'' && *quote_char != b'"' {
         return Err(FerrumError::io_error(format!(
@@ -222,9 +221,9 @@ fn extract_string_value(dict_body: &str, key: &str) -> FerrumResult<String> {
 
     let qc = *quote_char as char;
     let value_start = &after_key[1..];
-    let end = value_start.find(qc).ok_or_else(|| {
-        FerrumError::io_error(format!("unterminated string for key '{key}'"))
-    })?;
+    let end = value_start
+        .find(qc)
+        .ok_or_else(|| FerrumError::io_error(format!("unterminated string for key '{key}'")))?;
 
     Ok(value_start[..end].to_string())
 }
@@ -232,9 +231,9 @@ fn extract_string_value(dict_body: &str, key: &str) -> FerrumResult<String> {
 /// Extract a boolean value for a given key from the dict body.
 fn extract_bool_value(dict_body: &str, key: &str) -> FerrumResult<bool> {
     let pattern = format!("'{key}':");
-    let pos = dict_body.find(&pattern).ok_or_else(|| {
-        FerrumError::io_error(format!("header missing key '{key}'"))
-    })?;
+    let pos = dict_body
+        .find(&pattern)
+        .ok_or_else(|| FerrumError::io_error(format!("header missing key '{key}'")))?;
 
     let after_key = dict_body[pos + pattern.len()..].trim_start();
 
@@ -252,9 +251,9 @@ fn extract_bool_value(dict_body: &str, key: &str) -> FerrumResult<bool> {
 /// Extract a tuple shape value for a given key from the dict body.
 fn extract_shape_value(dict_body: &str, key: &str) -> FerrumResult<Vec<usize>> {
     let pattern = format!("'{key}':");
-    let pos = dict_body.find(&pattern).ok_or_else(|| {
-        FerrumError::io_error(format!("header missing key '{key}'"))
-    })?;
+    let pos = dict_body
+        .find(&pattern)
+        .ok_or_else(|| FerrumError::io_error(format!("header missing key '{key}'")))?;
 
     let after_key = dict_body[pos + pattern.len()..].trim_start();
 
@@ -265,9 +264,9 @@ fn extract_shape_value(dict_body: &str, key: &str) -> FerrumResult<Vec<usize>> {
         )));
     }
 
-    let close = after_key.find(')').ok_or_else(|| {
-        FerrumError::io_error(format!("unterminated tuple for key '{key}'"))
-    })?;
+    let close = after_key
+        .find(')')
+        .ok_or_else(|| FerrumError::io_error(format!("unterminated tuple for key '{key}'")))?;
 
     let tuple_inner = &after_key[1..close];
     let tuple_inner = tuple_inner.trim();
@@ -280,9 +279,9 @@ fn extract_shape_value(dict_body: &str, key: &str) -> FerrumResult<Vec<usize>> {
         .split(',')
         .filter(|s| !s.trim().is_empty())
         .map(|s| {
-            s.trim().parse::<usize>().map_err(|e| {
-                FerrumError::io_error(format!("invalid shape dimension '{s}': {e}"))
-            })
+            s.trim()
+                .parse::<usize>()
+                .map_err(|e| FerrumError::io_error(format!("invalid shape dimension '{s}': {e}")))
         })
         .collect();
 

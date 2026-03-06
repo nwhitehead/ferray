@@ -51,7 +51,11 @@ fn is_matmul_pattern(a: &[Label], b: &[Label], out: &[Label]) -> bool {
 
     let a_batch = &a[..a.len() - 2];
     let b_batch = &b[..b.len() - 2];
-    let out_batch = if out.len() >= 2 { &out[..out.len() - 2] } else { return false };
+    let out_batch = if out.len() >= 2 {
+        &out[..out.len() - 2]
+    } else {
+        return false;
+    };
 
     // Check batch dims match
     if a_batch != b_batch || a_batch != out_batch {
@@ -95,11 +99,15 @@ fn try_tensordot(a: &[Label], b: &[Label], out: &[Label]) -> Option<EinsumStrate
 
     // Verify that the output order matches tensordot's natural order:
     // free_a dims then free_b dims
-    let a_free: Vec<Label> = a.iter().enumerate()
+    let a_free: Vec<Label> = a
+        .iter()
+        .enumerate()
         .filter(|(i, _)| !axes_a.contains(i))
         .map(|(_, &l)| l)
         .collect();
-    let b_free: Vec<Label> = b.iter().enumerate()
+    let b_free: Vec<Label> = b
+        .iter()
+        .enumerate()
         .filter(|(i, _)| !axes_b.contains(i))
         .map(|(_, &l)| l)
         .collect();

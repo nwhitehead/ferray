@@ -64,22 +64,18 @@ fn lane_nanquantile<T: Float>(lane: &[T], q: T) -> T {
 ///
 /// `q` must be in \[0, 1\]. Uses linear interpolation (NumPy default method).
 /// Equivalent to `numpy.quantile`.
-pub fn quantile<T, D>(
-    a: &Array<T, D>,
-    q: T,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn quantile<T, D>(a: &Array<T, D>, q: T, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float,
     D: Dimension,
 {
     if q < <T as Element>::zero() || q > <T as Element>::one() {
-        return Err(FerrumError::invalid_value(
-            "quantile q must be in [0, 1]"
-        ));
+        return Err(FerrumError::invalid_value("quantile q must be in [0, 1]"));
     }
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute quantile of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute quantile of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
@@ -105,11 +101,7 @@ where
 ///
 /// `q` must be in \[0, 100\].
 /// Equivalent to `numpy.percentile`.
-pub fn percentile<T, D>(
-    a: &Array<T, D>,
-    q: T,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn percentile<T, D>(a: &Array<T, D>, q: T, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float,
     D: Dimension,
@@ -117,7 +109,7 @@ where
     let hundred = T::from(100.0).unwrap();
     if q < <T as Element>::zero() || q > hundred {
         return Err(FerrumError::invalid_value(
-            "percentile q must be in [0, 100]"
+            "percentile q must be in [0, 100]",
         ));
     }
     quantile(a, q / hundred, axis)
@@ -130,10 +122,7 @@ where
 /// Compute the median of array elements along a given axis.
 ///
 /// Equivalent to `numpy.median`.
-pub fn median<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn median<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float,
     D: Dimension,
@@ -149,10 +138,7 @@ where
 /// Median, skipping NaN values.
 ///
 /// Equivalent to `numpy.nanmedian`.
-pub fn nanmedian<T, D>(
-    a: &Array<T, D>,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+pub fn nanmedian<T, D>(a: &Array<T, D>, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float,
     D: Dimension,
@@ -176,29 +162,25 @@ where
     let hundred = T::from(100.0).unwrap();
     if q < <T as Element>::zero() || q > hundred {
         return Err(FerrumError::invalid_value(
-            "nanpercentile q must be in [0, 100]"
+            "nanpercentile q must be in [0, 100]",
         ));
     }
     nanquantile(a, q / hundred, axis)
 }
 
 /// Quantile, skipping NaN values.
-fn nanquantile<T, D>(
-    a: &Array<T, D>,
-    q: T,
-    axis: Option<usize>,
-) -> FerrumResult<Array<T, IxDyn>>
+fn nanquantile<T, D>(a: &Array<T, D>, q: T, axis: Option<usize>) -> FerrumResult<Array<T, IxDyn>>
 where
     T: Element + Float,
     D: Dimension,
 {
     if q < <T as Element>::zero() || q > <T as Element>::one() {
-        return Err(FerrumError::invalid_value(
-            "quantile q must be in [0, 1]"
-        ));
+        return Err(FerrumError::invalid_value("quantile q must be in [0, 1]"));
     }
     if a.is_empty() {
-        return Err(FerrumError::invalid_value("cannot compute nanquantile of empty array"));
+        return Err(FerrumError::invalid_value(
+            "cannot compute nanquantile of empty array",
+        ));
     }
     let data = collect_data(a);
     match axis {
@@ -263,10 +245,7 @@ mod tests {
 
     #[test]
     fn test_nanmedian() {
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([4]),
-            vec![1.0, f64::NAN, 3.0, 5.0],
-        ).unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, f64::NAN, 3.0, 5.0]).unwrap();
         let m = nanmedian(&a, None).unwrap();
         // non-nan sorted: [1, 3, 5], median = 3.0
         assert!((m.iter().next().unwrap() - 3.0).abs() < 1e-12);
@@ -274,20 +253,14 @@ mod tests {
 
     #[test]
     fn test_nanpercentile() {
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([4]),
-            vec![1.0, f64::NAN, 3.0, 5.0],
-        ).unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, f64::NAN, 3.0, 5.0]).unwrap();
         let p = nanpercentile(&a, 50.0, None).unwrap();
         assert!((p.iter().next().unwrap() - 3.0).abs() < 1e-12);
     }
 
     #[test]
     fn test_nanmedian_all_nan() {
-        let a = Array::<f64, Ix1>::from_vec(
-            Ix1::new([2]),
-            vec![f64::NAN, f64::NAN],
-        ).unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![f64::NAN, f64::NAN]).unwrap();
         let m = nanmedian(&a, None).unwrap();
         assert!(m.iter().next().unwrap().is_nan());
     }

@@ -25,9 +25,7 @@ impl Hermite {
     /// Create a new Hermite polynomial from coefficients.
     pub fn new(coeffs: &[f64]) -> Self {
         if coeffs.is_empty() {
-            Self {
-                coeffs: vec![0.0],
-            }
+            Self { coeffs: vec![0.0] }
         } else {
             Self {
                 coeffs: coeffs.to_vec(),
@@ -298,9 +296,7 @@ impl Poly for Hermite {
 
     fn pow(&self, n: usize) -> Result<Self, FerrumError> {
         if n == 0 {
-            return Ok(Self {
-                coeffs: vec![1.0],
-            });
+            return Ok(Self { coeffs: vec![1.0] });
         }
         let mut result = self.clone();
         for _ in 1..n {

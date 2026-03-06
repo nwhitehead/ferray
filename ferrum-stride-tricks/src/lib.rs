@@ -29,8 +29,8 @@ pub use sliding_window::sliding_window_view;
 mod integration_tests {
     //! Integration tests covering the acceptance criteria (AC-1 through AC-6).
 
-    use ferrum_core::dimension::{Ix1, Ix2};
     use ferrum_core::Array;
+    use ferrum_core::dimension::{Ix1, Ix2};
 
     use crate::{
         as_strided, as_strided_unchecked, broadcast_arrays, broadcast_shapes, broadcast_to,
@@ -75,8 +75,7 @@ mod integration_tests {
     #[test]
     fn ac4_as_strided_safe_vs_overlapping() {
         let a =
-            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
-                .unwrap();
+            Array::<f64, Ix1>::from_vec(Ix1::new([6]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
 
         // Non-overlapping: 2x3 with standard row-major strides
         let v = as_strided(&a, &[2, 3], &[3, 1]).unwrap();
@@ -85,11 +84,7 @@ mod integration_tests {
         assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
 
         // Overlapping: sliding window pattern (strides [1,1])
-        let a5 = Array::<f64, Ix1>::from_vec(
-            Ix1::new([5]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0],
-        )
-        .unwrap();
+        let a5 = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
         let err = as_strided(&a5, &[3, 3], &[1, 1]);
         assert!(err.is_err());
     }
@@ -126,9 +121,8 @@ mod integration_tests {
     // Additional: sliding_window_view is truly zero-copy
     #[test]
     fn sliding_window_is_zero_copy() {
-        let a =
-            Array::<f64, Ix1>::from_vec(Ix1::new([10]), (0..10).map(|i| i as f64).collect())
-                .unwrap();
+        let a = Array::<f64, Ix1>::from_vec(Ix1::new([10]), (0..10).map(|i| i as f64).collect())
+            .unwrap();
         let v = sliding_window_view(&a, &[4]).unwrap();
         // Shape: (7, 4)
         assert_eq!(v.shape(), &[7, 4]);
@@ -139,11 +133,8 @@ mod integration_tests {
     // Additional: as_strided with non-contiguous but non-overlapping strides
     #[test]
     fn as_strided_skip_elements() {
-        let a = Array::<i32, Ix1>::from_vec(
-            Ix1::new([10]),
-            vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        )
-        .unwrap();
+        let a = Array::<i32, Ix1>::from_vec(Ix1::new([10]), vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+            .unwrap();
         // Take every 3rd element: shape (3,), stride (3,)
         // offsets: 0, 3, 6 — within buffer of 10, non-overlapping
         let v = as_strided(&a, &[3], &[3]).unwrap();

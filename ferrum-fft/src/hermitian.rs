@@ -10,9 +10,9 @@
 
 use num_complex::Complex;
 
+use ferrum_core::Array;
 use ferrum_core::dimension::{Dimension, IxDyn};
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use crate::norm::FftNorm;
 
@@ -164,12 +164,7 @@ mod tests {
 
         let rec_data: Vec<f64> = recovered.iter().copied().collect();
         for (o, r) in original.iter().zip(rec_data.iter()) {
-            assert!(
-                (o - r).abs() < 1e-10,
-                "mismatch: expected {}, got {}",
-                o,
-                r
-            );
+            assert!((o - r).abs() < 1e-10, "mismatch: expected {}, got {}", o, r);
         }
     }
 

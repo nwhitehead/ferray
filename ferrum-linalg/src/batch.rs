@@ -19,7 +19,10 @@ pub fn batch_count(shape: &[usize], tail_dims: usize) -> FerrumResult<usize> {
             shape.len()
         )));
     }
-    Ok(shape[..shape.len() - tail_dims].iter().product::<usize>().max(1))
+    Ok(shape[..shape.len() - tail_dims]
+        .iter()
+        .product::<usize>()
+        .max(1))
 }
 
 /// Extract the i-th 2D matrix from a batched array (last 2 dims are matrix dims).
@@ -38,10 +41,7 @@ pub fn extract_batch_matrix(data: &[f64], shape: &[usize], batch_idx: usize) -> 
 /// a result vector for that batch.
 ///
 /// Results are computed in parallel using Rayon.
-pub fn apply_batched_2d<F>(
-    a: &Array<f64, IxDyn>,
-    f: F,
-) -> FerrumResult<Vec<Vec<f64>>>
+pub fn apply_batched_2d<F>(a: &Array<f64, IxDyn>, f: F) -> FerrumResult<Vec<Vec<f64>>>
 where
     F: Fn(usize, usize, &[f64]) -> FerrumResult<Vec<f64>> + Send + Sync,
 {
@@ -71,10 +71,7 @@ where
 
 /// Apply a scalar-returning function to each 2D matrix in a batched array.
 /// Returns an Array1<f64> with one scalar per batch.
-pub fn apply_batched_scalar<F>(
-    a: &Array<f64, IxDyn>,
-    f: F,
-) -> FerrumResult<Array<f64, Ix1>>
+pub fn apply_batched_scalar<F>(a: &Array<f64, IxDyn>, f: F) -> FerrumResult<Array<f64, Ix1>>
 where
     F: Fn(usize, usize, &[f64]) -> FerrumResult<f64> + Send + Sync,
 {

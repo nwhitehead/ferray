@@ -74,9 +74,7 @@ pub fn companion_matrix(coeffs: &[f64]) -> Result<Vec<f64>, FerrumError> {
 /// Returns an error if the coefficients represent a constant polynomial.
 pub fn companion_size(coeffs: &[f64]) -> Result<usize, FerrumError> {
     if coeffs.is_empty() {
-        return Err(FerrumError::invalid_value(
-            "empty coefficients",
-        ));
+        return Err(FerrumError::invalid_value("empty coefficients"));
     }
     let mut n = coeffs.len();
     while n > 1 && coeffs[n - 1].abs() < f64::EPSILON * 100.0 {

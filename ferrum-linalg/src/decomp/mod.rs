@@ -16,5 +16,5 @@ pub mod svd;
 pub use cholesky::cholesky;
 pub use eigen::{eig, eigh, eigvals, eigvalsh};
 pub use lu::lu;
-pub use qr::{qr, QrMode};
+pub use qr::{QrMode, qr};
 pub use svd::svd;

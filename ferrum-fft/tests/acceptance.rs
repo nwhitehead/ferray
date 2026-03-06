@@ -8,11 +8,11 @@
 // AC-6: FftPlan reuse produces identical results to non-cached fft() calls
 // AC-7: All three normalization modes produce correct scaling factors
 
-use ferrum_core::dimension::{Ix1, Ix2, Ix3, IxDyn};
 use ferrum_core::Array;
+use ferrum_core::dimension::{Ix1, Ix2, Ix3, IxDyn};
 use ferrum_fft::{
-    fft, fft2, fftfreq, fftshift, fftn, hfft, ifft, ifft2, ifftshift, ifftn, ihfft, irfft,
-    irfft2, irfftn, rfft, rfft2, rfftfreq, rfftn, FftNorm, FftPlan,
+    FftNorm, FftPlan, fft, fft2, fftfreq, fftn, fftshift, hfft, ifft, ifft2, ifftn, ifftshift,
+    ihfft, irfft, irfft2, irfftn, rfft, rfft2, rfftfreq, rfftn,
 };
 use num_complex::Complex;
 
@@ -100,12 +100,7 @@ fn ac1_fft_ifft_roundtrip_4ulps() {
 fn ac1_ifft_fft_roundtrip_4ulps() {
     // Also test ifft(fft(a)) direction, using powers-of-two-friendly values
     // to keep ULP drift minimal
-    let data = vec![
-        c(0.25, -0.5),
-        c(3.0, 2.0),
-        c(-1.5, 1.75),
-        c(0.0, -0.5),
-    ];
+    let data = vec![c(0.25, -0.5), c(3.0, 2.0), c(-1.5, 1.75), c(0.0, -0.5)];
     let a = make_complex_1d(data.clone());
 
     let recovered_via_ifft = ifft(&a, None, None, FftNorm::Backward).unwrap();
@@ -518,21 +513,16 @@ fn rfft_irfft_roundtrip_various_lengths() {
         let recovered = irfft(&spectrum, Some(n), None, FftNorm::Backward).unwrap();
         let rec: Vec<f64> = recovered.iter().copied().collect();
         for (i, (o, r)) in data.iter().zip(rec.iter()).enumerate() {
-            assert!(
-                (o - r).abs() < 1e-9,
-                "n={}, i={}: {} vs {}",
-                n,
-                i,
-                o,
-                r
-            );
+            assert!((o - r).abs() < 1e-9, "n={}, i={}: {} vs {}", n, i, o, r);
         }
     }
 }
 
 #[test]
 fn rfft2_irfft2_roundtrip() {
-    let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0];
+    let data = vec![
+        1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
+    ];
     let a = Array::<f64, Ix2>::from_vec(Ix2::new([3, 4]), data.clone()).unwrap();
     let spectrum = rfft2(&a, None, None, FftNorm::Backward).unwrap();
     let recovered = irfft2(&spectrum, Some(&[3, 4]), None, FftNorm::Backward).unwrap();

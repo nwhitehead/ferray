@@ -41,14 +41,25 @@ pub fn union1d<T>(
 where
     T: Element + PartialOrd + Copy,
 {
-    let av = if assume_unique { to_vec(a) } else { sorted_unique(&to_vec(a)) };
-    let bv = if assume_unique { to_vec(b) } else { sorted_unique(&to_vec(b)) };
+    let av = if assume_unique {
+        to_vec(a)
+    } else {
+        sorted_unique(&to_vec(a))
+    };
+    let bv = if assume_unique {
+        to_vec(b)
+    } else {
+        sorted_unique(&to_vec(b))
+    };
 
     // Merge two sorted arrays
     let mut result = Vec::with_capacity(av.len() + bv.len());
     let (mut i, mut j) = (0, 0);
     while i < av.len() && j < bv.len() {
-        match av[i].partial_cmp(&bv[j]).unwrap_or(std::cmp::Ordering::Equal) {
+        match av[i]
+            .partial_cmp(&bv[j])
+            .unwrap_or(std::cmp::Ordering::Equal)
+        {
             std::cmp::Ordering::Less => {
                 result.push(av[i]);
                 i += 1;
@@ -85,13 +96,24 @@ pub fn intersect1d<T>(
 where
     T: Element + PartialOrd + Copy,
 {
-    let av = if assume_unique { to_vec(a) } else { sorted_unique(&to_vec(a)) };
-    let bv = if assume_unique { to_vec(b) } else { sorted_unique(&to_vec(b)) };
+    let av = if assume_unique {
+        to_vec(a)
+    } else {
+        sorted_unique(&to_vec(a))
+    };
+    let bv = if assume_unique {
+        to_vec(b)
+    } else {
+        sorted_unique(&to_vec(b))
+    };
 
     let mut result = Vec::new();
     let (mut i, mut j) = (0, 0);
     while i < av.len() && j < bv.len() {
-        match av[i].partial_cmp(&bv[j]).unwrap_or(std::cmp::Ordering::Equal) {
+        match av[i]
+            .partial_cmp(&bv[j])
+            .unwrap_or(std::cmp::Ordering::Equal)
+        {
             std::cmp::Ordering::Less => i += 1,
             std::cmp::Ordering::Greater => j += 1,
             std::cmp::Ordering::Equal => {
@@ -120,8 +142,16 @@ pub fn setdiff1d<T>(
 where
     T: Element + PartialOrd + Copy,
 {
-    let av = if assume_unique { to_vec(a) } else { sorted_unique(&to_vec(a)) };
-    let bv = if assume_unique { to_vec(b) } else { sorted_unique(&to_vec(b)) };
+    let av = if assume_unique {
+        to_vec(a)
+    } else {
+        sorted_unique(&to_vec(a))
+    };
+    let bv = if assume_unique {
+        to_vec(b)
+    } else {
+        sorted_unique(&to_vec(b))
+    };
 
     let mut result = Vec::new();
     let (mut i, mut j) = (0, 0);
@@ -130,7 +160,10 @@ where
             result.push(av[i]);
             i += 1;
         } else {
-            match av[i].partial_cmp(&bv[j]).unwrap_or(std::cmp::Ordering::Equal) {
+            match av[i]
+                .partial_cmp(&bv[j])
+                .unwrap_or(std::cmp::Ordering::Equal)
+            {
                 std::cmp::Ordering::Less => {
                     result.push(av[i]);
                     i += 1;
@@ -166,13 +199,24 @@ pub fn setxor1d<T>(
 where
     T: Element + PartialOrd + Copy,
 {
-    let av = if assume_unique { to_vec(a) } else { sorted_unique(&to_vec(a)) };
-    let bv = if assume_unique { to_vec(b) } else { sorted_unique(&to_vec(b)) };
+    let av = if assume_unique {
+        to_vec(a)
+    } else {
+        sorted_unique(&to_vec(a))
+    };
+    let bv = if assume_unique {
+        to_vec(b)
+    } else {
+        sorted_unique(&to_vec(b))
+    };
 
     let mut result = Vec::new();
     let (mut i, mut j) = (0, 0);
     while i < av.len() && j < bv.len() {
-        match av[i].partial_cmp(&bv[j]).unwrap_or(std::cmp::Ordering::Equal) {
+        match av[i]
+            .partial_cmp(&bv[j])
+            .unwrap_or(std::cmp::Ordering::Equal)
+        {
             std::cmp::Ordering::Less => {
                 result.push(av[i]);
                 i += 1;
@@ -211,13 +255,21 @@ where
     T: Element + PartialOrd + Copy,
 {
     let av = to_vec(a);
-    let bv = if assume_unique { to_vec(b) } else { sorted_unique(&to_vec(b)) };
+    let bv = if assume_unique {
+        to_vec(b)
+    } else {
+        sorted_unique(&to_vec(b))
+    };
 
-    let result: Vec<bool> = av.iter().map(|&val| {
-        bv.binary_search_by(|probe| {
-            probe.partial_cmp(&val).unwrap_or(std::cmp::Ordering::Equal)
-        }).is_ok()
-    }).collect();
+    let result: Vec<bool> = av
+        .iter()
+        .map(|&val| {
+            bv.binary_search_by(|probe| {
+                probe.partial_cmp(&val).unwrap_or(std::cmp::Ordering::Equal)
+            })
+            .is_ok()
+        })
+        .collect();
 
     let n = result.len();
     Array::from_vec(Ix1::new([n]), result)

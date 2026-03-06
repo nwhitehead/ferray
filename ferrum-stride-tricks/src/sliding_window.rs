@@ -143,11 +143,7 @@ mod tests {
     #[test]
     fn sliding_window_2d() {
         // 3x4 array with 2x2 window -> (2, 3, 2, 2) output
-        let a = Array::<i32, Ix2>::from_vec(
-            Ix2::new([3, 4]),
-            (1..=12).collect(),
-        )
-        .unwrap();
+        let a = Array::<i32, Ix2>::from_vec(Ix2::new([3, 4]), (1..=12).collect()).unwrap();
         let v = sliding_window_view(&a, &[2, 2]).unwrap();
         assert_eq!(v.shape(), &[2, 3, 2, 2]);
     }

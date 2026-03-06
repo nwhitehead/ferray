@@ -29,8 +29,8 @@ pub use masked_array::MaskedArray;
 
 // Re-export masking constructors
 pub use constructors::{
-    masked_equal, masked_greater, masked_greater_equal, masked_inside, masked_invalid,
-    masked_less, masked_less_equal, masked_not_equal, masked_outside, masked_where,
+    masked_equal, masked_greater, masked_greater_equal, masked_inside, masked_invalid, masked_less,
+    masked_less_equal, masked_not_equal, masked_outside, masked_where,
 };
 
 // Re-export arithmetic operations
@@ -45,16 +45,19 @@ pub use mask_ops::{count_masked, getdata, getmask, is_masked};
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferrum_core::dimension::Ix1;
     use ferrum_core::Array;
+    use ferrum_core::dimension::Ix1;
 
     // -----------------------------------------------------------------------
     // AC-1: MaskedArray::new([1,2,3,4,5], [false,false,true,false,false]).mean() == 3.0
     // -----------------------------------------------------------------------
     #[test]
     fn ac1_masked_mean_skips_masked() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, false, true, false, false]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, false, true, false, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let mean = ma.mean().unwrap();
         // (1 + 2 + 4 + 5) / 4 = 3.0
@@ -67,7 +70,8 @@ mod tests {
     #[test]
     fn ac2_filled_replaces_masked() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, true]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, true]).unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let filled = ma.filled(0.0).unwrap();
         assert_eq!(filled.as_slice().unwrap(), &[1.0, 0.0, 3.0, 0.0]);
@@ -78,8 +82,11 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn ac3_compressed_returns_unmasked() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![10.0, 20.0, 30.0, 40.0, 50.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, true, false]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![10.0, 20.0, 30.0, 40.0, 50.0]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, true, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let compressed = ma.compressed().unwrap();
         assert_eq!(compressed.as_slice().unwrap(), &[10.0, 30.0, 50.0]);
@@ -90,10 +97,9 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn ac4_masked_invalid_nan_inf() {
-        let data = Array::<f64, Ix1>::from_vec(
-            Ix1::new([4]),
-            vec![1.0, f64::NAN, 3.0, f64::INFINITY],
-        ).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, f64::NAN, 3.0, f64::INFINITY])
+                .unwrap();
         let ma = masked_invalid(&data).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![false, true, false, true]);
@@ -105,11 +111,13 @@ mod tests {
     #[test]
     fn ac5_add_mask_union() {
         let d1 = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
-        let m1 = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, false]).unwrap();
+        let m1 =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, false]).unwrap();
         let ma1 = MaskedArray::new(d1, m1).unwrap();
 
         let d2 = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![10.0, 20.0, 30.0, 40.0]).unwrap();
-        let m2 = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, false, true, false]).unwrap();
+        let m2 =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, false, true, false]).unwrap();
         let ma2 = MaskedArray::new(d2, m2).unwrap();
 
         let result = masked_add(&ma1, &ma2).unwrap();
@@ -128,10 +136,8 @@ mod tests {
     #[test]
     fn ac7_ufunc_sin_masked() {
         use std::f64::consts::FRAC_PI_2;
-        let data = Array::<f64, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![0.0, FRAC_PI_2, FRAC_PI_2],
-        ).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![0.0, FRAC_PI_2, FRAC_PI_2]).unwrap();
         let mask = Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![false, true, false]).unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let result = ufunc_support::sin(&ma).unwrap();
@@ -148,8 +154,11 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn ac8_sort_masked_at_end() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![5.0, 1.0, 3.0, 2.0, 4.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, false, true, false, false]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![5.0, 1.0, 3.0, 2.0, 4.0]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, false, true, false, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let sorted = ma.sort().unwrap();
         let data_vals: Vec<f64> = sorted.data().iter().copied().collect();
@@ -224,15 +233,19 @@ mod tests {
     #[test]
     fn sum_skips_masked() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, true]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, true]).unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         assert!((ma.sum().unwrap() - 4.0).abs() < 1e-10);
     }
 
     #[test]
     fn min_max_skip_masked() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![5.0, 1.0, 3.0, 2.0, 4.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, false, false]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![5.0, 1.0, 3.0, 2.0, 4.0]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, false, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         assert!((ma.min().unwrap() - 2.0).abs() < 1e-10);
         assert!((ma.max().unwrap() - 5.0).abs() < 1e-10);
@@ -241,8 +254,11 @@ mod tests {
     #[test]
     fn var_std_skip_masked() {
         // values: [2, 4, 6] (mask out index 1 and 4)
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![2.0, 99.0, 4.0, 6.0, 99.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, false, true]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![2.0, 99.0, 4.0, 6.0, 99.0]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, false, false, true])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let mean = ma.mean().unwrap();
         assert!((mean - 4.0).abs() < 1e-10);
@@ -256,14 +272,17 @@ mod tests {
     #[test]
     fn count_elements() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0; 5]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, true, false, false]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, true, true, false, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         assert_eq!(ma.count().unwrap(), 3);
     }
 
     #[test]
     fn masked_equal_test() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 2.0, 1.0]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 2.0, 1.0]).unwrap();
         let ma = masked_equal(&data, 2.0).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![false, true, false, true, false]);
@@ -311,7 +330,8 @@ mod tests {
 
     #[test]
     fn masked_inside_test() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
         let ma = masked_inside(&data, 2.0, 4.0).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![false, true, true, true, false]);
@@ -319,7 +339,8 @@ mod tests {
 
     #[test]
     fn masked_outside_test() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
         let ma = masked_outside(&data, 2.0, 4.0).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![true, false, false, false, true]);
@@ -328,7 +349,8 @@ mod tests {
     #[test]
     fn masked_where_test() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
-        let cond = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
+        let cond =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
         let ma = masked_where(&cond, &data).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![true, false, true, false]);
@@ -336,8 +358,11 @@ mod tests {
 
     #[test]
     fn argsort_test() {
-        let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![5.0, 1.0, 3.0, 2.0, 4.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, false, true, false, false]).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![5.0, 1.0, 3.0, 2.0, 4.0]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![false, false, true, false, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let indices = ma.argsort().unwrap();
         let idx_vals: Vec<usize> = indices.iter().copied().collect();
@@ -361,7 +386,9 @@ mod tests {
     #[test]
     fn count_masked_test() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([5]), vec![1.0; 5]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![true, false, true, true, false]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([5]), vec![true, false, true, true, false])
+                .unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         assert_eq!(count_masked(&ma, None).unwrap(), 3);
     }
@@ -412,7 +439,8 @@ mod tests {
     #[test]
     fn ufunc_sqrt_masked() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![4.0, 9.0, 16.0, 25.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, true]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![false, true, false, true]).unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let result = ufunc_support::sqrt(&ma).unwrap();
         let data_vals: Vec<f64> = result.data().iter().copied().collect();
@@ -428,7 +456,8 @@ mod tests {
         ma.harden_mask().unwrap();
 
         // set_mask with all-false should not clear the existing true
-        let new_mask = Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![false, false, false]).unwrap();
+        let new_mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([3]), vec![false, false, false]).unwrap();
         ma.set_mask(new_mask).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         // Hard mask: union of old [false, true, false] and new [false, false, false] = [false, true, false]
@@ -488,10 +517,8 @@ mod tests {
 
     #[test]
     fn masked_invalid_negative_inf() {
-        let data = Array::<f64, Ix1>::from_vec(
-            Ix1::new([3]),
-            vec![1.0, f64::NEG_INFINITY, 3.0],
-        ).unwrap();
+        let data =
+            Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![1.0, f64::NEG_INFINITY, 3.0]).unwrap();
         let ma = masked_invalid(&data).unwrap();
         let mask_vals: Vec<bool> = ma.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![false, true, false]);
@@ -532,14 +559,15 @@ mod tests {
         let data_vals: Vec<f64> = result.data().iter().copied().collect();
         let mask_vals: Vec<bool> = result.mask().iter().copied().collect();
         assert_eq!(mask_vals, vec![false, true, false]);
-        assert!((data_vals[0] - 8.0).abs() < 1e-10);  // 2^3 = 8
+        assert!((data_vals[0] - 8.0).abs() < 1e-10); // 2^3 = 8
         assert!((data_vals[2] - 16.0).abs() < 1e-10); // 4^2 = 16
     }
 
     #[test]
     fn filled_with_custom_value() {
         let data = Array::<f64, Ix1>::from_vec(Ix1::new([4]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
-        let mask = Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
+        let mask =
+            Array::<bool, Ix1>::from_vec(Ix1::new([4]), vec![true, false, true, false]).unwrap();
         let ma = MaskedArray::new(data, mask).unwrap();
         let filled = ma.filled(-999.0).unwrap();
         assert_eq!(filled.as_slice().unwrap(), &[-999.0, 2.0, -999.0, 4.0]);

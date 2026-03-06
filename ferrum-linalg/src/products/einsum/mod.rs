@@ -14,7 +14,7 @@ use ferrum_core::dimension::IxDyn;
 use ferrum_core::error::FerrumResult;
 
 use self::contraction::generic_contraction;
-use self::optimizer::{optimize, EinsumStrategy};
+use self::optimizer::{EinsumStrategy, optimize};
 use self::parser::parse_subscripts;
 
 /// Compute Einstein summation notation.
@@ -98,7 +98,7 @@ fn execute_tensordot(
     axes_a: Vec<usize>,
     axes_b: Vec<usize>,
 ) -> FerrumResult<Array<f64, IxDyn>> {
-    use crate::products::tensordot::{tensordot, TensordotAxes};
+    use crate::products::tensordot::{TensordotAxes, tensordot};
     tensordot(a, b, TensordotAxes::Pairs(axes_a, axes_b))
 }
 
@@ -108,11 +108,9 @@ mod tests {
 
     #[test]
     fn einsum_matmul_explicit() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
@@ -129,11 +127,9 @@ mod tests {
 
     #[test]
     fn einsum_matmul_implicit() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2, 3]),
-            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        )
-        .unwrap();
+        let a =
+            Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+                .unwrap();
         let b = Array::<f64, IxDyn>::from_vec(
             IxDyn::new(&[3, 2]),
             vec![7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
@@ -169,16 +165,8 @@ mod tests {
 
     #[test]
     fn einsum_outer_product() {
-        let a = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[2]),
-            vec![1.0, 2.0],
-        )
-        .unwrap();
-        let b = Array::<f64, IxDyn>::from_vec(
-            IxDyn::new(&[3]),
-            vec![3.0, 4.0, 5.0],
-        )
-        .unwrap();
+        let a = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[2]), vec![1.0, 2.0]).unwrap();
+        let b = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[3]), vec![3.0, 4.0, 5.0]).unwrap();
         let c = einsum("i,j->ij", &[&a, &b]).unwrap();
         assert_eq!(c.shape(), &[2, 3]);
         let data: Vec<f64> = c.iter().copied().collect();

@@ -3,9 +3,9 @@
 // Implements NumPy-equivalent window functions: bartlett, blackman, hamming,
 // hanning, and kaiser. Each returns an Array1<f64> of the specified length M.
 
+use ferrum_core::Array;
 use ferrum_core::dimension::Ix1;
 use ferrum_core::error::{FerrumError, FerrumResult};
-use ferrum_core::Array;
 
 use std::f64::consts::PI;
 
@@ -21,8 +21,7 @@ fn bessel_i0_scalar(x: f64) -> f64 {
         1.0 + t
             * (3.5156229
                 + t * (3.0899424
-                    + t * (1.2067492
-                        + t * (0.2659732 + t * (0.0360768 + t * 0.0045813)))))
+                    + t * (1.2067492 + t * (0.2659732 + t * (0.0360768 + t * 0.0045813)))))
     } else {
         let t = 3.75 / ax;
         let poly = 0.39894228
@@ -31,8 +30,7 @@ fn bessel_i0_scalar(x: f64) -> f64 {
                     + t * (-0.00157565
                         + t * (0.00916281
                             + t * (-0.02057706
-                                + t * (0.02635537
-                                    + t * (-0.01647633 + t * 0.00392377)))))));
+                                + t * (0.02635537 + t * (-0.01647633 + t * 0.00392377)))))));
         poly * ax.exp() / ax.sqrt()
     }
 }
@@ -92,8 +90,7 @@ pub fn blackman(m: usize) -> FerrumResult<Array<f64, Ix1>> {
     let mut data = Vec::with_capacity(m);
     for n in 0..m {
         let x = n as f64;
-        let val =
-            0.42 - 0.5 * (2.0 * PI * x / denom).cos() + 0.08 * (4.0 * PI * x / denom).cos();
+        let val = 0.42 - 0.5 * (2.0 * PI * x / denom).cos() + 0.08 * (4.0 * PI * x / denom).cos();
         data.push(val);
     }
     Array::from_vec(Ix1::new([m]), data)
