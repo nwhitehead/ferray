@@ -39,10 +39,7 @@ pub(crate) fn fft_along_axis(
         return Err(FerrumError::invalid_value("FFT length must be > 0"));
     }
 
-    // Compute strides for the input shape (row-major)
-    let strides = compute_strides(shape);
-
-    // Number of lanes = total elements / axis_len
+    // Total elements
     let total = shape.iter().product::<usize>();
     if total == 0 {
         let mut new_shape = shape.to_vec();
@@ -50,7 +47,16 @@ pub(crate) fn fft_along_axis(
         let new_total: usize = new_shape.iter().product();
         return Ok((new_shape, vec![Complex::new(0.0, 0.0); new_total]));
     }
+
+    // Fast path: 1D array — skip all lane machinery
+    if ndim == 1 {
+        return fft_1d_fast(data, fft_len, axis_len, inverse, norm);
+    }
+
     let num_lanes = total / axis_len;
+
+    // Compute strides for the input shape (row-major)
+    let strides = compute_strides(shape);
 
     // Build output shape
     let mut new_shape = shape.to_vec();
@@ -73,31 +79,37 @@ pub(crate) fn fft_along_axis(
     };
     let scale = norm.scale_factor(fft_len, direction);
 
-    // Process all lanes in parallel
+    // Pre-compute scratch size once
+    let scratch_len = plan.get_inplace_scratch_len();
+
+    // Process all lanes in parallel, using thread-local scratch buffers
     let lane_results: Vec<Vec<Complex<f64>>> = lane_starts
         .par_iter()
-        .map(|&start_offset| {
-            // Extract lane from input
-            let mut buffer = Vec::with_capacity(fft_len);
-            let stride = strides[axis] as usize;
-            for i in 0..axis_len.min(fft_len) {
-                buffer.push(data[start_offset + i * stride]);
-            }
-            // Zero-pad if needed
-            buffer.resize(fft_len, Complex::new(0.0, 0.0));
-
-            // Execute FFT
-            plan.process(&mut buffer);
-
-            // Apply normalization
-            if (scale - 1.0).abs() > f64::EPSILON {
-                for c in &mut buffer {
-                    *c *= scale;
+        .map_init(
+            || vec![Complex::new(0.0, 0.0); scratch_len],
+            |scratch, &start_offset| {
+                // Extract lane from input
+                let mut buffer = Vec::with_capacity(fft_len);
+                let stride = strides[axis] as usize;
+                for i in 0..axis_len.min(fft_len) {
+                    buffer.push(data[start_offset + i * stride]);
                 }
-            }
+                // Zero-pad if needed
+                buffer.resize(fft_len, Complex::new(0.0, 0.0));
 
-            buffer
-        })
+                // Execute FFT reusing thread-local scratch
+                plan.process_with_scratch(&mut buffer, scratch);
+
+                // Apply normalization
+                if (scale - 1.0).abs() > f64::EPSILON {
+                    for c in &mut buffer {
+                        *c *= scale;
+                    }
+                }
+
+                buffer
+            },
+        )
         .collect();
 
     // Write results back into a flat output array
@@ -121,6 +133,42 @@ pub(crate) fn fft_along_axis(
     }
 
     Ok((new_shape, output))
+}
+
+/// Fast path for 1D FFT: no lane extraction, no parallel overhead.
+/// Operates directly on a contiguous buffer in-place.
+fn fft_1d_fast(
+    data: &[Complex<f64>],
+    fft_len: usize,
+    input_len: usize,
+    inverse: bool,
+    norm: FftNorm,
+) -> FerrumResult<(Vec<usize>, Vec<Complex<f64>>)> {
+    // Build buffer: copy input (truncated or padded)
+    let mut buffer = Vec::with_capacity(fft_len);
+    let copy_len = input_len.min(fft_len);
+    buffer.extend_from_slice(&data[..copy_len]);
+    buffer.resize(fft_len, Complex::new(0.0, 0.0));
+
+    // Get cached plan and execute in-place
+    let plan = get_cached_plan(fft_len, inverse);
+    let mut scratch = vec![Complex::new(0.0, 0.0); plan.get_inplace_scratch_len()];
+    plan.process_with_scratch(&mut buffer, &mut scratch);
+
+    // Apply normalization
+    let direction = if inverse {
+        crate::norm::FftDirection::Inverse
+    } else {
+        crate::norm::FftDirection::Forward
+    };
+    let scale = norm.scale_factor(fft_len, direction);
+    if (scale - 1.0).abs() > f64::EPSILON {
+        for c in &mut buffer {
+            *c *= scale;
+        }
+    }
+
+    Ok((vec![fft_len], buffer))
 }
 
 /// Apply 1-D FFTs along multiple axes sequentially.

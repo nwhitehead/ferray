@@ -20,13 +20,17 @@ where
     T: Element + Copy,
     D: Dimension,
 {
-    // Fast path: contiguous array — iterate the flat slice directly.
-    // Pre-allocate and use iter_mut().zip() for best auto-vectorization.
+    // Fast path: contiguous array — write directly into uninit buffer to skip zeroing.
     if let Some(slice) = input.as_slice() {
         let n = slice.len();
-        let mut data = vec![T::zero(); n];
-        for (out, &inp) in data.iter_mut().zip(slice.iter()) {
-            *out = f(inp);
+        let mut data = Vec::with_capacity(n);
+        // SAFETY: We write all n elements in the loop below before reading any.
+        #[allow(clippy::uninit_vec)]
+        unsafe {
+            data.set_len(n);
+        }
+        for (o, &x) in data.iter_mut().zip(slice.iter()) {
+            *o = f(x);
         }
         Array::from_vec(input.dim().clone(), data)
     } else {
@@ -50,14 +54,17 @@ where
 {
     let n = input.size();
     if let Some(slice) = input.as_slice() {
-        let mut data = vec![0.0f64; n];
+        // SAFETY: kernel writes all n elements. We allocate uninit memory and let
+        // the kernel fill it, avoiding a pointless zeroing pass over 8*n bytes.
+        let mut data = Vec::with_capacity(n);
+        #[allow(clippy::uninit_vec)]
+        unsafe {
+            data.set_len(n);
+        }
         kernel(slice, &mut data);
         Array::from_vec(input.dim().clone(), data)
     } else {
-        let mut data = Vec::with_capacity(n);
-        for &x in input.iter() {
-            data.push(scalar_fallback(x));
-        }
+        let data: Vec<f64> = input.iter().map(|&x| scalar_fallback(x)).collect();
         Array::from_vec(input.dim().clone(), data)
     }
 }
@@ -74,14 +81,15 @@ where
 {
     let n = input.size();
     if let Some(slice) = input.as_slice() {
-        let mut data = vec![0.0f32; n];
+        let mut data = Vec::with_capacity(n);
+        #[allow(clippy::uninit_vec)]
+        unsafe {
+            data.set_len(n);
+        }
         kernel(slice, &mut data);
         Array::from_vec(input.dim().clone(), data)
     } else {
-        let mut data = Vec::with_capacity(n);
-        for &x in input.iter() {
-            data.push(scalar_fallback(x));
-        }
+        let data: Vec<f32> = input.iter().map(|&x| scalar_fallback(x)).collect();
         Array::from_vec(input.dim().clone(), data)
     }
 }
@@ -110,7 +118,11 @@ where
     // identical size, alignment, and bit representation.
     let f64_slice: &[f64] =
         unsafe { std::slice::from_raw_parts(slice.as_ptr() as *const f64, n) };
-    let mut output = vec![0.0f64; n];
+    let mut output = Vec::with_capacity(n);
+    #[allow(clippy::uninit_vec)]
+    unsafe {
+        output.set_len(n);
+    }
     kernel(f64_slice, &mut output);
     // SAFETY: T is f64. Reinterpret Vec<f64> as Vec<T> without copying.
     let t_vec: Vec<T> = unsafe {

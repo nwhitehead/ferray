@@ -15,8 +15,10 @@ pub const PARALLEL_SORT_THRESHOLD: usize = 100_000;
 
 /// Pairwise summation base case threshold.
 ///
-/// Below this size, we use an unrolled sequential sum. Matches NumPy's approach.
-const PAIRWISE_BASE: usize = 128;
+/// Below this size, we use an unrolled sequential sum. 256 elements gives a
+/// good balance: halves carry-merge overhead vs 128 while keeping the same
+/// O(ε log N) accuracy bound (just one fewer merge level).
+const PAIRWISE_BASE: usize = 256;
 
 /// 8-wide unrolled base-case sum for auto-vectorization.
 #[inline(always)]
@@ -137,16 +139,22 @@ fn simd_base_sum_f64<S: pulp::Simd>(simd: S, data: &[f64]) -> f64 {
     let zero = simd.splat_f64s(0.0);
     let mut acc0 = zero;
     let mut acc1 = zero;
+    let mut acc2 = zero;
+    let mut acc3 = zero;
 
-    // 2-accumulator unroll for ILP
-    let stride = lane_count * 2;
+    // 4-accumulator unroll to saturate FPU throughput
+    let stride = lane_count * 4;
     let unrolled_end = n - (n % stride);
     let mut i = 0;
     while i < unrolled_end {
         let v0 = simd.partial_load_f64s(&data[i..i + lane_count]);
-        let v1 = simd.partial_load_f64s(&data[i + lane_count..i + stride]);
+        let v1 = simd.partial_load_f64s(&data[i + lane_count..i + lane_count * 2]);
+        let v2 = simd.partial_load_f64s(&data[i + lane_count * 2..i + lane_count * 3]);
+        let v3 = simd.partial_load_f64s(&data[i + lane_count * 3..i + stride]);
         acc0 = simd.add_f64s(acc0, v0);
         acc1 = simd.add_f64s(acc1, v1);
+        acc2 = simd.add_f64s(acc2, v2);
+        acc3 = simd.add_f64s(acc3, v3);
         i += stride;
     }
     while i + lane_count <= simd_end {
@@ -155,6 +163,8 @@ fn simd_base_sum_f64<S: pulp::Simd>(simd: S, data: &[f64]) -> f64 {
         i += lane_count;
     }
     acc0 = simd.add_f64s(acc0, acc1);
+    acc2 = simd.add_f64s(acc2, acc3);
+    acc0 = simd.add_f64s(acc0, acc2);
 
     // Horizontal sum: store SIMD register to temp array
     let mut temp = [0.0f64; 8]; // max 8 lanes (AVX-512)
@@ -206,6 +216,82 @@ fn simd_pairwise_f64<S: pulp::Simd>(simd: S, data: &[f64]) -> f64 {
         result += stack_val[i];
     }
     result
+}
+
+// ---------------------------------------------------------------------------
+// SIMD-accelerated fused sum of squared differences for variance
+// ---------------------------------------------------------------------------
+
+/// SIMD-accelerated computation of sum((x - mean)²) for f64 slices.
+///
+/// Computes the sum of squared differences from the mean in a single pass
+/// without allocating an intermediate Vec. Uses 4 SIMD accumulators for ILP.
+pub fn simd_sum_sq_diff_f64(data: &[f64], mean: f64) -> f64 {
+    Arch::new().dispatch(SumSqDiffF64Op { data, mean })
+}
+
+struct SumSqDiffF64Op<'a> {
+    data: &'a [f64],
+    mean: f64,
+}
+
+impl pulp::WithSimd for SumSqDiffF64Op<'_> {
+    type Output = f64;
+
+    #[inline(always)]
+    fn with_simd<S: pulp::Simd>(self, simd: S) -> f64 {
+        let data = self.data;
+        let n = data.len();
+        let lane_count = size_of::<S::f64s>() / size_of::<f64>();
+        let simd_end = n - (n % lane_count);
+
+        let zero = simd.splat_f64s(0.0);
+        let mean_v = simd.splat_f64s(self.mean);
+        let mut acc0 = zero;
+        let mut acc1 = zero;
+        let mut acc2 = zero;
+        let mut acc3 = zero;
+
+        let stride = lane_count * 4;
+        let unrolled_end = n - (n % stride);
+        let mut i = 0;
+        while i < unrolled_end {
+            let v0 = simd.partial_load_f64s(&data[i..i + lane_count]);
+            let v1 = simd.partial_load_f64s(&data[i + lane_count..i + lane_count * 2]);
+            let v2 = simd.partial_load_f64s(&data[i + lane_count * 2..i + lane_count * 3]);
+            let v3 = simd.partial_load_f64s(&data[i + lane_count * 3..i + stride]);
+            let d0 = simd.sub_f64s(v0, mean_v);
+            let d1 = simd.sub_f64s(v1, mean_v);
+            let d2 = simd.sub_f64s(v2, mean_v);
+            let d3 = simd.sub_f64s(v3, mean_v);
+            acc0 = simd.mul_add_f64s(d0, d0, acc0);
+            acc1 = simd.mul_add_f64s(d1, d1, acc1);
+            acc2 = simd.mul_add_f64s(d2, d2, acc2);
+            acc3 = simd.mul_add_f64s(d3, d3, acc3);
+            i += stride;
+        }
+        while i + lane_count <= simd_end {
+            let v = simd.partial_load_f64s(&data[i..i + lane_count]);
+            let d = simd.sub_f64s(v, mean_v);
+            acc0 = simd.mul_add_f64s(d, d, acc0);
+            i += lane_count;
+        }
+        acc0 = simd.add_f64s(acc0, acc1);
+        acc2 = simd.add_f64s(acc2, acc3);
+        acc0 = simd.add_f64s(acc0, acc2);
+
+        let mut temp = [0.0f64; 8];
+        simd.partial_store_f64s(&mut temp[..lane_count], acc0);
+        let mut sum = 0.0f64;
+        for t in temp.iter().take(lane_count) {
+            sum += t;
+        }
+        for &val in &data[simd_end..n] {
+            let d = val - self.mean;
+            sum += d * d;
+        }
+        sum
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -203,6 +203,34 @@ pub fn simd_neg_f64(input: &[f64], output: &mut [f64]) {
     }
 }
 
+/// SIMD square (x*x) for f64 slices.
+#[inline]
+pub fn simd_square_f64(input: &[f64], output: &mut [f64]) {
+    debug_assert_eq!(input.len(), output.len());
+    if force_scalar() {
+        for (o, &i) in output.iter_mut().zip(input.iter()) {
+            *o = i * i;
+        }
+    } else {
+        let arch = Arch::new();
+        arch.dispatch(SquareF64Op { input, output });
+    }
+}
+
+/// SIMD reciprocal (1/x) for f64 slices.
+#[inline]
+pub fn simd_reciprocal_f64(input: &[f64], output: &mut [f64]) {
+    debug_assert_eq!(input.len(), output.len());
+    if force_scalar() {
+        for (o, &i) in output.iter_mut().zip(input.iter()) {
+            *o = 1.0 / i;
+        }
+    } else {
+        let arch = Arch::new();
+        arch.dispatch(ReciprocalF64Op { input, output });
+    }
+}
+
 // ---------------------------------------------------------------------------
 // WithSimd implementations for pulp dispatch
 // ---------------------------------------------------------------------------
@@ -297,15 +325,35 @@ impl pulp::WithSimd for SqrtF64Op<'_> {
     fn with_simd<S: pulp::Simd>(self, simd: S) -> Self::Output {
         let n = self.input.len();
         let lane_count = size_of::<S::f64s>() / size_of::<f64>();
+        let stride = lane_count * 4;
+        let unrolled_end = n - (n % stride);
         let simd_end = n - (n % lane_count);
 
-        for i in (0..simd_end).step_by(lane_count) {
+        // 4-wide unroll to hide sqrt's ~12-cycle latency
+        let mut i = 0;
+        while i < unrolled_end {
+            let v0 = simd.partial_load_f64s(&self.input[i..i + lane_count]);
+            let v1 = simd.partial_load_f64s(&self.input[i + lane_count..i + lane_count * 2]);
+            let v2 = simd.partial_load_f64s(&self.input[i + lane_count * 2..i + lane_count * 3]);
+            let v3 = simd.partial_load_f64s(&self.input[i + lane_count * 3..i + stride]);
+            let r0 = simd.sqrt_f64s(v0);
+            let r1 = simd.sqrt_f64s(v1);
+            let r2 = simd.sqrt_f64s(v2);
+            let r3 = simd.sqrt_f64s(v3);
+            simd.partial_store_f64s(&mut self.output[i..i + lane_count], r0);
+            simd.partial_store_f64s(&mut self.output[i + lane_count..i + lane_count * 2], r1);
+            simd.partial_store_f64s(&mut self.output[i + lane_count * 2..i + lane_count * 3], r2);
+            simd.partial_store_f64s(&mut self.output[i + lane_count * 3..i + stride], r3);
+            i += stride;
+        }
+        while i < simd_end {
             let v = simd.partial_load_f64s(&self.input[i..i + lane_count]);
             let r = simd.sqrt_f64s(v);
             simd.partial_store_f64s(&mut self.output[i..i + lane_count], r);
+            i += lane_count;
         }
-        for i in simd_end..n {
-            self.output[i] = self.input[i].sqrt();
+        for j in simd_end..n {
+            self.output[j] = self.input[j].sqrt();
         }
     }
 }
@@ -381,6 +429,57 @@ impl pulp::WithSimd for NegF64Op<'_> {
         }
         for i in simd_end..n {
             self.output[i] = -self.input[i];
+        }
+    }
+}
+
+struct SquareF64Op<'a> {
+    input: &'a [f64],
+    output: &'a mut [f64],
+}
+
+impl pulp::WithSimd for SquareF64Op<'_> {
+    type Output = ();
+
+    #[inline(always)]
+    fn with_simd<S: pulp::Simd>(self, simd: S) -> Self::Output {
+        let n = self.input.len();
+        let lane_count = size_of::<S::f64s>() / size_of::<f64>();
+        let simd_end = n - (n % lane_count);
+
+        for i in (0..simd_end).step_by(lane_count) {
+            let v = simd.partial_load_f64s(&self.input[i..i + lane_count]);
+            let r = simd.mul_f64s(v, v);
+            simd.partial_store_f64s(&mut self.output[i..i + lane_count], r);
+        }
+        for i in simd_end..n {
+            self.output[i] = self.input[i] * self.input[i];
+        }
+    }
+}
+
+struct ReciprocalF64Op<'a> {
+    input: &'a [f64],
+    output: &'a mut [f64],
+}
+
+impl pulp::WithSimd for ReciprocalF64Op<'_> {
+    type Output = ();
+
+    #[inline(always)]
+    fn with_simd<S: pulp::Simd>(self, simd: S) -> Self::Output {
+        let n = self.input.len();
+        let lane_count = size_of::<S::f64s>() / size_of::<f64>();
+        let simd_end = n - (n % lane_count);
+        let one = simd.splat_f64s(1.0);
+
+        for i in (0..simd_end).step_by(lane_count) {
+            let v = simd.partial_load_f64s(&self.input[i..i + lane_count]);
+            let r = simd.div_f64s(one, v);
+            simd.partial_store_f64s(&mut self.output[i..i + lane_count], r);
+        }
+        for i in simd_end..n {
+            self.output[i] = 1.0 / self.input[i];
         }
     }
 }

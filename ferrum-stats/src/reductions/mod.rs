@@ -12,6 +12,21 @@ use num_traits::Float;
 
 use crate::parallel;
 
+/// Try SIMD-accelerated fused sum of squared differences if T is f64.
+/// Returns sum((x - mean)²) without allocating an intermediate Vec.
+#[inline]
+fn try_simd_sum_sq_diff<T: Element + Copy + 'static>(data: &[T], mean: T) -> Option<T> {
+    if TypeId::of::<T>() == TypeId::of::<f64>() {
+        let f64_slice =
+            unsafe { std::slice::from_raw_parts(data.as_ptr() as *const f64, data.len()) };
+        let mean_f64 = unsafe { *(&mean as *const T as *const f64) };
+        let result = parallel::simd_sum_sq_diff_f64(f64_slice, mean_f64);
+        Some(unsafe { *(&result as *const f64 as *const T) })
+    } else {
+        None
+    }
+}
+
 /// Try SIMD-accelerated pairwise sum if T is f64.
 /// Returns the sum transmuted back to T, or None if T is not f64.
 #[inline]
@@ -87,22 +102,23 @@ pub(crate) fn reduce_axis_general<T: Copy, F: Fn(&[T]) -> T>(
 
     let mut result = Vec::with_capacity(out_size);
     let mut out_multi = vec![0usize; out_shape.len()];
+    let mut in_multi = vec![0usize; ndim];
+    let mut lane_vec = Vec::with_capacity(axis_len);
 
     for _ in 0..out_size {
         // Build input multi-index by inserting axis position
-        let mut in_multi = Vec::with_capacity(ndim);
         let mut out_dim = 0;
-        for d in 0..ndim {
+        for (d, idx) in in_multi.iter_mut().enumerate() {
             if d == axis {
-                in_multi.push(0); // placeholder for axis
+                *idx = 0;
             } else {
-                in_multi.push(out_multi[out_dim]);
+                *idx = out_multi[out_dim];
                 out_dim += 1;
             }
         }
 
         // Gather lane values
-        let mut lane_vec = Vec::with_capacity(axis_len);
+        lane_vec.clear();
         for k in 0..axis_len {
             in_multi[axis] = k;
             let idx = flat_index(&in_multi, &strides);
@@ -438,24 +454,25 @@ pub(crate) fn reduce_axis_general_u64<T: Copy, F: Fn(&[T]) -> u64>(
 
     let mut result = Vec::with_capacity(out_size);
     let mut out_multi = vec![0usize; out_shape.len()];
+    let mut in_multi = vec![0usize; ndim];
+    let mut lane_vec = Vec::with_capacity(axis_len);
 
     for _ in 0..out_size {
-        let mut in_multi = Vec::with_capacity(ndim);
         let mut out_dim = 0;
-        for d in 0..ndim {
+        for (d, idx) in in_multi.iter_mut().enumerate() {
             if d == axis {
-                in_multi.push(0);
+                *idx = 0;
             } else {
-                in_multi.push(out_multi[out_dim]);
+                *idx = out_multi[out_dim];
                 out_dim += 1;
             }
         }
 
-        let mut lane_vec = Vec::with_capacity(axis_len);
+        lane_vec.clear();
         for k in 0..axis_len {
             in_multi[axis] = k;
-            let idx = flat_index(&in_multi, &strides);
-            lane_vec.push(data[idx]);
+            let flat = flat_index(&in_multi, &strides);
+            lane_vec.push(data[flat]);
         }
 
         result.push(f(&lane_vec));
@@ -540,13 +557,13 @@ where
             let mean_val = try_simd_pairwise_sum(&data)
                 .unwrap_or_else(|| parallel::pairwise_sum(&data, <T as Element>::zero()))
                 / nf;
-            let sq_diffs: Vec<T> = data.iter().copied().map(|x| {
-                let d = x - mean_val;
-                d * d
-            }).collect();
-            let var_val = try_simd_pairwise_sum(&sq_diffs)
-                .unwrap_or_else(|| parallel::pairwise_sum(&sq_diffs, <T as Element>::zero()))
-                / T::from(n - ddof).unwrap();
+            let sum_sq = try_simd_sum_sq_diff(&data, mean_val).unwrap_or_else(|| {
+                data.iter().copied().fold(<T as Element>::zero(), |acc, x| {
+                    let d = x - mean_val;
+                    acc + d * d
+                })
+            });
+            let var_val = sum_sq / T::from(n - ddof).unwrap();
             make_result(&[], vec![var_val])
         }
         Some(ax) => {
@@ -565,13 +582,13 @@ where
                 let mean_val = try_simd_pairwise_sum(lane)
                     .unwrap_or_else(|| parallel::pairwise_sum(lane, <T as Element>::zero()))
                     / nf;
-                let sq_diffs: Vec<T> = lane.iter().copied().map(|x| {
-                    let d = x - mean_val;
-                    d * d
-                }).collect();
-                try_simd_pairwise_sum(&sq_diffs)
-                    .unwrap_or_else(|| parallel::pairwise_sum(&sq_diffs, <T as Element>::zero()))
-                    / denom
+                let sum_sq = try_simd_sum_sq_diff(lane, mean_val).unwrap_or_else(|| {
+                    lane.iter().copied().fold(<T as Element>::zero(), |acc, x| {
+                        let d = x - mean_val;
+                        acc + d * d
+                    })
+                });
+                sum_sq / denom
             });
             make_result(&out_s, result)
         }

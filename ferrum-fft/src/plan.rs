@@ -152,7 +152,8 @@ impl FftPlan {
             )));
         }
         let mut buffer: Vec<Complex<f64>> = signal.iter().copied().collect();
-        self.forward.process(&mut buffer);
+        let mut scratch = vec![Complex::new(0.0, 0.0); self.forward.get_inplace_scratch_len()];
+        self.forward.process_with_scratch(&mut buffer, &mut scratch);
 
         let scale = norm.scale_factor(self.size, FftDirection::Forward);
         if (scale - 1.0).abs() > f64::EPSILON {
@@ -196,7 +197,8 @@ impl FftPlan {
             )));
         }
         let mut buffer: Vec<Complex<f64>> = spectrum.iter().copied().collect();
-        self.inverse.process(&mut buffer);
+        let mut scratch = vec![Complex::new(0.0, 0.0); self.inverse.get_inplace_scratch_len()];
+        self.inverse.process_with_scratch(&mut buffer, &mut scratch);
 
         let scale = norm.scale_factor(self.size, FftDirection::Inverse);
         if (scale - 1.0).abs() > f64::EPSILON {

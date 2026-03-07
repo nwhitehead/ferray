@@ -233,11 +233,18 @@ where
 }
 
 /// Elementwise reciprocal: 1/x.
+///
+/// Uses hardware SIMD for contiguous f64 arrays.
 pub fn reciprocal<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
 {
+    if let Some(r) =
+        crate::helpers::try_simd_f64_unary(input, crate::dispatch::simd_reciprocal_f64)
+    {
+        return r;
+    }
     unary_float_op(input, T::recip)
 }
 
@@ -265,11 +272,16 @@ where
 }
 
 /// Elementwise square: x^2.
+///
+/// Uses hardware SIMD for contiguous f64 arrays.
 pub fn square<T, D>(input: &Array<T, D>) -> FerrumResult<Array<T, D>>
 where
     T: Element + Float,
     D: Dimension,
 {
+    if let Some(r) = crate::helpers::try_simd_f64_unary(input, crate::dispatch::simd_square_f64) {
+        return r;
+    }
     unary_float_op(input, |x| x * x)
 }
 

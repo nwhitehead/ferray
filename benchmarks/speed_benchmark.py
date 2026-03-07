@@ -2,7 +2,7 @@
 """Speed benchmark: NumPy vs ferrum.
 
 Measures wall-clock time for both implementations on identical workloads.
-ferrum timing is measured internally (excludes JSON I/O overhead).
+ferrum runs in batch mode (single process) for fair cache comparison.
 
 Usage:
     python3 benchmarks/speed_benchmark.py
@@ -48,31 +48,39 @@ def time_numpy(func, data, iters):
     return times[len(times) // 2]  # median
 
 
-def time_ferrum(bench_bin, func_name, size_str, data, iters):
-    """Time a ferrum function via the bench binary, return median internal time in microseconds."""
-    input_json = json.dumps(data.tolist())
+def time_ferrum_batch(bench_bin, tests, warmup, iterations):
+    """Run all ferrum benchmarks in a single process via batch mode.
 
-    # Warmup
-    for _ in range(WARMUP_ITERS):
-        subprocess.run(
-            [bench_bin, func_name, size_str],
-            input=input_json, capture_output=True, text=True, timeout=120,
-        )
+    Returns a dict mapping (function, size_str) -> median time in microseconds.
+    """
+    batch_input = {
+        "warmup": warmup,
+        "iterations": iterations,
+        "tests": tests,
+    }
 
-    times = []
-    for _ in range(iters):
-        result = subprocess.run(
-            [bench_bin, func_name, size_str],
-            input=input_json, capture_output=True, text=True, timeout=120,
-        )
-        if result.returncode != 0:
-            return None
-        output = json.loads(result.stdout)
-        elapsed_ns = output.get("elapsed_ns", 0)
-        times.append(elapsed_ns / 1000.0)  # ns -> us
+    input_json = json.dumps(batch_input)
+    result = subprocess.run(
+        [bench_bin, "batch"],
+        input=input_json,
+        capture_output=True,
+        text=True,
+        timeout=600,
+    )
 
-    times.sort()
-    return times[len(times) // 2]  # median
+    if result.returncode != 0:
+        print(f"ERROR: ferrum batch mode failed: {result.stderr}", file=sys.stderr)
+        return {}
+
+    batch_results = json.loads(result.stdout)
+    timing_map = {}
+    for r in batch_results:
+        times_us = [t / 1000.0 for t in r["times_ns"]]
+        times_us.sort()
+        median = times_us[len(times_us) // 2]
+        timing_map[(r["function"], r["size"])] = median
+
+    return timing_map
 
 
 def format_time(us):
@@ -103,9 +111,10 @@ def main():
     print(f"Python version: {sys.version.split()[0]}")
     print(f"Iterations:     {BENCH_ITERS} (median of)")
     print(f"Warmup:         {WARMUP_ITERS} iterations")
+    print(f"Mode:           batch (single process, warm caches)")
     print()
 
-    # Define benchmarks: (name, category, sizes, numpy_func, ferrum_func_name, input_gen)
+    # Define benchmarks
     benchmarks = []
 
     # Ufuncs
@@ -185,7 +194,23 @@ def main():
             "ferrum_name": "fft",
         })
 
-    # Run benchmarks
+    # Build batch test list for ferrum
+    batch_tests = []
+    for bench in benchmarks:
+        size_str = bench.get("size_str", str(bench["size"]))
+        batch_tests.append({
+            "function": bench["ferrum_name"],
+            "size": size_str,
+            "data": bench["data"].tolist(),
+        })
+
+    # Run ferrum batch (all tests in one process)
+    print("Running ferrum batch (single process)...")
+    ferrum_timings = time_ferrum_batch(bench_bin, batch_tests, WARMUP_ITERS, BENCH_ITERS)
+    print(f"  Got {len(ferrum_timings)} results")
+    print()
+
+    # Run NumPy tests and display results
     results = []
     total = len(benchmarks)
 
@@ -198,11 +223,8 @@ def main():
         # Time NumPy
         np_us = time_numpy(bench["numpy_func"], bench["data"], BENCH_ITERS)
 
-        # Time ferrum
-        fe_us = time_ferrum(
-            bench_bin, bench["ferrum_name"], size_str,
-            bench["data"], BENCH_ITERS,
-        )
+        # Get ferrum time from batch results
+        fe_us = ferrum_timings.get((bench["ferrum_name"], size_str))
 
         if fe_us is not None and fe_us > 0:
             ratio = fe_us / np_us
@@ -264,7 +286,7 @@ def main():
 
     print("-" * 70)
 
-    # Output JSON for BENCHMARKS.md generation
+    # Output JSON
     json_path = Path(__file__).parent / "speed_results.json"
     json_results = []
     for r in results:

@@ -226,6 +226,12 @@ pub fn matmul(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<Arra
     }
 }
 
+/// Below this threshold, use the naive ikj loop (avoids faer setup overhead).
+const FAER_MATMUL_THRESHOLD: usize = 64;
+
+/// Above this threshold, use faer with Rayon parallelism.
+const FAER_PARALLEL_THRESHOLD: usize = 256;
+
 fn matmul_2d(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<Array<f64, Ix2>> {
     let a_shape = a.shape();
     let b_shape = b.shape();
@@ -238,21 +244,55 @@ fn matmul_2d(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<Array
         )));
     }
 
-    let a_data: Vec<f64> = a.iter().copied().collect();
-    let b_data: Vec<f64> = b.iter().copied().collect();
     let k = k1;
+    let max_dim = m.max(n).max(k);
 
-    let mut result = vec![0.0; m * n];
-    for i in 0..m {
-        for p in 0..k {
-            let a_ip = a_data[i * k + p];
-            for j in 0..n {
-                result[i * n + j] += a_ip * b_data[p * n + j];
+    // For small matrices, the naive ikj loop avoids faer setup/conversion overhead
+    if max_dim <= FAER_MATMUL_THRESHOLD {
+        let a_data: Vec<f64> = a.iter().copied().collect();
+        let b_data: Vec<f64> = b.iter().copied().collect();
+        let mut result = vec![0.0; m * n];
+        for i in 0..m {
+            for p in 0..k {
+                let a_ip = a_data[i * k + p];
+                for j in 0..n {
+                    result[i * n + j] += a_ip * b_data[p * n + j];
+                }
             }
         }
+        return Array::from_vec(Ix2::new([m, n]), result);
     }
 
-    Array::from_vec(Ix2::new([m, n]), result)
+    // Use faer's optimized matmul with explicit parallelism control
+    let a_faer = crate::faer_bridge::array2_to_faer_general(a)?;
+    let b_faer = crate::faer_bridge::array2_to_faer_general(b)?;
+    let mut c_faer = faer::Mat::<f64>::zeros(m, n);
+
+    let par = if max_dim >= FAER_PARALLEL_THRESHOLD {
+        faer::Par::Rayon(std::num::NonZeroUsize::new(0).unwrap_or(
+            std::num::NonZeroUsize::new(1).unwrap(),
+        ))
+    } else {
+        faer::Par::Seq
+    };
+
+    faer::linalg::matmul::matmul(
+        c_faer.as_mut(),
+        faer::Accum::Replace,
+        a_faer.as_ref(),
+        b_faer.as_ref(),
+        1.0,
+        par,
+    );
+
+    // Convert back to ferrum array
+    let mut data = Vec::with_capacity(m * n);
+    for i in 0..m {
+        for j in 0..n {
+            data.push(c_faer[(i, j)]);
+        }
+    }
+    Array::from_vec(Ix2::new([m, n]), data)
 }
 
 fn matmul_batched(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<Array<f64, IxDyn>> {
@@ -283,7 +323,6 @@ fn matmul_batched(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<
     let batch_shape = broadcast_shapes(a_batch, b_batch)?;
 
     let batch_size: usize = batch_shape.iter().product::<usize>().max(1);
-    let k = a_k;
 
     let a_data: Vec<f64> = a.iter().copied().collect();
     let b_data: Vec<f64> = b.iter().copied().collect();
@@ -303,12 +342,15 @@ fn matmul_batched(a: &Array<f64, IxDyn>, b: &Array<f64, IxDyn>) -> FerrumResult<
         let b_offset = b_idx * b_mat_size;
         let out_offset = batch_idx * out_mat_size;
 
+        // Use faer for each batch element's matmul
+        let a_slice = &a_data[a_offset..a_offset + a_mat_size];
+        let b_slice = &b_data[b_offset..b_offset + b_mat_size];
+        let a_faer = faer::Mat::from_fn(a_m, a_k, |i, j| a_slice[i * a_k + j]);
+        let b_faer = faer::Mat::from_fn(b_k, b_n, |i, j| b_slice[i * b_n + j]);
+        let c_faer = a_faer * b_faer;
         for i in 0..a_m {
-            for p in 0..k {
-                let a_ip = a_data[a_offset + i * a_k + p];
-                for j in 0..b_n {
-                    result[out_offset + i * b_n + j] += a_ip * b_data[b_offset + p * b_n + j];
-                }
+            for j in 0..b_n {
+                result[out_offset + i * b_n + j] = c_faer[(i, j)];
             }
         }
     }
