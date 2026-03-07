@@ -1,0 +1,15 @@
+[package]
+name = "ferrum-window"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Window functions, vectorize, piecewise, and apply_along_axis for ferrum"
+
+[dependencies]
+ferrum-core = { workspace = true }
+ferrum-ufunc = { workspace = true }
+num-traits = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

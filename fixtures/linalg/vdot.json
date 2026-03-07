@@ -1,0 +1,85 @@
+{
+  "function": "numpy.vdot",
+  "ferrum_function": "ferrum_linalg::vdot",
+  "test_cases": [
+    {
+      "name": "1d",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            4.0,
+            5.0,
+            6.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": 32.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "complex128",
+      "inputs": {
+        "a": {
+          "data": [
+            {
+              "re": 1.0,
+              "im": 2.0
+            },
+            {
+              "re": 3.0,
+              "im": 4.0
+            }
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "complex128"
+        },
+        "b": {
+          "data": [
+            {
+              "re": 5.0,
+              "im": 6.0
+            },
+            {
+              "re": 7.0,
+              "im": 8.0
+            }
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "complex128"
+        }
+      },
+      "expected": {
+        "data": {
+          "re": 70.0,
+          "im": -8.0
+        },
+        "shape": [],
+        "dtype": "complex128"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "function": "numpy.ma.masked_invalid",
+  "ferrum_function": "ferrum_ma::masked_invalid",
+  "test_cases": [
+    {
+      "name": "nan_inf",
+      "inputs": {
+        "data": {
+          "data": [
+            1.0,
+            "NaN",
+            3.0,
+            "Inf",
+            5.0,
+            "-Inf"
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "mask": {
+          "data": [
+            false,
+            true,
+            false,
+            true,
+            false,
+            true
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "bool"
+        }
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

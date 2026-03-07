@@ -1,0 +1,39 @@
+{
+  "function": "numpy.inner",
+  "ferrum_function": "ferrum_linalg::inner",
+  "test_cases": [
+    {
+      "name": "1d",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            4.0,
+            5.0,
+            6.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": 32.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "function": "numpy.random.Generator",
+  "ferrum_function": "ferrum_random::Generator",
+  "test_cases": [
+    {
+      "name": "standard_normal_moments",
+      "inputs": {
+        "distribution": "standard_normal",
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 0.0,
+        "expected_var": 1.0,
+        "mean_tolerance": 0.02,
+        "var_tolerance": 0.02
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "uniform_moments",
+      "inputs": {
+        "distribution": "uniform",
+        "low": 0.0,
+        "high": 1.0,
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 0.5,
+        "expected_var": 0.08333333333333333,
+        "mean_tolerance": 0.02,
+        "var_tolerance": 0.02
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "exponential_moments",
+      "inputs": {
+        "distribution": "exponential",
+        "scale": 2.0,
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 2.0,
+        "expected_var": 4.0,
+        "mean_tolerance": 0.05,
+        "var_tolerance": 0.1
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "gamma_moments",
+      "inputs": {
+        "distribution": "gamma",
+        "shape": 2.0,
+        "scale": 3.0,
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 6.0,
+        "expected_var": 18.0,
+        "mean_tolerance": 0.1,
+        "var_tolerance": 0.5
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "beta_moments",
+      "inputs": {
+        "distribution": "beta",
+        "a": 2.0,
+        "b": 5.0,
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 0.2857142857142857,
+        "expected_var": 0.025510204081632654,
+        "mean_tolerance": 0.02,
+        "var_tolerance": 0.01
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "poisson_moments",
+      "inputs": {
+        "distribution": "poisson",
+        "lam": 5.0,
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 5.0,
+        "expected_var": 5.0,
+        "mean_tolerance": 0.05,
+        "var_tolerance": 0.1
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "binomial_moments",
+      "inputs": {
+        "distribution": "binomial",
+        "n": 10,
+        "p": 0.3,
+        "size": 100000,
+        "seed": 42
+      },
+      "expected": {
+        "expected_mean": 3.0,
+        "expected_var": 2.0999999999999996,
+        "mean_tolerance": 0.05,
+        "var_tolerance": 0.1
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

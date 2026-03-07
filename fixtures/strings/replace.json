@@ -1,0 +1,67 @@
+{
+  "function": "numpy.strings.replace",
+  "ferrum_function": "ferrum_strings::replace",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "hello world",
+            "foo bar foo",
+            "aaa"
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "str"
+        },
+        "old": "o",
+        "new": "0"
+      },
+      "expected": {
+        "data": [
+          "hell0 w0rld",
+          "f00 bar f00",
+          "aaa"
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "with_count",
+      "inputs": {
+        "x": {
+          "data": [
+            "hello world",
+            "foo bar foo",
+            "aaa"
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "str"
+        },
+        "old": "o",
+        "new": "0",
+        "count": 1
+      },
+      "expected": {
+        "data": [
+          "hell0 world",
+          "f0o bar foo",
+          "aaa"
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

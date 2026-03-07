@@ -1,0 +1,390 @@
+// ferrum-polynomial: Root finding via companion matrix eigenvalues (REQ-12)
+//
+// Computes polynomial roots by constructing a companion matrix and finding
+// its eigenvalues. Uses a built-in QR iteration since ferrum-linalg may not
+// yet be available. When ferrum-linalg::eigvals is ready, this can delegate
+// to it for improved performance.
+
+use ferrum_core::error::FerrumError;
+use num_complex::Complex;
+
+use crate::companion::companion_matrix;
+
+/// Find roots of a polynomial given its power basis coefficients.
+///
+/// Coefficients are in ascending order: `coeffs[i]` is the coefficient of x^i.
+/// Returns all roots (including complex ones) as `Complex<f64>` values.
+///
+/// For degree-0 polynomials (constants), returns an empty vector.
+/// For degree-1 (linear), solves directly.
+/// For degree-2 (quadratic), uses the quadratic formula.
+/// For higher degrees, uses companion matrix eigenvalues via QR iteration.
+///
+/// # Errors
+/// Returns `FerrumError::InvalidValue` if coefficients are empty or
+/// the leading coefficient is zero.
+pub fn find_roots_from_power_coeffs(coeffs: &[f64]) -> Result<Vec<Complex<f64>>, FerrumError> {
+    if coeffs.is_empty() {
+        return Err(FerrumError::invalid_value(
+            "cannot find roots of empty polynomial",
+        ));
+    }
+
+    // Trim trailing near-zero coefficients
+    let mut n = coeffs.len();
+    while n > 1 && coeffs[n - 1].abs() < f64::EPSILON * 100.0 {
+        n -= 1;
+    }
+
+    let deg = n - 1;
+
+    match deg {
+        0 => Ok(Vec::new()),
+        1 => {
+            // c[0] + c[1]*x = 0 => x = -c[0]/c[1]
+            let root = -coeffs[0] / coeffs[1];
+            Ok(vec![Complex::new(root, 0.0)])
+        }
+        2 => {
+            // Quadratic formula: c[0] + c[1]*x + c[2]*x^2 = 0
+            let a = coeffs[2];
+            let b = coeffs[1];
+            let c = coeffs[0];
+            let disc = b * b - 4.0 * a * c;
+            if disc >= 0.0 {
+                let sqrt_disc = disc.sqrt();
+                let r1 = (-b + sqrt_disc) / (2.0 * a);
+                let r2 = (-b - sqrt_disc) / (2.0 * a);
+                Ok(vec![Complex::new(r1, 0.0), Complex::new(r2, 0.0)])
+            } else {
+                let sqrt_disc = (-disc).sqrt();
+                let re = -b / (2.0 * a);
+                let im = sqrt_disc / (2.0 * a);
+                Ok(vec![Complex::new(re, im), Complex::new(re, -im)])
+            }
+        }
+        _ => {
+            // Use companion matrix eigenvalues
+            let mat = companion_matrix(&coeffs[..n])?;
+            let eigenvalues = qr_eigenvalues(&mat, deg)?;
+            Ok(eigenvalues)
+        }
+    }
+}
+
+/// Compute eigenvalues of an n x n real matrix using the implicit QR algorithm
+/// with shifts (Francis double-shift for real matrices).
+///
+/// This is a simplified but functional implementation suitable for companion matrices.
+/// Returns all eigenvalues as Complex<f64>.
+fn qr_eigenvalues(mat: &[f64], n: usize) -> Result<Vec<Complex<f64>>, FerrumError> {
+    if n == 0 {
+        return Ok(Vec::new());
+    }
+    if n == 1 {
+        return Ok(vec![Complex::new(mat[0], 0.0)]);
+    }
+
+    // First reduce to upper Hessenberg form
+    let mut h = mat.to_vec();
+    reduce_to_hessenberg(&mut h, n);
+
+    // QR iteration on Hessenberg matrix
+    let mut eigenvalues = Vec::with_capacity(n);
+    let max_iter = 1000 * n;
+    let mut p = n; // Active matrix size
+
+    let mut iter_count = 0;
+
+    while p > 2 {
+        if iter_count > max_iter {
+            return Err(FerrumError::ConvergenceFailure {
+                iterations: max_iter,
+                message: "QR iteration did not converge".to_string(),
+            });
+        }
+
+        // Check for deflation: if h[p-1, p-2] is small, deflate
+        let sub = h[(p - 1) * n + (p - 2)].abs();
+        let diag_sum = h[(p - 1) * n + (p - 1)].abs() + h[(p - 2) * n + (p - 2)].abs();
+        let tol = f64::EPSILON * diag_sum.max(1e-300);
+
+        if sub <= tol {
+            eigenvalues.push(Complex::new(h[(p - 1) * n + (p - 1)], 0.0));
+            p -= 1;
+            continue;
+        }
+
+        // Check for 2x2 block deflation
+        if p >= 3 {
+            let sub2 = h[(p - 2) * n + (p - 3)].abs();
+            let diag_sum2 = h[(p - 2) * n + (p - 2)].abs() + h[(p - 3) * n + (p - 3)].abs();
+            let tol2 = f64::EPSILON * diag_sum2.max(1e-300);
+            if sub2 <= tol2 {
+                // Deflate 2x2 block
+                let eigs = eigenvalues_2x2(
+                    h[(p - 2) * n + (p - 2)],
+                    h[(p - 2) * n + (p - 1)],
+                    h[(p - 1) * n + (p - 2)],
+                    h[(p - 1) * n + (p - 1)],
+                );
+                eigenvalues.push(eigs.0);
+                eigenvalues.push(eigs.1);
+                p -= 2;
+                continue;
+            }
+        }
+
+        // Wilkinson shift
+        let a11 = h[(p - 2) * n + (p - 2)];
+        let a12 = h[(p - 2) * n + (p - 1)];
+        let a21 = h[(p - 1) * n + (p - 2)];
+        let a22 = h[(p - 1) * n + (p - 1)];
+        let trace = a11 + a22;
+        let det = a11 * a22 - a12 * a21;
+        let disc = trace * trace - 4.0 * det;
+
+        let shift = if disc >= 0.0 {
+            let s1 = (trace + disc.sqrt()) / 2.0;
+            let s2 = (trace - disc.sqrt()) / 2.0;
+            // Pick the shift closest to a22
+            if (s1 - a22).abs() < (s2 - a22).abs() {
+                s1
+            } else {
+                s2
+            }
+        } else {
+            // Complex shift: use the real part
+            trace / 2.0
+        };
+
+        // Single-shift QR step on the active Hessenberg matrix [0..p, 0..p]
+        qr_step_hessenberg(&mut h, n, p, shift);
+        iter_count += 1;
+    }
+
+    if p == 2 {
+        let eigs = eigenvalues_2x2(h[0], h[1], h[n], h[n + 1]);
+        eigenvalues.push(eigs.0);
+        eigenvalues.push(eigs.1);
+    } else if p == 1 {
+        eigenvalues.push(Complex::new(h[0], 0.0));
+    }
+
+    Ok(eigenvalues)
+}
+
+/// Reduce a general matrix to upper Hessenberg form using Householder reflections.
+fn reduce_to_hessenberg(h: &mut [f64], n: usize) {
+    for k in 0..(n.saturating_sub(2)) {
+        // Compute Householder vector for column k, rows k+1..n
+        let m = n - k - 1;
+        if m == 0 {
+            continue;
+        }
+
+        let mut v = vec![0.0; m];
+        for i in 0..m {
+            v[i] = h[(k + 1 + i) * n + k];
+        }
+
+        let norm = v.iter().map(|x| x * x).sum::<f64>().sqrt();
+        if norm < f64::EPSILON * 1e6 {
+            continue;
+        }
+
+        let sign = if v[0] >= 0.0 { 1.0 } else { -1.0 };
+        v[0] += sign * norm;
+        let v_norm = v.iter().map(|x| x * x).sum::<f64>().sqrt();
+        if v_norm < f64::EPSILON * 1e6 {
+            continue;
+        }
+        for vi in &mut v {
+            *vi /= v_norm;
+        }
+
+        // Apply H = I - 2*v*v^T from the left: H * A
+        // Affects rows k+1..n, all columns
+        for j in 0..n {
+            let mut dot = 0.0;
+            for i in 0..m {
+                dot += v[i] * h[(k + 1 + i) * n + j];
+            }
+            for i in 0..m {
+                h[(k + 1 + i) * n + j] -= 2.0 * v[i] * dot;
+            }
+        }
+
+        // Apply from the right: A * H
+        // Affects all rows, columns k+1..n
+        for i in 0..n {
+            let mut dot = 0.0;
+            for j in 0..m {
+                dot += h[i * n + (k + 1 + j)] * v[j];
+            }
+            for j in 0..m {
+                h[i * n + (k + 1 + j)] -= 2.0 * dot * v[j];
+            }
+        }
+    }
+}
+
+/// Perform one implicit single-shift QR step on an upper Hessenberg matrix.
+fn qr_step_hessenberg(h: &mut [f64], n: usize, p: usize, shift: f64) {
+    // Bulge chase
+    let mut x = h[0] - shift;
+    let mut z = h[n]; // h[1, 0]
+
+    for k in 0..(p - 1) {
+        // Givens rotation to zero out z
+        let r = (x * x + z * z).sqrt();
+        if r < f64::EPSILON * 1e-100 {
+            x = h[(k + 1) * n + k];
+            if k + 2 < p {
+                z = h[(k + 2) * n + k];
+            }
+            continue;
+        }
+        let c = x / r;
+        let s = z / r;
+
+        // Apply rotation from left: rows k and k+1
+        for j in (if k > 0 { k - 1 } else { 0 })..p {
+            let h1 = h[k * n + j];
+            let h2 = h[(k + 1) * n + j];
+            h[k * n + j] = c * h1 + s * h2;
+            h[(k + 1) * n + j] = -s * h1 + c * h2;
+        }
+
+        // Apply rotation from right: columns k and k+1
+        let row_limit = (k + 3).min(p);
+        for i in 0..row_limit {
+            let h1 = h[i * n + k];
+            let h2 = h[i * n + (k + 1)];
+            h[i * n + k] = c * h1 + s * h2;
+            h[i * n + (k + 1)] = -s * h1 + c * h2;
+        }
+
+        if k + 2 < p {
+            x = h[(k + 1) * n + k];
+            z = h[(k + 2) * n + k];
+        }
+    }
+}
+
+/// Compute eigenvalues of a 2x2 matrix.
+fn eigenvalues_2x2(a: f64, b: f64, c: f64, d: f64) -> (Complex<f64>, Complex<f64>) {
+    let trace = a + d;
+    let det = a * d - b * c;
+    let disc = trace * trace - 4.0 * det;
+
+    if disc >= 0.0 {
+        let sqrt_disc = disc.sqrt();
+        (
+            Complex::new((trace + sqrt_disc) / 2.0, 0.0),
+            Complex::new((trace - sqrt_disc) / 2.0, 0.0),
+        )
+    } else {
+        let sqrt_disc = (-disc).sqrt();
+        (
+            Complex::new(trace / 2.0, sqrt_disc / 2.0),
+            Complex::new(trace / 2.0, -sqrt_disc / 2.0),
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sort_roots(roots: &mut [Complex<f64>]) {
+        roots.sort_by(|a, b| {
+            a.re.partial_cmp(&b.re)
+                .unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| a.im.partial_cmp(&b.im).unwrap_or(std::cmp::Ordering::Equal))
+        });
+    }
+
+    #[test]
+    fn roots_linear() {
+        // 2 + x = 0 => x = -2
+        let roots = find_roots_from_power_coeffs(&[2.0, 1.0]).unwrap();
+        assert_eq!(roots.len(), 1);
+        assert!((roots[0].re - (-2.0)).abs() < 1e-12);
+        assert!(roots[0].im.abs() < 1e-12);
+    }
+
+    #[test]
+    fn roots_quadratic_real() {
+        // AC-1: x^2 - 3x + 2 = (x-1)(x-2), coefficients [2, -3, 1]
+        let mut roots = find_roots_from_power_coeffs(&[2.0, -3.0, 1.0]).unwrap();
+        assert_eq!(roots.len(), 2);
+        sort_roots(&mut roots);
+        assert!(
+            (roots[0].re - 1.0).abs() < 1e-10,
+            "root[0] = {:?}",
+            roots[0]
+        );
+        assert!(
+            (roots[1].re - 2.0).abs() < 1e-10,
+            "root[1] = {:?}",
+            roots[1]
+        );
+        assert!(roots[0].im.abs() < 1e-10);
+        assert!(roots[1].im.abs() < 1e-10);
+    }
+
+    #[test]
+    fn roots_quadratic_complex() {
+        // x^2 + 1 = 0 => x = +/- i
+        let mut roots = find_roots_from_power_coeffs(&[1.0, 0.0, 1.0]).unwrap();
+        assert_eq!(roots.len(), 2);
+        sort_roots(&mut roots);
+        assert!(roots[0].re.abs() < 1e-10);
+        assert!((roots[0].im.abs() - 1.0).abs() < 1e-10);
+        assert!(roots[1].re.abs() < 1e-10);
+        assert!((roots[1].im.abs() - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn roots_cubic() {
+        // (x-1)(x-2)(x-3) = x^3 - 6x^2 + 11x - 6
+        // coefficients [-6, 11, -6, 1]
+        let mut roots = find_roots_from_power_coeffs(&[-6.0, 11.0, -6.0, 1.0]).unwrap();
+        assert_eq!(roots.len(), 3);
+        sort_roots(&mut roots);
+        assert!((roots[0].re - 1.0).abs() < 1e-8, "root[0] = {:?}", roots[0]);
+        assert!((roots[1].re - 2.0).abs() < 1e-8, "root[1] = {:?}", roots[1]);
+        assert!((roots[2].re - 3.0).abs() < 1e-8, "root[2] = {:?}", roots[2]);
+    }
+
+    #[test]
+    fn roots_quartic() {
+        // (x-1)(x-2)(x-3)(x-4) = x^4 - 10x^3 + 35x^2 - 50x + 24
+        // coefficients [24, -50, 35, -10, 1]
+        let mut roots = find_roots_from_power_coeffs(&[24.0, -50.0, 35.0, -10.0, 1.0]).unwrap();
+        assert_eq!(roots.len(), 4);
+        sort_roots(&mut roots);
+        for (i, &expected) in [1.0, 2.0, 3.0, 4.0].iter().enumerate() {
+            assert!(
+                (roots[i].re - expected).abs() < 1e-6,
+                "root[{}] = {:?}, expected {}",
+                i,
+                roots[i],
+                expected
+            );
+            assert!(roots[i].im.abs() < 1e-6);
+        }
+    }
+
+    #[test]
+    fn roots_constant() {
+        let roots = find_roots_from_power_coeffs(&[5.0]).unwrap();
+        assert!(roots.is_empty());
+    }
+
+    #[test]
+    fn roots_empty_err() {
+        assert!(find_roots_from_power_coeffs(&[]).is_err());
+    }
+}

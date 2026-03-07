@@ -1,0 +1,132 @@
+{
+  "function": "numpy.arctan2",
+  "ferrum_function": "ferrum_ufunc::arctan2",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "a": {
+          "data": [
+            0.0,
+            1.0,
+            -1.0,
+            1.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            1.0,
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.5707963267948966,
+          -1.5707963267948966,
+          2.356194490192345
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "zero_zero",
+      "inputs": {
+        "a": {
+          "data": [
+            0.0,
+            0.0,
+            -0.0,
+            -0.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            0.0,
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          3.141592653589793,
+          -0.0,
+          -3.141592653589793
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "inf",
+      "inputs": {
+        "a": {
+          "data": [
+            "Inf",
+            "-Inf",
+            1.0,
+            -1.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            1.0,
+            1.0,
+            "Inf",
+            "-Inf"
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          1.5707963267948966,
+          -1.5707963267948966,
+          0.0,
+          -3.141592653589793
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

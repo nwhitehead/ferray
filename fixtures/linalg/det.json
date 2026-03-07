@@ -1,0 +1,88 @@
+{
+  "function": "numpy.linalg.det",
+  "ferrum_function": "ferrum_linalg::det",
+  "test_cases": [
+    {
+      "name": "2x2",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": -2.0000000000000004,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "3x3",
+      "inputs": {
+        "a": {
+          "data": [
+            2.0,
+            1.0,
+            1.0,
+            1.0,
+            3.0,
+            2.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": -1.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "identity",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": 1.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

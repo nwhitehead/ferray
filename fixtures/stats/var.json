@@ -1,0 +1,127 @@
+{
+  "function": "numpy.var",
+  "ferrum_function": "ferrum_stats::var",
+  "test_cases": [
+    {
+      "name": "ddof0_1d",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            4.0,
+            1.0,
+            5.0,
+            9.0,
+            2.0,
+            6.0
+          ],
+          "shape": [
+            8
+          ],
+          "dtype": "float64"
+        },
+        "ddof": 0
+      },
+      "expected": {
+        "data": 6.609375,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "ddof1_1d",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            4.0,
+            1.0,
+            5.0,
+            9.0,
+            2.0,
+            6.0
+          ],
+          "shape": [
+            8
+          ],
+          "dtype": "float64"
+        },
+        "ddof": 1
+      },
+      "expected": {
+        "data": 7.553571428571429,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "constant",
+      "inputs": {
+        "x": {
+          "data": [
+            5.0,
+            5.0,
+            5.0,
+            5.0
+          ],
+          "shape": [
+            4
+          ],
+          "dtype": "float64"
+        },
+        "ddof": 0
+      },
+      "expected": {
+        "data": 0.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_axis0",
+      "inputs": {
+        "x": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0
+          ],
+          "shape": [
+            3,
+            4
+          ],
+          "dtype": "float64"
+        },
+        "axis": 0,
+        "ddof": 0
+      },
+      "expected": {
+        "data": [
+          10.666666666666666,
+          10.666666666666666,
+          10.666666666666666,
+          10.666666666666666
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

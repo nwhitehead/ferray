@@ -1,0 +1,64 @@
+{
+  "function": "numpy.linalg.matrix_rank",
+  "ferrum_function": "ferrum_linalg::matrix_rank",
+  "test_cases": [
+    {
+      "name": "rank_2",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": 2,
+        "shape": [],
+        "dtype": "int64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "full_rank",
+      "inputs": {
+        "a": {
+          "data": [
+            2.0,
+            1.0,
+            1.0,
+            1.0,
+            3.0,
+            2.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": 3,
+        "shape": [],
+        "dtype": "int64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

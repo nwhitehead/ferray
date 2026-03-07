@@ -1,0 +1,56 @@
+{
+  "function": "numpy.fft.irfft",
+  "ferrum_function": "ferrum_fft::irfft",
+  "test_cases": [
+    {
+      "name": "roundtrip_8",
+      "inputs": {
+        "x": {
+          "data": [
+            {
+              "re": 0.0,
+              "im": 0.0
+            },
+            {
+              "re": 0.0,
+              "im": 0.0
+            },
+            {
+              "re": 4.0,
+              "im": -0.0
+            },
+            {
+              "re": 0.0,
+              "im": 0.0
+            },
+            {
+              "re": 0.0,
+              "im": 0.0
+            }
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "complex128"
+        }
+      },
+      "expected": {
+        "data": [
+          1.0,
+          0.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "shape": [
+          8
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "function": "numpy.sort",
+  "ferrum_function": "ferrum_stats::sort",
+  "test_cases": [
+    {
+      "name": "1d",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            4.0,
+            1.0,
+            5.0,
+            9.0,
+            2.0,
+            6.0
+          ],
+          "shape": [
+            8
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          1.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          9.0
+        ],
+        "shape": [
+          8
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_axis0",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            2.0,
+            6.0,
+            4.0,
+            5.0
+          ],
+          "shape": [
+            2,
+            3
+          ],
+          "dtype": "float64"
+        },
+        "axis": 0
+      },
+      "expected": {
+        "data": [
+          3.0,
+          1.0,
+          2.0,
+          6.0,
+          4.0,
+          5.0
+        ],
+        "shape": [
+          2,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "2d_axis1",
+      "inputs": {
+        "x": {
+          "data": [
+            3.0,
+            1.0,
+            2.0,
+            6.0,
+            4.0,
+            5.0
+          ],
+          "shape": [
+            2,
+            3
+          ],
+          "dtype": "float64"
+        },
+        "axis": 1
+      },
+      "expected": {
+        "data": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0
+        ],
+        "shape": [
+          2,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

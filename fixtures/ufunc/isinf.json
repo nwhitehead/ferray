@@ -1,0 +1,40 @@
+{
+  "function": "numpy.isinf",
+  "ferrum_function": "ferrum_ufunc::isinf",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "NaN",
+            "Inf",
+            "-Inf",
+            0.0,
+            1.0,
+            -1.0
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          false,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "shape": [
+          6
+        ],
+        "dtype": "bool"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

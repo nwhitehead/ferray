@@ -1,0 +1,129 @@
+{
+  "function": "numpy.broadcast_shapes",
+  "ferrum_function": "ferrum_core::broadcast_shapes",
+  "test_cases": [
+    {
+      "name": "broadcast_4x3_3",
+      "inputs": {
+        "shape1": [
+          4,
+          3
+        ],
+        "shape2": [
+          3
+        ]
+      },
+      "expected": {
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "broadcast_4x1_4x3",
+      "inputs": {
+        "shape1": [
+          4,
+          1
+        ],
+        "shape2": [
+          4,
+          3
+        ]
+      },
+      "expected": {
+        "shape": [
+          4,
+          3
+        ]
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "broadcast_2x1x4_3x4",
+      "inputs": {
+        "shape1": [
+          2,
+          1,
+          4
+        ],
+        "shape2": [
+          3,
+          4
+        ]
+      },
+      "expected": {
+        "shape": [
+          2,
+          3,
+          4
+        ]
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "broadcast_5x1_1x6",
+      "inputs": {
+        "shape1": [
+          5,
+          1
+        ],
+        "shape2": [
+          1,
+          6
+        ]
+      },
+      "expected": {
+        "shape": [
+          5,
+          6
+        ]
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "broadcast_1_5x4",
+      "inputs": {
+        "shape1": [
+          1
+        ],
+        "shape2": [
+          5,
+          4
+        ]
+      },
+      "expected": {
+        "shape": [
+          5,
+          4
+        ]
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "broadcast_3x1x5_1x4x5",
+      "inputs": {
+        "shape1": [
+          3,
+          1,
+          5
+        ],
+        "shape2": [
+          1,
+          4,
+          5
+        ]
+      },
+      "expected": {
+        "shape": [
+          3,
+          4,
+          5
+        ]
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

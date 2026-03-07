@@ -1,0 +1,72 @@
+{
+  "function": "numpy.fft.rfftfreq",
+  "ferrum_function": "ferrum_fft::rfftfreq",
+  "test_cases": [
+    {
+      "name": "n8_d1.0",
+      "inputs": {
+        "n": 8,
+        "d": 1.0
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "n7_d1.0",
+      "inputs": {
+        "n": 7,
+        "d": 1.0
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.14285714285714285,
+          0.2857142857142857,
+          0.42857142857142855
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "n16_d1.0",
+      "inputs": {
+        "n": 16,
+        "d": 1.0
+      },
+      "expected": {
+        "data": [
+          0.0,
+          0.0625,
+          0.125,
+          0.1875,
+          0.25,
+          0.3125,
+          0.375,
+          0.4375,
+          0.5
+        ],
+        "shape": [
+          9
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

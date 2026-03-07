@@ -1,0 +1,101 @@
+{
+  "function": "numpy.fft.rfft",
+  "ferrum_function": "ferrum_fft::rfft",
+  "test_cases": [
+    {
+      "name": "real_8",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "shape": [
+            8
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 4.0,
+            "im": -0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "complex128"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "real_7",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0
+          ],
+          "shape": [
+            7
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          {
+            "re": 28.0,
+            "im": 0.0
+          },
+          {
+            "re": -3.5,
+            "im": 7.267824888003178
+          },
+          {
+            "re": -3.499999999999999,
+            "im": 2.7911568610884143
+          },
+          {
+            "re": -3.4999999999999996,
+            "im": 0.7988521603655246
+          }
+        ],
+        "shape": [
+          4
+        ],
+        "dtype": "complex128"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

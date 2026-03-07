@@ -1,0 +1,156 @@
+{
+  "function": "numpy.percentile",
+  "ferrum_function": "ferrum_stats::percentile",
+  "test_cases": [
+    {
+      "name": "p0",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 0
+      },
+      "expected": {
+        "data": 1.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "p25",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 25
+      },
+      "expected": {
+        "data": 3.25,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "p50",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 50
+      },
+      "expected": {
+        "data": 5.5,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "p75",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 75
+      },
+      "expected": {
+        "data": 7.75,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "p100",
+      "inputs": {
+        "x": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0
+          ],
+          "shape": [
+            10
+          ],
+          "dtype": "float64"
+        },
+        "q": 100
+      },
+      "expected": {
+        "data": 10.0,
+        "shape": [],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

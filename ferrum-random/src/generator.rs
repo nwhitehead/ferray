@@ -1,0 +1,236 @@
+// ferrum-random: Generator struct — the main user-facing RNG API
+//
+// Wraps a BitGenerator and provides distribution sampling methods.
+// Takes &mut self — stateful, NOT Sync.
+
+use ferrum_core::{Array, FerrumError, Ix1};
+
+use crate::bitgen::{BitGenerator, Xoshiro256StarStar};
+
+/// The main random number generator, wrapping a pluggable [`BitGenerator`].
+///
+/// `Generator` takes `&mut self` for all sampling methods — it is stateful
+/// and NOT `Sync`. Thread-safety is handled by spawning independent generators
+/// via [`spawn`](Generator::spawn) or using the parallel generation API.
+///
+/// # Example
+/// ```
+/// use ferrum_random::{default_rng_seeded, Generator};
+///
+/// let mut rng = default_rng_seeded(42);
+/// let values = rng.random(10).unwrap();
+/// assert_eq!(values.shape(), &[10]);
+/// ```
+pub struct Generator<B: BitGenerator = Xoshiro256StarStar> {
+    /// The underlying bit generator.
+    pub(crate) bg: B,
+    /// The seed used to create this generator (for spawn).
+    pub(crate) seed: u64,
+}
+
+impl<B: BitGenerator> Generator<B> {
+    /// Create a new `Generator` wrapping the given `BitGenerator`.
+    pub fn new(bg: B) -> Self {
+        Self { bg, seed: 0 }
+    }
+
+    /// Create a new `Generator` with a known seed (stored for spawn).
+    pub(crate) fn new_with_seed(bg: B, seed: u64) -> Self {
+        Self { bg, seed }
+    }
+
+    /// Access the underlying BitGenerator mutably.
+    #[inline]
+    pub fn bit_generator(&mut self) -> &mut B {
+        &mut self.bg
+    }
+
+    /// Generate the next random `u64`.
+    #[inline]
+    pub fn next_u64(&mut self) -> u64 {
+        self.bg.next_u64()
+    }
+
+    /// Generate the next random `f64` in [0, 1).
+    #[inline]
+    pub fn next_f64(&mut self) -> f64 {
+        self.bg.next_f64()
+    }
+
+    /// Generate a `u64` in [0, bound).
+    #[inline]
+    pub fn next_u64_bounded(&mut self, bound: u64) -> u64 {
+        self.bg.next_u64_bounded(bound)
+    }
+}
+
+/// Create a `Generator` with the default BitGenerator (Xoshiro256**)
+/// seeded from a non-deterministic source (using the system time as a
+/// simple entropy source).
+///
+/// # Example
+/// ```
+/// let mut rng = ferrum_random::default_rng();
+/// let val = rng.next_f64();
+/// assert!((0.0..1.0).contains(&val));
+/// ```
+pub fn default_rng() -> Generator<Xoshiro256StarStar> {
+    // Use a combination of time-based entropy sources
+    let seed = {
+        use std::time::SystemTime;
+        let dur = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap_or_default();
+        let nanos = dur.as_nanos();
+        // Mix bits for better distribution
+        let mut s = nanos as u64;
+        s ^= (nanos >> 64) as u64;
+        // Mix in address of a stack variable as additional entropy
+        let stack_var: u8 = 0;
+        let addr = &stack_var as *const u8 as u64;
+        s ^= addr;
+        s
+    };
+    default_rng_seeded(seed)
+}
+
+/// Create a `Generator` with the default BitGenerator (Xoshiro256**)
+/// from a specific seed, ensuring deterministic output.
+///
+/// # Example
+/// ```
+/// let mut rng1 = ferrum_random::default_rng_seeded(42);
+/// let mut rng2 = ferrum_random::default_rng_seeded(42);
+/// assert_eq!(rng1.next_u64(), rng2.next_u64());
+/// ```
+pub fn default_rng_seeded(seed: u64) -> Generator<Xoshiro256StarStar> {
+    let bg = Xoshiro256StarStar::seed_from_u64(seed);
+    Generator::new_with_seed(bg, seed)
+}
+
+/// Spawn `n` independent child generators from this generator.
+///
+/// Uses `jump()` if available (Xoshiro256**), otherwise uses
+/// `stream()` (Philox), otherwise falls back to seeding from
+/// the parent generator's output.
+///
+/// # Errors
+/// Returns `FerrumError::InvalidValue` if `n` is zero.
+pub fn spawn_generators<B: BitGenerator + Clone>(
+    parent: &mut Generator<B>,
+    n: usize,
+) -> Result<Vec<Generator<B>>, FerrumError> {
+    if n == 0 {
+        return Err(FerrumError::invalid_value("spawn count must be > 0"));
+    }
+
+    let mut children = Vec::with_capacity(n);
+
+    // Try jump-based spawning first
+    let mut test_bg = parent.bg.clone();
+    if test_bg.jump().is_some() {
+        // Jump-based: each child starts at a 2^128 offset
+        let mut current = parent.bg.clone();
+        for _ in 0..n {
+            children.push(Generator::new(current.clone()));
+            current.jump();
+        }
+        // Advance parent past all children
+        parent.bg = current;
+        return Ok(children);
+    }
+
+    // Try stream-based spawning
+    if let Some(first) = B::stream(parent.seed, 0) {
+        drop(first);
+        for i in 0..n {
+            if let Some(bg) = B::stream(parent.seed, i as u64) {
+                children.push(Generator::new(bg));
+            }
+        }
+        if children.len() == n {
+            return Ok(children);
+        }
+        children.clear();
+    }
+
+    // Fallback: seed from parent output (less ideal but works for PCG64)
+    for _ in 0..n {
+        let child_seed = parent.bg.next_u64();
+        let bg = B::seed_from_u64(child_seed);
+        children.push(Generator::new(bg));
+    }
+    Ok(children)
+}
+
+// Helper: generate a Vec<f64> of given size using a closure
+pub(crate) fn generate_vec<B: BitGenerator>(
+    rng: &mut Generator<B>,
+    size: usize,
+    mut f: impl FnMut(&mut B) -> f64,
+) -> Vec<f64> {
+    let mut data = Vec::with_capacity(size);
+    for _ in 0..size {
+        data.push(f(&mut rng.bg));
+    }
+    data
+}
+
+// Helper: generate a Vec<i64> of given size using a closure
+pub(crate) fn generate_vec_i64<B: BitGenerator>(
+    rng: &mut Generator<B>,
+    size: usize,
+    mut f: impl FnMut(&mut B) -> i64,
+) -> Vec<i64> {
+    let mut data = Vec::with_capacity(size);
+    for _ in 0..size {
+        data.push(f(&mut rng.bg));
+    }
+    data
+}
+
+// Helper: wrap a Vec<f64> into an Array1<f64>
+pub(crate) fn vec_to_array1(data: Vec<f64>) -> Result<Array<f64, Ix1>, FerrumError> {
+    let n = data.len();
+    Array::<f64, Ix1>::from_vec(Ix1::new([n]), data)
+}
+
+// Helper: wrap a Vec<i64> into an Array1<i64>
+pub(crate) fn vec_to_array1_i64(data: Vec<i64>) -> Result<Array<i64, Ix1>, FerrumError> {
+    let n = data.len();
+    Array::<i64, Ix1>::from_vec(Ix1::new([n]), data)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_rng_seeded_deterministic() {
+        let mut rng1 = default_rng_seeded(42);
+        let mut rng2 = default_rng_seeded(42);
+        for _ in 0..100 {
+            assert_eq!(rng1.next_u64(), rng2.next_u64());
+        }
+    }
+
+    #[test]
+    fn default_rng_works() {
+        let mut rng = default_rng();
+        let v = rng.next_f64();
+        assert!((0.0..1.0).contains(&v));
+    }
+
+    #[test]
+    fn spawn_xoshiro() {
+        let mut parent = default_rng_seeded(42);
+        let children = spawn_generators(&mut parent, 4).unwrap();
+        assert_eq!(children.len(), 4);
+    }
+
+    #[test]
+    fn spawn_zero_is_error() {
+        let mut parent = default_rng_seeded(42);
+        assert!(spawn_generators(&mut parent, 0).is_err());
+    }
+}

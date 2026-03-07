@@ -1,0 +1,36 @@
+[package]
+name = "ferrum-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "N-dimensional array type and foundational primitives for ferrum"
+
+[dependencies]
+ndarray = { workspace = true }
+num-complex = { workspace = true }
+num-traits = { workspace = true }
+thiserror = { workspace = true }
+ferrum-core-macros = { workspace = true }
+
+[dependencies.half]
+workspace = true
+optional = true
+
+[dependencies.serde]
+workspace = true
+optional = true
+
+[features]
+default = ["std"]
+std = []
+f16 = ["dep:half"]
+serde = ["dep:serde", "ndarray/serde"]
+no_std = []
+const_shapes = []
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }
+
+[dev-dependencies]
+proptest = { workspace = true }

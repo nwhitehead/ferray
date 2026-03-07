@@ -1,0 +1,91 @@
+{
+  "function": "numpy.linalg.solve",
+  "ferrum_function": "ferrum_linalg::solve",
+  "test_cases": [
+    {
+      "name": "2x2",
+      "inputs": {
+        "a": {
+          "data": [
+            3.0,
+            1.0,
+            1.0,
+            2.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            9.0,
+            8.0
+          ],
+          "shape": [
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          2.0,
+          3.0
+        ],
+        "shape": [
+          2
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "3x3",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            10.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            1.0,
+            2.0,
+            3.0
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          -0.3333333333333333,
+          0.6666666666666666,
+          -0.0
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    }
+  ]
+}

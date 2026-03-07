@@ -1,0 +1,68 @@
+[workspace]
+resolver = "2"
+exclude = ["benchmarks/ferrum_bench"]
+members = [
+    "ferrum",
+    "ferrum-core",
+    "ferrum-core-macros",
+    "ferrum-ufunc",
+    "ferrum-stats",
+    "ferrum-io",
+    "ferrum-linalg",
+    "ferrum-fft",
+    "ferrum-random",
+    "ferrum-polynomial",
+    "ferrum-window",
+    "ferrum-strings",
+    "ferrum-ma",
+    "ferrum-stride-tricks",
+    "ferrum-numpy-interop",
+    "ferrum-autodiff",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# Internal crates
+ferrum-core = { path = "ferrum-core" }
+ferrum-core-macros = { path = "ferrum-core-macros" }
+ferrum-ufunc = { path = "ferrum-ufunc" }
+ferrum-stats = { path = "ferrum-stats" }
+ferrum-io = { path = "ferrum-io" }
+ferrum-linalg = { path = "ferrum-linalg" }
+ferrum-fft = { path = "ferrum-fft" }
+ferrum-random = { path = "ferrum-random" }
+ferrum-polynomial = { path = "ferrum-polynomial" }
+ferrum-window = { path = "ferrum-window" }
+ferrum-strings = { path = "ferrum-strings" }
+ferrum-ma = { path = "ferrum-ma" }
+ferrum-stride-tricks = { path = "ferrum-stride-tricks" }
+ferrum-numpy-interop = { path = "ferrum-numpy-interop" }
+
+# External dependencies (pinned versions per design spec)
+ndarray = "0.17"
+num-complex = "0.4"
+num-traits = "0.2"
+half = "2.4"
+thiserror = "2.0"
+serde = { version = "1.0", features = ["derive"] }
+pulp = { version = "0.22", features = ["x86-v3"] }
+rayon = "1.11"
+faer = "0.24"
+rustfft = "6.4"
+byteorder = "1.5"
+flate2 = "1.0"
+memmap2 = "0.9"
+zip = "2.2"
+regex = "1.11"
+pyo3 = "0.23"
+numpy = "0.23"
+arrow = "54"
+polars = { version = "0.46", default-features = false }
+rand_core = "0.6"
+proptest = "1.6"
+core-math = "1.0"

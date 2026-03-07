@@ -1,0 +1,165 @@
+{
+  "function": "numpy.matmul",
+  "ferrum_function": "ferrum_linalg::matmul",
+  "test_cases": [
+    {
+      "name": "2d",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0
+          ],
+          "shape": [
+            3,
+            2
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0,
+            12.0
+          ],
+          "shape": [
+            2,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          27.0,
+          30.0,
+          33.0,
+          61.0,
+          68.0,
+          75.0,
+          95.0,
+          106.0,
+          117.0
+        ],
+        "shape": [
+          3,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "square",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            1.0,
+            2.0,
+            3.0,
+            4.0
+          ],
+          "shape": [
+            2,
+            2
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          7.0,
+          10.0,
+          15.0,
+          22.0
+        ],
+        "shape": [
+          2,
+          2
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 4
+    },
+    {
+      "name": "identity",
+      "inputs": {
+        "a": {
+          "data": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        },
+        "b": {
+          "data": [
+            0.0,
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0
+          ],
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          7.0,
+          8.0
+        ],
+        "shape": [
+          3,
+          3
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

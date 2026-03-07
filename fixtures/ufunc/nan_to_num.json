@@ -1,0 +1,77 @@
+{
+  "function": "numpy.nan_to_num",
+  "ferrum_function": "ferrum_ufunc::nan_to_num",
+  "test_cases": [
+    {
+      "name": "standard_f64",
+      "inputs": {
+        "x": {
+          "data": [
+            "NaN",
+            "Inf",
+            "-Inf",
+            0.0,
+            1.0,
+            -1.0
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "float64"
+        },
+        "nan": 0.0,
+        "posinf": 1e+308,
+        "neginf": -1e+308
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1e+308,
+          -1e+308,
+          0.0,
+          1.0,
+          -1.0
+        ],
+        "shape": [
+          6
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "defaults",
+      "inputs": {
+        "x": {
+          "data": [
+            "NaN",
+            "Inf",
+            "-Inf",
+            0.0,
+            1.0,
+            -1.0
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          0.0,
+          1.7976931348623157e+308,
+          -1.7976931348623157e+308,
+          0.0,
+          1.0,
+          -1.0
+        ],
+        "shape": [
+          6
+        ],
+        "dtype": "float64"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

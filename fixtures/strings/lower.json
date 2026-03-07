@@ -1,0 +1,90 @@
+{
+  "function": "numpy.strings.lower",
+  "ferrum_function": "ferrum_strings::lower",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "hello",
+            "WORLD",
+            "FoO BaR",
+            "  spaces  ",
+            "123abc"
+          ],
+          "shape": [
+            5
+          ],
+          "dtype": "str"
+        }
+      },
+      "expected": {
+        "data": [
+          "hello",
+          "world",
+          "foo bar",
+          "  spaces  ",
+          "123abc"
+        ],
+        "shape": [
+          5
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "single",
+      "inputs": {
+        "x": {
+          "data": [
+            "tEsT"
+          ],
+          "shape": [
+            1
+          ],
+          "dtype": "str"
+        }
+      },
+      "expected": {
+        "data": [
+          "test"
+        ],
+        "shape": [
+          1
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    },
+    {
+      "name": "with_empty",
+      "inputs": {
+        "x": {
+          "data": [
+            "",
+            "a",
+            ""
+          ],
+          "shape": [
+            3
+          ],
+          "dtype": "str"
+        }
+      },
+      "expected": {
+        "data": [
+          "",
+          "a",
+          ""
+        ],
+        "shape": [
+          3
+        ],
+        "dtype": "str"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}

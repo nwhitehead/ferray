@@ -1,0 +1,40 @@
+{
+  "function": "numpy.isnan",
+  "ferrum_function": "ferrum_ufunc::isnan",
+  "test_cases": [
+    {
+      "name": "standard",
+      "inputs": {
+        "x": {
+          "data": [
+            "NaN",
+            "Inf",
+            "-Inf",
+            0.0,
+            1.0,
+            -1.0
+          ],
+          "shape": [
+            6
+          ],
+          "dtype": "float64"
+        }
+      },
+      "expected": {
+        "data": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "shape": [
+          6
+        ],
+        "dtype": "bool"
+      },
+      "tolerance_ulps": 0
+    }
+  ]
+}
