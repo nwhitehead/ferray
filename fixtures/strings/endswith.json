@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.endswith",
-  "ferrum_function": "ferrum_strings::endswith",
+  "ferray_function": "ferray_strings::endswith",
   "test_cases": [
     {
       "name": "standard",

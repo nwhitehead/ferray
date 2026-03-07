@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.upper",
-  "ferrum_function": "ferrum_strings::upper",
+  "ferray_function": "ferray_strings::upper",
   "test_cases": [
     {
       "name": "standard",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.array + filled",
-  "ferrum_function": "ferrum_ma::MaskedArray",
+  "ferray_function": "ferray_ma::MaskedArray",
   "test_cases": [
     {
       "name": "basic_creation",

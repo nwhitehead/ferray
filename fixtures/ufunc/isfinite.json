@@ -1,6 +1,6 @@
 {
   "function": "numpy.isfinite",
-  "ferrum_function": "ferrum_ufunc::isfinite",
+  "ferray_function": "ferray_ufunc::isfinite",
   "test_cases": [
     {
       "name": "standard",

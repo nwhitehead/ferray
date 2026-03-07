@@ -1,6 +1,6 @@
 {
   "function": "numpy.cos",
-  "ferrum_function": "ferrum_ufunc::cos",
+  "ferray_function": "ferray_ufunc::cos",
   "test_cases": [
     {
       "name": "standard_f64",

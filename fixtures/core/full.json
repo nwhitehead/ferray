@@ -1,6 +1,6 @@
 {
   "function": "numpy.full",
-  "ferrum_function": "ferrum_core::full",
+  "ferray_function": "ferray_core::full",
   "test_cases": [
     {
       "name": "full_5_3.14_float64",

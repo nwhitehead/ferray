@@ -1,6 +1,6 @@
 {
   "function": "numpy.percentile",
-  "ferrum_function": "ferrum_stats::percentile",
+  "ferray_function": "ferray_stats::percentile",
   "test_cases": [
     {
       "name": "p0",

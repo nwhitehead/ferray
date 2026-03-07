@@ -1,6 +1,6 @@
 {
   "function": "numpy.linspace",
-  "ferrum_function": "ferrum_core::linspace",
+  "ferray_function": "ferray_core::linspace",
   "test_cases": [
     {
       "name": "linspace_0.0_1.0_5_float64",

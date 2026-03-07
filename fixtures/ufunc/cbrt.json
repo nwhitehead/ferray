@@ -1,6 +1,6 @@
 {
   "function": "numpy.cbrt",
-  "ferrum_function": "ferrum_ufunc::cbrt",
+  "ferray_function": "ferray_ufunc::cbrt",
   "test_cases": [
     {
       "name": "small_f64",

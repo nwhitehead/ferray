@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.compressed",
-  "ferrum_function": "ferrum_ma::MaskedArray::compressed",
+  "ferray_function": "ferray_ma::MaskedArray::compressed",
   "test_cases": [
     {
       "name": "basic",

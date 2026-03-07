@@ -1,6 +1,6 @@
 {
   "function": "numpy.tensordot",
-  "ferrum_function": "ferrum_linalg::tensordot",
+  "ferray_function": "ferray_linalg::tensordot",
   "test_cases": [
     {
       "name": "3d_contraction",

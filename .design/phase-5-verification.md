@@ -1,10 +1,10 @@
 # Feature: Phase 5 — Formal Verification, Oracle Testing, and Final Quality Gate
 
 ## Summary
-The final phase: comprehensive verification that ferrum produces correct results. Generates NumPy oracle fixtures for every public function, runs property-based tests for algorithmic invariants, verifies SIMD-vs-scalar equivalence, executes statistical equivalence benchmarks against NumPy, runs fuzz campaigns for robustness, and applies formal verification (Prusti annotations) to core primitives. This phase produces no new features — it proves that existing features are correct. Nothing ships until this phase passes.
+The final phase: comprehensive verification that ferray produces correct results. Generates NumPy oracle fixtures for every public function, runs property-based tests for algorithmic invariants, verifies SIMD-vs-scalar equivalence, executes statistical equivalence benchmarks against NumPy, runs fuzz campaigns for robustness, and applies formal verification (Prusti annotations) to core primitives. This phase produces no new features — it proves that existing features are correct. Nothing ships until this phase passes.
 
 ## Dependencies
-- **Upstream**: ALL phases (1-4) must be complete. The full ferrum workspace must compile and pass basic tests.
+- **Upstream**: ALL phases (1-4) must be complete. The full ferray workspace must compile and pass basic tests.
 - **External tooling**: Python 3.12+ with NumPy (for fixture generation), `cargo-fuzz` with libFuzzer, Prusti (Rust formal verifier), `criterion` (benchmarks)
 - **Phase**: 5 — Verification (final gate before 1.0)
 
@@ -13,12 +13,12 @@ The final phase: comprehensive verification that ferrum produces correct results
 ### Layer 1 — NumPy Oracle Fixtures (adapted from ferrolearn Section 20.1)
 - REQ-1: A Python script (`scripts/generate_fixtures.py`) generates golden fixtures by running NumPy on curated inputs. Fixtures are JSON files under `fixtures/` committed to the repository.
 - REQ-2: Fixture coverage per function: standard case, non-default parameters (3+ configs), edge cases (empty arrays, single-element, NaN/Inf inputs, very large values 1e6+, very small values 1e-7), all supported dtypes (f32, f64, Complex64, Complex128, relevant integer types), shapes from 0-D to 5-D
-- REQ-3: Rust oracle tests load fixtures and compare ferrum output using ULP-based tolerance:
+- REQ-3: Rust oracle tests load fixtures and compare ferray output using ULP-based tolerance:
   - Elementwise ufunc outputs: 1 ULP for correctly-rounded, 4 ULP max for approximations
   - Transcendental functions (sin, exp, log): 4 ULP budget, documented per function
   - Linear algebra outputs: 4 ULP for well-conditioned inputs, 10 ULP for iterative solvers
   - Integer and boolean outputs: exact match
-- REQ-4: Every public function in every ferrum subcrate must have at least one oracle test
+- REQ-4: Every public function in every ferray subcrate must have at least one oracle test
 
 ### Layer 2 — Property-Based Testing for Algorithmic Invariants
 - REQ-5: Every public function must have a minimum of 8 property-based tests using `proptest` with `ProptestConfig::with_cases(256)`. Properties are derived from mathematical definitions, not reference implementations.
@@ -35,13 +35,13 @@ The final phase: comprehensive verification that ferrum produces correct results
 - REQ-9: Benchmark both paths with `criterion` to verify SIMD achieves at least 2x throughput on contiguous inputs (on hardware with AVX2+)
 
 ### Layer 4 — Statistical Equivalence Benchmarking (adapted from ferrolearn Section 20.3)
-- REQ-10: A Python harness (`benchmarks/statistical_equivalence.py`) runs both NumPy and ferrum on identical inputs and applies Welch's t-test to verify no statistically significant regression (one-sided, alpha=0.05)
+- REQ-10: A Python harness (`benchmarks/statistical_equivalence.py`) runs both NumPy and ferray on identical inputs and applies Welch's t-test to verify no statistically significant regression (one-sided, alpha=0.05)
 - REQ-11: Benchmark suite covers: all ufunc families (trig, exp/log, arithmetic) on arrays of size 1k, 100k, 10M; linalg operations on matrices 10x10 to 1000x1000; FFT on signals of length 64 to 1M; random distribution moments on 100k samples
 - REQ-12: No function may produce a statistically significantly worse result than NumPy on any benchmark input
 
 ### Layer 5 — Fuzz Testing for Numerical Robustness (adapted from ferrolearn Section 20.5)
 - REQ-13: Every public function that accepts array input must have a fuzz target in `fuzz/fuzz_targets/`
-- REQ-14: The contract: ferrum either returns `Ok(valid_result)` or `Err(FerrumError)` — never panics, never hangs, never propagates NaN from non-NaN input
+- REQ-14: The contract: ferray either returns `Ok(valid_result)` or `Err(FerrumError)` — never panics, never hangs, never propagates NaN from non-NaN input
 - REQ-15: Fuzz corpus must be run for a minimum of 24 CPU-hours before release
 - REQ-16: Mandatory seed corpus inputs: all-zero, all-NaN, single-row, single-column, n_samples < n_features, f64::MAX, f64::MIN_POSITIVE, duplicate rows, perfectly collinear features
 - REQ-17: Any panic discovered by fuzzing is a P0 bug that blocks release
@@ -83,19 +83,19 @@ scripts/
   generate_fixtures.py        # NumPy fixture generator
   verify_simd_scalar.sh       # Runs tests with and without FERRUM_FORCE_SCALAR
 fixtures/
-  core/                       # ferrum-core fixtures (creation, indexing, broadcasting)
-  ufunc/                      # ferrum-ufunc fixtures (all math functions)
-  stats/                      # ferrum-stats fixtures (reductions, histograms, sorting)
-  linalg/                     # ferrum-linalg fixtures (decompositions, solvers)
-  fft/                        # ferrum-fft fixtures
-  random/                     # ferrum-random fixtures (distribution moments)
-  io/                         # ferrum-io fixtures (.npy round-trip)
-  polynomial/                 # ferrum-polynomial fixtures
-  strings/                    # ferrum-strings fixtures
-  ma/                         # ferrum-ma fixtures
+  core/                       # ferray-core fixtures (creation, indexing, broadcasting)
+  ufunc/                      # ferray-ufunc fixtures (all math functions)
+  stats/                      # ferray-stats fixtures (reductions, histograms, sorting)
+  linalg/                     # ferray-linalg fixtures (decompositions, solvers)
+  fft/                        # ferray-fft fixtures
+  random/                     # ferray-random fixtures (distribution moments)
+  io/                         # ferray-io fixtures (.npy round-trip)
+  polynomial/                 # ferray-polynomial fixtures
+  strings/                    # ferray-strings fixtures
+  ma/                         # ferray-ma fixtures
 benchmarks/
-  statistical_equivalence.py  # NumPy vs ferrum statistical comparison
-  ferrum_bench/               # Rust benchmark binary for criterion
+  statistical_equivalence.py  # NumPy vs ferray statistical comparison
+  ferray_bench/               # Rust benchmark binary for criterion
     Cargo.toml
     src/main.rs
 fuzz/

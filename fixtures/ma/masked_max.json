@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.max",
-  "ferrum_function": "ferrum_ma::MaskedArray::max",
+  "ferray_function": "ferray_ma::MaskedArray::max",
   "test_cases": [
     {
       "name": "basic",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.argmax",
-  "ferrum_function": "ferrum_stats::argmax",
+  "ferray_function": "ferray_stats::argmax",
   "test_cases": [
     {
       "name": "1d_f64",

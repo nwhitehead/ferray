@@ -1,6 +1,6 @@
 {
   "function": "numpy.fft.fft2",
-  "ferrum_function": "ferrum_fft::fft2",
+  "ferray_function": "ferray_fft::fft2",
   "test_cases": [
     {
       "name": "4x4",

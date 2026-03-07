@@ -1,6 +1,6 @@
 {
   "function": "numpy.divide",
-  "ferrum_function": "ferrum_ufunc::divide",
+  "ferray_function": "ferray_ufunc::divide",
   "test_cases": [
     {
       "name": "standard_f64",

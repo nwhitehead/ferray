@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.mean",
-  "ferrum_function": "ferrum_ma::MaskedArray::mean",
+  "ferray_function": "ferray_ma::MaskedArray::mean",
   "test_cases": [
     {
       "name": "basic",

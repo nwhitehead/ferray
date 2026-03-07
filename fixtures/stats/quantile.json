@@ -1,6 +1,6 @@
 {
   "function": "numpy.quantile",
-  "ferrum_function": "ferrum_stats::quantile",
+  "ferray_function": "ferray_stats::quantile",
   "test_cases": [
     {
       "name": "q0.0",

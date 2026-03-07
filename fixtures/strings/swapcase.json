@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.swapcase",
-  "ferrum_function": "ferrum_strings::swapcase",
+  "ferray_function": "ferray_strings::swapcase",
   "test_cases": [
     {
       "name": "standard",

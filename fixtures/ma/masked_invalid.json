@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.masked_invalid",
-  "ferrum_function": "ferrum_ma::masked_invalid",
+  "ferray_function": "ferray_ma::masked_invalid",
   "test_cases": [
     {
       "name": "nan_inf",

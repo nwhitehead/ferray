@@ -1,6 +1,6 @@
 {
   "function": "numpy.ceil",
-  "ferrum_function": "ferrum_ufunc::ceil",
+  "ferray_function": "ferray_ufunc::ceil",
   "test_cases": [
     {
       "name": "standard_f64",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.min",
-  "ferrum_function": "ferrum_ma::MaskedArray::min",
+  "ferray_function": "ferray_ma::MaskedArray::min",
   "test_cases": [
     {
       "name": "basic",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.rstrip",
-  "ferrum_function": "ferrum_strings::rstrip",
+  "ferray_function": "ferray_strings::rstrip",
   "test_cases": [
     {
       "name": "whitespace",

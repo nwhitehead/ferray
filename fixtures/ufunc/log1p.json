@@ -1,6 +1,6 @@
 {
   "function": "numpy.log1p",
-  "ferrum_function": "ferrum_ufunc::log1p",
+  "ferray_function": "ferray_ufunc::log1p",
   "test_cases": [
     {
       "name": "standard_f64",

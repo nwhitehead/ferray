@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.svd",
-  "ferrum_function": "ferrum_linalg::svd",
+  "ferray_function": "ferray_linalg::svd",
   "test_cases": [
     {
       "name": "3x2_reduced",

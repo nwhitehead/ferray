@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.find",
-  "ferrum_function": "ferrum_strings::find",
+  "ferray_function": "ferray_strings::find",
   "test_cases": [
     {
       "name": "standard",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.sum",
-  "ferrum_function": "ferrum_stats::sum",
+  "ferray_function": "ferray_stats::sum",
   "test_cases": [
     {
       "name": "1d_f64",

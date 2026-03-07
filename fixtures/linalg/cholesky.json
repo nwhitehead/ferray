@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.cholesky",
-  "ferrum_function": "ferrum_linalg::cholesky",
+  "ferray_function": "ferray_linalg::cholesky",
   "test_cases": [
     {
       "name": "2x2_spd",

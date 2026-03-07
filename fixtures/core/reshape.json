@@ -1,6 +1,6 @@
 {
   "function": "numpy.reshape",
-  "ferrum_function": "ferrum_core::reshape",
+  "ferray_function": "ferray_core::reshape",
   "test_cases": [
     {
       "name": "reshape_3x4",

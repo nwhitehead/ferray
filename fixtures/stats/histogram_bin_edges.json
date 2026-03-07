@@ -1,6 +1,6 @@
 {
   "function": "numpy.histogram_bin_edges",
-  "ferrum_function": "ferrum_stats::histogram_bin_edges",
+  "ferray_function": "ferray_stats::histogram_bin_edges",
   "test_cases": [
     {
       "name": "5_bins",

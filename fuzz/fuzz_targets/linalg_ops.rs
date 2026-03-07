@@ -5,12 +5,12 @@
 //! All linalg functions take f64 arrays. We construct small matrices from
 //! fuzzed bytes and verify no panics occur.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::{Ix2, IxDyn};
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::{Ix2, IxDyn};
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)
@@ -50,36 +50,36 @@ fuzz_target!(|data: &[u8]| {
         };
 
         // matmul(A, A)
-        let _ = ferrum_linalg::matmul(&a_dyn, &a_dyn);
+        let _ = ferray_linalg::matmul(&a_dyn, &a_dyn);
 
         // dot(A, A)
-        let _ = ferrum_linalg::dot(&a_dyn, &a_dyn);
+        let _ = ferray_linalg::dot(&a_dyn, &a_dyn);
 
         // inv(A)
-        let _ = ferrum_linalg::inv(&a_ix2);
+        let _ = ferray_linalg::inv(&a_ix2);
 
         // solve(A, b) — b is a 1-D column vector promoted to IxDyn
         if values.len() >= needed + dim {
             let b_vals: Vec<f64> = values[needed..needed + dim].to_vec();
             if let Ok(b_dyn) = Array::from_vec(IxDyn::new(&[dim]), b_vals) {
-                let _ = ferrum_linalg::solve(&a_ix2, &b_dyn);
+                let _ = ferray_linalg::solve(&a_ix2, &b_dyn);
             }
         }
 
         // det(A)
-        let _ = ferrum_linalg::det(&a_ix2);
+        let _ = ferray_linalg::det(&a_ix2);
 
         // norm(A) — Frobenius norm
-        let _ = ferrum_linalg::norm(&a_dyn, ferrum_linalg::NormOrder::Fro);
+        let _ = ferray_linalg::norm(&a_dyn, ferray_linalg::NormOrder::Fro);
 
         // trace(A)
-        let _ = ferrum_linalg::trace(&a_ix2);
+        let _ = ferray_linalg::trace(&a_ix2);
 
         // cholesky — may fail for non-PD matrices, must not panic
-        let _ = ferrum_linalg::cholesky(&a_ix2);
+        let _ = ferray_linalg::cholesky(&a_ix2);
 
         // svd
-        let _ = ferrum_linalg::svd(&a_ix2, true);
+        let _ = ferray_linalg::svd(&a_ix2, true);
 
         // 1-D dot product
         if values.len() >= 2 * dim {
@@ -89,7 +89,7 @@ fuzz_target!(|data: &[u8]| {
                 Array::from_vec(IxDyn::new(&[dim]), v1),
                 Array::from_vec(IxDyn::new(&[dim]), v2),
             ) {
-                let _ = ferrum_linalg::dot(&v1d, &v2d);
+                let _ = ferray_linalg::dot(&v1d, &v2d);
             }
         }
 
@@ -99,7 +99,7 @@ fuzz_target!(|data: &[u8]| {
         if values.len() >= needed + needed_b {
             let b_vals = values[needed..needed + needed_b].to_vec();
             if let Ok(b_rect) = Array::from_vec(IxDyn::new(&[dim, k]), b_vals) {
-                let _ = ferrum_linalg::matmul(&a_dyn, &b_rect);
+                let _ = ferray_linalg::matmul(&a_dyn, &b_rect);
             }
         }
     }));

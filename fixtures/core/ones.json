@@ -1,6 +1,6 @@
 {
   "function": "numpy.ones",
-  "ferrum_function": "ferrum_core::ones",
+  "ferray_function": "ferray_core::ones",
   "test_cases": [
     {
       "name": "ones_5_float64",

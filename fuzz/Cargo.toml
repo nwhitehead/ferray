@@ -1,5 +1,5 @@
 [package]
-name = "ferrum-fuzz"
+name = "ferray-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2024"
@@ -10,11 +10,11 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 arbitrary = { version = "1", features = ["derive"] }
-ferrum-core = { path = "../ferrum-core" }
-ferrum-ufunc = { path = "../ferrum-ufunc" }
-ferrum-stats = { path = "../ferrum-stats" }
-ferrum-linalg = { path = "../ferrum-linalg" }
-ferrum-fft = { path = "../ferrum-fft" }
+ferray-core = { path = "../ferray-core" }
+ferray-ufunc = { path = "../ferray-ufunc" }
+ferray-stats = { path = "../ferray-stats" }
+ferray-linalg = { path = "../ferray-linalg" }
+ferray-fft = { path = "../ferray-fft" }
 num-complex = "0.4"
 num-traits = "0.2"
 

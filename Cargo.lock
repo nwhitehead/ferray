@@ -983,28 +983,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
-name = "ferrum"
+name = "ferray"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
- "ferrum-fft",
- "ferrum-io",
- "ferrum-linalg",
- "ferrum-ma",
- "ferrum-numpy-interop",
- "ferrum-polynomial",
- "ferrum-random",
- "ferrum-stats",
- "ferrum-stride-tricks",
- "ferrum-strings",
- "ferrum-ufunc",
- "ferrum-window",
+ "ferray-core",
+ "ferray-fft",
+ "ferray-io",
+ "ferray-linalg",
+ "ferray-ma",
+ "ferray-numpy-interop",
+ "ferray-polynomial",
+ "ferray-random",
+ "ferray-stats",
+ "ferray-stride-tricks",
+ "ferray-strings",
+ "ferray-ufunc",
+ "ferray-window",
  "proptest",
  "rayon",
 ]
 
 [[package]]
-name = "ferrum-autodiff"
+name = "ferray-autodiff"
 version = "0.2.0"
 dependencies = [
  "num-traits",
@@ -1012,10 +1012,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-core"
+name = "ferray-core"
 version = "0.2.0"
 dependencies = [
- "ferrum-core-macros",
+ "ferray-core-macros",
  "half",
  "ndarray 0.17.2",
  "num-complex",
@@ -1026,7 +1026,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-core-macros"
+name = "ferray-core-macros"
 version = "0.2.0"
 dependencies = [
  "proc-macro2",
@@ -1035,10 +1035,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-fft"
+name = "ferray-fft"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
+ "ferray-core",
  "num-complex",
  "proptest",
  "rayon",
@@ -1046,11 +1046,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-io"
+name = "ferray-io"
 version = "0.2.0"
 dependencies = [
  "byteorder",
- "ferrum-core",
+ "ferray-core",
  "flate2",
  "half",
  "memmap2",
@@ -1059,12 +1059,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-linalg"
+name = "ferray-linalg"
 version = "0.2.0"
 dependencies = [
  "faer",
- "ferrum-core",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-ufunc",
  "half",
  "num-complex",
  "num-traits",
@@ -1073,22 +1073,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-ma"
+name = "ferray-ma"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
- "ferrum-stats",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-stats",
+ "ferray-ufunc",
  "num-traits",
  "proptest",
 ]
 
 [[package]]
-name = "ferrum-numpy-interop"
+name = "ferray-numpy-interop"
 version = "0.2.0"
 dependencies = [
  "arrow",
- "ferrum-core",
+ "ferray-core",
  "numpy",
  "polars",
  "proptest",
@@ -1096,32 +1096,32 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-polynomial"
+name = "ferray-polynomial"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
- "ferrum-linalg",
+ "ferray-core",
+ "ferray-linalg",
  "num-complex",
  "num-traits",
  "proptest",
 ]
 
 [[package]]
-name = "ferrum-random"
+name = "ferray-random"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
+ "ferray-core",
  "proptest",
  "rand_core 0.6.4",
  "rayon",
 ]
 
 [[package]]
-name = "ferrum-stats"
+name = "ferray-stats"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-ufunc",
  "num-traits",
  "proptest",
  "pulp",
@@ -1129,28 +1129,28 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-stride-tricks"
+name = "ferray-stride-tricks"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
+ "ferray-core",
  "proptest",
 ]
 
 [[package]]
-name = "ferrum-strings"
+name = "ferray-strings"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
+ "ferray-core",
  "proptest",
  "regex",
 ]
 
 [[package]]
-name = "ferrum-ufunc"
+name = "ferray-ufunc"
 version = "0.2.0"
 dependencies = [
  "core-math",
- "ferrum-core",
+ "ferray-core",
  "half",
  "num-complex",
  "num-traits",
@@ -1160,11 +1160,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-window"
+name = "ferray-window"
 version = "0.2.0"
 dependencies = [
- "ferrum-core",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-ufunc",
  "num-traits",
  "proptest",
 ]

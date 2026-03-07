@@ -1,6 +1,6 @@
 {
   "function": "numpy.dot",
-  "ferrum_function": "ferrum_linalg::dot",
+  "ferray_function": "ferray_linalg::dot",
   "test_cases": [
     {
       "name": "1d_inner",

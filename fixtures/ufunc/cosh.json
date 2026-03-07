@@ -1,6 +1,6 @@
 {
   "function": "numpy.cosh",
-  "ferrum_function": "ferrum_ufunc::cosh",
+  "ferray_function": "ferray_ufunc::cosh",
   "test_cases": [
     {
       "name": "standard_f64",

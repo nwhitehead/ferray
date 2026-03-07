@@ -1,6 +1,6 @@
 {
   "function": "numpy.power",
-  "ferrum_function": "ferrum_ufunc::power",
+  "ferray_function": "ferray_ufunc::power",
   "test_cases": [
     {
       "name": "standard",

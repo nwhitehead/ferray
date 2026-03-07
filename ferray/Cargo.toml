@@ -1,0 +1,81 @@
+[package]
+name = "ferray"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "../README.md"
+description = "A NumPy-equivalent library for Rust — N-dimensional arrays with SIMD acceleration"
+
+[dependencies]
+ferray-core = { workspace = true }
+ferray-ufunc = { workspace = true }
+ferray-stats = { workspace = true }
+rayon = { workspace = true }
+
+[dependencies.ferray-io]
+workspace = true
+optional = true
+
+[dependencies.ferray-linalg]
+workspace = true
+optional = true
+
+[dependencies.ferray-fft]
+workspace = true
+optional = true
+
+[dependencies.ferray-random]
+workspace = true
+optional = true
+
+[dependencies.ferray-polynomial]
+workspace = true
+optional = true
+
+[dependencies.ferray-window]
+workspace = true
+optional = true
+
+[dependencies.ferray-strings]
+workspace = true
+optional = true
+
+[dependencies.ferray-ma]
+workspace = true
+optional = true
+
+[dependencies.ferray-stride-tricks]
+workspace = true
+optional = true
+
+[dependencies.ferray-numpy-interop]
+workspace = true
+optional = true
+
+[features]
+default = ["rayon", "simd", "complex", "strings", "ma", "io", "window"]
+full = ["default", "linalg", "fft", "random", "polynomial", "stride-tricks"]
+rayon = []
+simd = []
+complex = []
+f16 = ["ferray-core/f16"]
+strings = ["dep:ferray-strings"]
+ma = ["dep:ferray-ma"]
+io = ["dep:ferray-io"]
+linalg = ["dep:ferray-linalg"]
+fft = ["dep:ferray-fft"]
+random = ["dep:ferray-random"]
+polynomial = ["dep:ferray-polynomial", "linalg"]
+window = ["dep:ferray-window"]
+stride-tricks = ["dep:ferray-stride-tricks"]
+numpy = ["dep:ferray-numpy-interop"]
+serde = ["ferray-core/serde"]
+no_std = ["ferray-core/no_std"]
+
+[dev-dependencies]
+proptest = { workspace = true }

@@ -336,10 +336,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-core"
+name = "ferray-core"
 version = "0.1.0"
 dependencies = [
- "ferrum-core-macros",
+ "ferray-core-macros",
  "ndarray",
  "num-complex",
  "num-traits",
@@ -347,7 +347,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-core-macros"
+name = "ferray-core-macros"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
@@ -356,57 +356,57 @@ dependencies = [
 ]
 
 [[package]]
-name = "ferrum-fft"
+name = "ferray-fft"
 version = "0.1.0"
 dependencies = [
- "ferrum-core",
+ "ferray-core",
  "num-complex",
  "rayon",
  "rustfft",
 ]
 
 [[package]]
-name = "ferrum-fuzz"
+name = "ferray-fuzz"
 version = "0.0.0"
 dependencies = [
  "arbitrary",
- "ferrum-core",
- "ferrum-fft",
- "ferrum-linalg",
- "ferrum-stats",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-fft",
+ "ferray-linalg",
+ "ferray-stats",
+ "ferray-ufunc",
  "libfuzzer-sys",
  "num-complex",
  "num-traits",
 ]
 
 [[package]]
-name = "ferrum-linalg"
+name = "ferray-linalg"
 version = "0.1.0"
 dependencies = [
  "faer",
- "ferrum-core",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-ufunc",
  "num-complex",
  "num-traits",
  "rayon",
 ]
 
 [[package]]
-name = "ferrum-stats"
+name = "ferray-stats"
 version = "0.1.0"
 dependencies = [
- "ferrum-core",
- "ferrum-ufunc",
+ "ferray-core",
+ "ferray-ufunc",
  "num-traits",
  "rayon",
 ]
 
 [[package]]
-name = "ferrum-ufunc"
+name = "ferray-ufunc"
 version = "0.1.0"
 dependencies = [
- "ferrum-core",
+ "ferray-core",
  "num-complex",
  "num-traits",
  "pulp",

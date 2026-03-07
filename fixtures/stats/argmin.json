@@ -1,6 +1,6 @@
 {
   "function": "numpy.argmin",
-  "ferrum_function": "ferrum_stats::argmin",
+  "ferray_function": "ferray_stats::argmin",
   "test_cases": [
     {
       "name": "1d_f64",

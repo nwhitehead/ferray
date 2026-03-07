@@ -1,6 +1,6 @@
 {
   "function": "numpy.squeeze",
-  "ferrum_function": "ferrum_core::squeeze",
+  "ferray_function": "ferray_core::squeeze",
   "test_cases": [
     {
       "name": "squeeze_1x6x1",

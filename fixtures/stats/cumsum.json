@@ -1,6 +1,6 @@
 {
   "function": "numpy.cumsum",
-  "ferrum_function": "ferrum_stats::cumsum",
+  "ferray_function": "ferray_stats::cumsum",
   "test_cases": [
     {
       "name": "1d",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.arctan",
-  "ferrum_function": "ferrum_ufunc::arctan",
+  "ferray_function": "ferray_ufunc::arctan",
   "test_cases": [
     {
       "name": "standard_f64",

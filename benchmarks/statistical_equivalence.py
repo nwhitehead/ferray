@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Statistical equivalence testing: NumPy vs ferrum.
+"""Statistical equivalence testing: NumPy vs ferray.
 
-Runs both NumPy and ferrum on identical inputs, compares results
+Runs both NumPy and ferray on identical inputs, compares results
 using Welch's t-test to verify no statistically significant
 regression in accuracy.
 
@@ -12,7 +12,7 @@ Requirements:
     - Python 3.12+
     - NumPy
     - scipy (optional, falls back to max-ULP threshold comparison)
-    - ferrum-bench binary (built from benchmarks/ferrum_bench/)
+    - ferray-bench binary (built from benchmarks/ferray_bench/)
 """
 
 import json
@@ -33,11 +33,11 @@ ALPHA = 0.05
 MAX_ULP_FALLBACK = 4  # Default: if scipy unavailable, pass if max ULP <= this
 
 # Per-category max ULP thresholds.
-# ferrum uses CORE-MATH (correctly rounded, < 0.5 ULP from truth) so we can
+# ferray uses CORE-MATH (correctly rounded, < 0.5 ULP from truth) so we can
 # be stricter than NumPy on transcendentals. But accumulated operations
 # (reductions, matmul, FFT) inherently diverge due to operation ordering.
 CATEGORY_MAX_ULP = {
-    "ufunc": 256,      # P99.9 threshold. ferrum uses correctly-rounded CORE-MATH
+    "ufunc": 256,      # P99.9 threshold. ferray uses correctly-rounded CORE-MATH
                         # (< 0.5 ULP from truth). NumPy uses glibc/openlibm which
                         # can be hundreds of ULP off for sin/cos near argument
                         # reduction boundaries. The P99.9 captures the inter-
@@ -47,7 +47,7 @@ CATEGORY_MAX_ULP = {
     "linalg": None,     # Matmul: O(N) error growth. Scale threshold with matrix size.
     "fft": None,        # FFT: O(log N) error per butterfly. Scale with transform size.
 }
-FERRUM_BENCH_DIR = Path(__file__).parent / "ferrum_bench"
+FERRUM_BENCH_DIR = Path(__file__).parent / "ferray_bench"
 FERRUM_BENCH_BIN = None  # Set after build
 
 # Try to import scipy for statistical testing
@@ -102,8 +102,8 @@ def make_test_cases():
                 "size_label": str(size),
                 "input_data": data,
                 "numpy_func": np_func,
-                "ferrum_func": func_name,
-                "ferrum_size": str(size),
+                "ferray_func": func_name,
+                "ferray_size": str(size),
                 "is_complex": False,
                 "is_matmul": False,
             })
@@ -126,8 +126,8 @@ def make_test_cases():
                 "size_label": str(size),
                 "input_data": data,
                 "numpy_func": np_func,
-                "ferrum_func": func_name,
-                "ferrum_size": str(size),
+                "ferray_func": func_name,
+                "ferray_size": str(size),
                 "is_complex": False,
                 "is_matmul": False,
             })
@@ -139,7 +139,7 @@ def make_test_cases():
         a = rng.standard_normal((rows, cols))
         b = rng.standard_normal((cols, rows))
         numpy_result = a @ b  # rows x rows
-        # Flatten both matrices into one stream for ferrum
+        # Flatten both matrices into one stream for ferray
         combined = np.concatenate([a.ravel(), b.ravel()])
         cases.append({
             "function": "matmul",
@@ -148,8 +148,8 @@ def make_test_cases():
             "input_data": combined,
             "numpy_result_override": numpy_result.ravel(),
             "numpy_func": None,
-            "ferrum_func": "matmul",
-            "ferrum_size": f"{rows}x{cols}",
+            "ferray_func": "matmul",
+            "ferray_size": f"{rows}x{cols}",
             "is_complex": False,
             "is_matmul": True,
         })
@@ -164,8 +164,8 @@ def make_test_cases():
             "size_label": str(size),
             "input_data": data,
             "numpy_func": np.fft.fft,
-            "ferrum_func": "fft",
-            "ferrum_size": str(size),
+            "ferray_func": "fft",
+            "ferray_size": str(size),
             "is_complex": True,
             "is_matmul": False,
         })
@@ -194,16 +194,16 @@ def run_numpy(case):
 # Ferrum execution
 # ---------------------------------------------------------------------------
 
-def find_ferrum_bench():
-    """Find or build the ferrum-bench binary."""
+def find_ferray_bench():
+    """Find or build the ferray-bench binary."""
     # Check common build locations
     for profile in ["release", "debug"]:
-        candidate = FERRUM_BENCH_DIR / "target" / profile / "ferrum-bench"
+        candidate = FERRUM_BENCH_DIR / "target" / profile / "ferray-bench"
         if candidate.exists():
             return str(candidate)
 
     # Try to build it
-    print("Building ferrum-bench binary...")
+    print("Building ferray-bench binary...")
     result = subprocess.run(
         ["cargo", "build", "--release"],
         cwd=str(FERRUM_BENCH_DIR),
@@ -212,23 +212,23 @@ def find_ferrum_bench():
         timeout=600,
     )
     if result.returncode != 0:
-        print(f"WARNING: Failed to build ferrum-bench:\n{result.stderr}")
+        print(f"WARNING: Failed to build ferray-bench:\n{result.stderr}")
         return None
 
-    candidate = FERRUM_BENCH_DIR / "target" / "release" / "ferrum-bench"
+    candidate = FERRUM_BENCH_DIR / "target" / "release" / "ferray-bench"
     if candidate.exists():
         return str(candidate)
 
     return None
 
 
-def run_ferrum(case, bench_bin):
-    """Run the ferrum function via the benchmark binary and return the result."""
+def run_ferray(case, bench_bin):
+    """Run the ferray function via the benchmark binary and return the result."""
     input_json = json.dumps(case["input_data"].tolist())
 
     try:
         result = subprocess.run(
-            [bench_bin, case["ferrum_func"], case["ferrum_size"]],
+            [bench_bin, case["ferray_func"], case["ferray_size"]],
             input=input_json,
             capture_output=True,
             text=True,
@@ -260,27 +260,27 @@ def run_ferrum(case, bench_bin):
 # Comparison
 # ---------------------------------------------------------------------------
 
-def compute_ulp_distances(numpy_result, ferrum_result):
+def compute_ulp_distances(numpy_result, ferray_result):
     """Compute ULP distances between two arrays, handling special values."""
     numpy_flat = np.asarray(numpy_result).ravel()
-    ferrum_flat = np.asarray(ferrum_result).ravel()
+    ferray_flat = np.asarray(ferray_result).ravel()
 
-    if numpy_flat.shape != ferrum_flat.shape:
+    if numpy_flat.shape != ferray_flat.shape:
         raise ValueError(
-            f"Shape mismatch: numpy={numpy_flat.shape}, ferrum={ferrum_flat.shape}"
+            f"Shape mismatch: numpy={numpy_flat.shape}, ferray={ferray_flat.shape}"
         )
 
-    if np.iscomplexobj(numpy_flat) or np.iscomplexobj(ferrum_flat):
+    if np.iscomplexobj(numpy_flat) or np.iscomplexobj(ferray_flat):
         # For complex, compute ULP distance on real and imaginary parts separately
         numpy_flat = np.asarray(numpy_flat, dtype=np.complex128)
-        ferrum_flat = np.asarray(ferrum_flat, dtype=np.complex128)
-        ulp_real = _ulp_distances_real(numpy_flat.real, ferrum_flat.real)
-        ulp_imag = _ulp_distances_real(numpy_flat.imag, ferrum_flat.imag)
+        ferray_flat = np.asarray(ferray_flat, dtype=np.complex128)
+        ulp_real = _ulp_distances_real(numpy_flat.real, ferray_flat.real)
+        ulp_imag = _ulp_distances_real(numpy_flat.imag, ferray_flat.imag)
         return np.maximum(ulp_real, ulp_imag)
     else:
         return _ulp_distances_real(
             np.asarray(numpy_flat, dtype=np.float64),
-            np.asarray(ferrum_flat, dtype=np.float64),
+            np.asarray(ferray_flat, dtype=np.float64),
         )
 
 
@@ -333,11 +333,11 @@ def get_max_ulp_threshold(category, size_label):
     return MAX_ULP_FALLBACK
 
 
-def compare_results(numpy_result, ferrum_result, func_name, category="ufunc",
+def compare_results(numpy_result, ferray_result, func_name, category="ufunc",
                     size_label="", alpha=ALPHA):
     """Compare results using ULP distance and statistical test."""
     try:
-        ulp_distances = compute_ulp_distances(numpy_result, ferrum_result)
+        ulp_distances = compute_ulp_distances(numpy_result, ferray_result)
     except ValueError as e:
         return {
             "function": func_name,
@@ -388,7 +388,7 @@ def compare_results(numpy_result, ferrum_result, func_name, category="ufunc",
     # For ufuncs, use the 99.9th percentile for pass/fail.
     # This accounts for edge cases where NumPy's glibc libm has large errors
     # at specific inputs (near singularities, argument reduction boundaries),
-    # while ferrum uses correctly-rounded CORE-MATH.
+    # while ferray uses correctly-rounded CORE-MATH.
     # For accumulated ops (stats, linalg, fft), use max ULP since those
     # errors are systematic, not edge-case spikes.
     if category == "ufunc":
@@ -459,7 +459,7 @@ def print_table(results):
 
 def main():
     print("=" * 72)
-    print("Statistical Equivalence Testing: NumPy vs ferrum")
+    print("Statistical Equivalence Testing: NumPy vs ferray")
     print("=" * 72)
     print()
     print(f"NumPy version:  {np.__version__}")
@@ -473,10 +473,10 @@ def main():
     print(f"Scipy:          {scipy_status}")
     print()
 
-    # Find or build the ferrum-bench binary
-    bench_bin = find_ferrum_bench()
+    # Find or build the ferray-bench binary
+    bench_bin = find_ferray_bench()
     if bench_bin is None:
-        print("ERROR: Could not find or build ferrum-bench binary.")
+        print("ERROR: Could not find or build ferray-bench binary.")
         print(
             f"       Build it manually: "
             f"cd {FERRUM_BENCH_DIR} && cargo build --release"
@@ -486,7 +486,7 @@ def main():
         cases = make_test_cases()
         print(f"  {len(cases)} test cases generated.")
         print()
-        print("Skipping comparison -- ferrum-bench binary not available.")
+        print("Skipping comparison -- ferray-bench binary not available.")
         sys.exit(0)
 
     print(f"Ferrum bench:   {bench_bin}")
@@ -508,8 +508,8 @@ def main():
         # Run NumPy
         numpy_result = run_numpy(case)
 
-        # Run ferrum
-        ferrum_result, error = run_ferrum(case, bench_bin)
+        # Run ferray
+        ferray_result, error = run_ferray(case, bench_bin)
 
         if error is not None:
             result = {
@@ -526,7 +526,7 @@ def main():
             sys.stdout.write(f"FAIL (error: {err_msg})\n")
         else:
             result = compare_results(
-                numpy_result, ferrum_result, case["function"],
+                numpy_result, ferray_result, case["function"],
                 category=case["category"], size_label=case["size_label"],
             )
             result["size_label"] = case["size_label"]

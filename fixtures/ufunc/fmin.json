@@ -1,6 +1,6 @@
 {
   "function": "numpy.fmin",
-  "ferrum_function": "ferrum_ufunc::fmin",
+  "ferray_function": "ferray_ufunc::fmin",
   "test_cases": [
     {
       "name": "standard_f64",

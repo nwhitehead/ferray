@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.strip",
-  "ferrum_function": "ferrum_strings::strip",
+  "ferray_function": "ferray_strings::strip",
   "test_cases": [
     {
       "name": "whitespace",

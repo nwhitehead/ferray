@@ -1,6 +1,6 @@
 {
   "function": "numpy.round",
-  "ferrum_function": "ferrum_ufunc::round",
+  "ferray_function": "ferray_ufunc::round",
   "test_cases": [
     {
       "name": "standard_f64",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.lstsq",
-  "ferrum_function": "ferrum_linalg::lstsq",
+  "ferray_function": "ferray_linalg::lstsq",
   "test_cases": [
     {
       "name": "overdetermined",

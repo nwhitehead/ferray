@@ -1,0 +1,30 @@
+[package]
+name = "ferray-io"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+description = "NumPy-compatible file I/O (.npy, .npz, memory-mapped) for ferray"
+
+[dependencies]
+ferray-core = { workspace = true }
+byteorder = { workspace = true }
+flate2 = { workspace = true }
+memmap2 = { workspace = true }
+zip = { workspace = true }
+
+[dependencies.half]
+workspace = true
+optional = true
+
+[features]
+default = []
+f16 = ["dep:half", "ferray-core/f16"]
+
+[dev-dependencies]
+proptest = { workspace = true }

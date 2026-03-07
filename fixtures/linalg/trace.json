@@ -1,6 +1,6 @@
 {
   "function": "numpy.trace",
-  "ferrum_function": "ferrum_linalg::trace",
+  "ferray_function": "ferray_linalg::trace",
   "test_cases": [
     {
       "name": "3x3",

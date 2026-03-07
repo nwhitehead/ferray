@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.replace",
-  "ferrum_function": "ferrum_strings::replace",
+  "ferray_function": "ferray_strings::replace",
   "test_cases": [
     {
       "name": "standard",

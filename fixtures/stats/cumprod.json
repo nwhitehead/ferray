@@ -1,6 +1,6 @@
 {
   "function": "numpy.cumprod",
-  "ferrum_function": "ferrum_stats::cumprod",
+  "ferray_function": "ferray_stats::cumprod",
   "test_cases": [
     {
       "name": "1d",

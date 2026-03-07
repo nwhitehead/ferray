@@ -1,7 +1,7 @@
 # Feature: Phase 4 — Beyond NumPy
 
 ## Summary
-Extensions that go beyond NumPy's current capabilities, leveraging Rust's type system and performance characteristics: half-precision float (f16) support throughout, `no_std` core for embedded targets, compile-time dimensionality checking via const generics, and foundations for automatic differentiation. These are stretch goals that enhance ferrum's value proposition beyond "NumPy in Rust."
+Extensions that go beyond NumPy's current capabilities, leveraging Rust's type system and performance characteristics: half-precision float (f16) support throughout, `no_std` core for embedded targets, compile-time dimensionality checking via const generics, and foundations for automatic differentiation. These are stretch goals that enhance ferray's value proposition beyond "NumPy in Rust."
 
 ## Dependencies
 - **Upstream**: All Phase 1-3 crates must be complete and integrated
@@ -10,13 +10,13 @@ Extensions that go beyond NumPy's current capabilities, leveraging Rust's type s
 ## Requirements
 
 ### f16 Support
-- REQ-1: Enable the `f16` feature flag to make `f16` (from the `half` crate) a first-class element type throughout all ferrum crates
+- REQ-1: Enable the `f16` feature flag to make `f16` (from the `half` crate) a first-class element type throughout all ferray crates
 - REQ-2: All ufunc operations must support `f16` inputs/outputs with appropriate SIMD paths (where hardware supports f16 natively) or fallback through f32 promotion
 - REQ-3: f16 I/O: .npy files with `<f2` dtype must round-trip correctly
 - REQ-4: f16 linalg operations: promote to f32 internally for numerical stability, return f16 results
 
 ### no_std Core
-- REQ-5: `ferrum-core` and `ferrum-ufunc` must compile with `#![no_std]` when the `no_std` feature is enabled (requires `alloc` but not `std`)
+- REQ-5: `ferray-core` and `ferray-ufunc` must compile with `#![no_std]` when the `no_std` feature is enabled (requires `alloc` but not `std`)
 - REQ-6: Features requiring std (I/O, threading, memmap) are gated behind `std` feature flag
 - REQ-7: Core numeric operations (array creation, indexing, ufuncs, basic reductions) must work in no_std environments
 
@@ -34,7 +34,7 @@ Extensions that go beyond NumPy's current capabilities, leveraging Rust's type s
 
 ## Acceptance Criteria
 - [ ] AC-1: `Array1<f16>` can be created, indexed, and have ufuncs applied. Results match f32 computation downcast to f16.
-- [ ] AC-2: `cargo build -p ferrum-core --no-default-features --features no_std` compiles for a bare-metal target (e.g., thumbv7em-none-eabihf)
+- [ ] AC-2: `cargo build -p ferray-core --no-default-features --features no_std` compiles for a bare-metal target (e.g., thumbv7em-none-eabihf)
 - [ ] AC-3: `Array<f64, Shape2<3, 4>> * Array<f64, Shape2<4, 5>>` compiles and produces `Array<f64, Shape2<3, 5>>`; `Shape2<3, 4> * Shape2<5, 5>` does not compile (K=4 vs K=5 mismatch)
 - [ ] AC-3a: `Array<f64, Shape2<3, 4>>` converts to `ArrayD<f64>` via `Into<IxDyn>` for interop with dynamic code
 - [ ] AC-3b: `Array<f64, Shape1<12>>.reshape::<Shape2<3, 4>>()` compiles; `.reshape::<Shape2<3, 5>>()` does not (3*5 != 12)
@@ -44,10 +44,10 @@ Extensions that go beyond NumPy's current capabilities, leveraging Rust's type s
 ## Architecture
 
 These features are implemented as additions to existing crates, not new crates:
-- f16: additions to `ferrum-core` (Element impl), `ferrum-ufunc` (kernels), `ferrum-io` (dtype)
-- no_std: conditional compilation (`#[cfg(feature = "no_std")]`) throughout ferrum-core and ferrum-ufunc
-- Const generics: new `shape` module in `ferrum-core` with `Shape1<const N>`, `Shape2<const M, const N>`, through `Shape6`, all implementing `Dimension`
-- DualNumber: new `ferrum-autodiff` crate (not in the main workspace initially, added as an optional dependency)
+- f16: additions to `ferray-core` (Element impl), `ferray-ufunc` (kernels), `ferray-io` (dtype)
+- no_std: conditional compilation (`#[cfg(feature = "no_std")]`) throughout ferray-core and ferray-ufunc
+- Const generics: new `shape` module in `ferray-core` with `Shape1<const N>`, `Shape2<const M, const N>`, through `Shape6`, all implementing `Dimension`
+- DualNumber: new `ferray-autodiff` crate (not in the main workspace initially, added as an optional dependency)
 
 ## Open Questions
 
@@ -56,5 +56,5 @@ These features are implemented as additions to existing crates, not new crates:
 
 ## Out of Scope
 - Full reverse-mode autograd with tape (separate project)
-- GPU compute (separate crate, not part of ferrum core)
+- GPU compute (separate crate, not part of ferray core)
 - Distributed/multi-node arrays

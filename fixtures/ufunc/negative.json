@@ -1,6 +1,6 @@
 {
   "function": "numpy.negative",
-  "ferrum_function": "ferrum_ufunc::negative",
+  "ferray_function": "ferray_ufunc::negative",
   "test_cases": [
     {
       "name": "small_f64",

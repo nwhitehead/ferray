@@ -1,6 +1,6 @@
 {
   "function": "numpy.zeros",
-  "ferrum_function": "ferrum_core::zeros",
+  "ferray_function": "ferray_core::zeros",
   "test_cases": [
     {
       "name": "zeros_5_float64",

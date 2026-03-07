@@ -1,6 +1,6 @@
 {
   "function": "numpy.ma.getmask/getdata",
-  "ferrum_function": "ferrum_ma::getmask/getdata",
+  "ferray_function": "ferray_ma::getmask/getdata",
   "test_cases": [
     {
       "name": "basic",

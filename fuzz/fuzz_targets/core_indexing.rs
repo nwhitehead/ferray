@@ -2,13 +2,13 @@
 
 //! Fuzz target for core indexing: get, slice_axis, slice_multi, index_select.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::{Axis, Ix1, Ix2};
-use ferrum_core::indexing::basic::SliceSpec;
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::{Axis, Ix1, Ix2};
+use ferray_core::indexing::basic::SliceSpec;
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)

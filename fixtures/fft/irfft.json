@@ -1,6 +1,6 @@
 {
   "function": "numpy.fft.irfft",
-  "ferrum_function": "ferrum_fft::irfft",
+  "ferray_function": "ferray_fft::irfft",
   "test_cases": [
     {
       "name": "roundtrip_8",

@@ -2,12 +2,12 @@
 
 //! Fuzz target for rounding ufuncs: round, floor, ceil, trunc, rint, fix.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::Ix1;
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::Ix1;
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)
@@ -28,11 +28,11 @@ fuzz_target!(|data: &[u8]| {
     };
 
     let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        let _ = ferrum_ufunc::round(&arr);
-        let _ = ferrum_ufunc::floor(&arr);
-        let _ = ferrum_ufunc::ceil(&arr);
-        let _ = ferrum_ufunc::trunc(&arr);
-        let _ = ferrum_ufunc::rint(&arr);
-        let _ = ferrum_ufunc::fix(&arr);
+        let _ = ferray_ufunc::round(&arr);
+        let _ = ferray_ufunc::floor(&arr);
+        let _ = ferray_ufunc::ceil(&arr);
+        let _ = ferray_ufunc::trunc(&arr);
+        let _ = ferray_ufunc::rint(&arr);
+        let _ = ferray_ufunc::fix(&arr);
     }));
 });

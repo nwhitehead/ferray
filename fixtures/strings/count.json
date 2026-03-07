@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.count",
-  "ferrum_function": "ferrum_strings::count",
+  "ferray_function": "ferray_strings::count",
   "test_cases": [
     {
       "name": "standard",

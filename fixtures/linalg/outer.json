@@ -1,6 +1,6 @@
 {
   "function": "numpy.outer",
-  "ferrum_function": "ferrum_linalg::outer",
+  "ferray_function": "ferray_linalg::outer",
   "test_cases": [
     {
       "name": "1d",

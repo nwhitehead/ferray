@@ -1,6 +1,6 @@
 {
   "function": "numpy.fft.rfft",
-  "ferrum_function": "ferrum_fft::rfft",
+  "ferray_function": "ferray_fft::rfft",
   "test_cases": [
     {
       "name": "real_8",

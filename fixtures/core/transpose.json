@@ -1,6 +1,6 @@
 {
   "function": "numpy.transpose",
-  "ferrum_function": "ferrum_core::transpose",
+  "ferray_function": "ferray_core::transpose",
   "test_cases": [
     {
       "name": "transpose_2d",

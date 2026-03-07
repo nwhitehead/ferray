@@ -1,6 +1,6 @@
 {
   "function": "numpy.min",
-  "ferrum_function": "ferrum_stats::min",
+  "ferray_function": "ferray_stats::min",
   "test_cases": [
     {
       "name": "1d_f64",

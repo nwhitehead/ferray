@@ -1,6 +1,6 @@
 {
   "function": "numpy.absolute",
-  "ferrum_function": "ferrum_ufunc::absolute",
+  "ferray_function": "ferray_ufunc::absolute",
   "test_cases": [
     {
       "name": "standard_f64",

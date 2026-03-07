@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Speed benchmark: NumPy vs ferrum.
+"""Speed benchmark: NumPy vs ferray.
 
 Measures wall-clock time for both implementations on identical workloads.
-ferrum runs in batch mode (single process) for fair cache comparison.
+ferray runs in batch mode (single process) for fair cache comparison.
 
 Usage:
     python3 benchmarks/speed_benchmark.py
@@ -20,12 +20,12 @@ SEED = 42
 WARMUP_ITERS = 3
 BENCH_ITERS = 10
 
-FERRUM_BENCH_DIR = Path(__file__).parent / "ferrum_bench"
+FERRUM_BENCH_DIR = Path(__file__).parent / "ferray_bench"
 
 
-def find_ferrum_bench():
+def find_ferray_bench():
     for profile in ["release", "debug"]:
-        candidate = FERRUM_BENCH_DIR / "target" / profile / "ferrum-bench"
+        candidate = FERRUM_BENCH_DIR / "target" / profile / "ferray-bench"
         if candidate.exists():
             return str(candidate)
     return None
@@ -48,8 +48,8 @@ def time_numpy(func, data, iters):
     return times[len(times) // 2]  # median
 
 
-def time_ferrum_batch(bench_bin, tests, warmup, iterations):
-    """Run all ferrum benchmarks in a single process via batch mode.
+def time_ferray_batch(bench_bin, tests, warmup, iterations):
+    """Run all ferray benchmarks in a single process via batch mode.
 
     Returns a dict mapping (function, size_str) -> median time in microseconds.
     """
@@ -69,7 +69,7 @@ def time_ferrum_batch(bench_bin, tests, warmup, iterations):
     )
 
     if result.returncode != 0:
-        print(f"ERROR: ferrum batch mode failed: {result.stderr}", file=sys.stderr)
+        print(f"ERROR: ferray batch mode failed: {result.stderr}", file=sys.stderr)
         return {}
 
     batch_results = json.loads(result.stdout)
@@ -96,16 +96,16 @@ def format_time(us):
 
 
 def main():
-    bench_bin = find_ferrum_bench()
+    bench_bin = find_ferray_bench()
     if bench_bin is None:
-        print("ERROR: ferrum-bench binary not found. Build with:")
+        print("ERROR: ferray-bench binary not found. Build with:")
         print(f"  cd {FERRUM_BENCH_DIR} && cargo build --release")
         sys.exit(1)
 
     rng = np.random.default_rng(SEED)
 
     print("=" * 80)
-    print("Speed Benchmark: NumPy vs ferrum")
+    print("Speed Benchmark: NumPy vs ferray")
     print("=" * 80)
     print(f"NumPy version:  {np.__version__}")
     print(f"Python version: {sys.version.split()[0]}")
@@ -139,7 +139,7 @@ def main():
                 "size": size,
                 "data": data,
                 "numpy_func": np_func,
-                "ferrum_name": func_name,
+                "ferray_name": func_name,
             })
 
     # Stats reductions
@@ -160,7 +160,7 @@ def main():
                 "size": size,
                 "data": data,
                 "numpy_func": np_func,
-                "ferrum_name": func_name,
+                "ferray_name": func_name,
             })
 
     # Matmul
@@ -177,7 +177,7 @@ def main():
             "numpy_func": lambda d, r=rows, c=cols: (
                 d[:r*c].reshape(r, c) @ d[r*c:].reshape(c, r)
             ),
-            "ferrum_name": "matmul",
+            "ferray_name": "matmul",
             "size_str": f"{rows}x{cols}",
         })
 
@@ -191,23 +191,23 @@ def main():
             "size": size,
             "data": data,
             "numpy_func": np.fft.fft,
-            "ferrum_name": "fft",
+            "ferray_name": "fft",
         })
 
-    # Build batch test list for ferrum
+    # Build batch test list for ferray
     batch_tests = []
     for bench in benchmarks:
         size_str = bench.get("size_str", str(bench["size"]))
         batch_tests.append({
-            "function": bench["ferrum_name"],
+            "function": bench["ferray_name"],
             "size": size_str,
             "data": bench["data"].tolist(),
         })
 
-    # Run ferrum batch (all tests in one process)
-    print("Running ferrum batch (single process)...")
-    ferrum_timings = time_ferrum_batch(bench_bin, batch_tests, WARMUP_ITERS, BENCH_ITERS)
-    print(f"  Got {len(ferrum_timings)} results")
+    # Run ferray batch (all tests in one process)
+    print("Running ferray batch (single process)...")
+    ferray_timings = time_ferray_batch(bench_bin, batch_tests, WARMUP_ITERS, BENCH_ITERS)
+    print(f"  Got {len(ferray_timings)} results")
     print()
 
     # Run NumPy tests and display results
@@ -223,20 +223,20 @@ def main():
         # Time NumPy
         np_us = time_numpy(bench["numpy_func"], bench["data"], BENCH_ITERS)
 
-        # Get ferrum time from batch results
-        fe_us = ferrum_timings.get((bench["ferrum_name"], size_str))
+        # Get ferray time from batch results
+        fe_us = ferray_timings.get((bench["ferray_name"], size_str))
 
         if fe_us is not None and fe_us > 0:
             ratio = fe_us / np_us
-            winner = "ferrum" if ratio < 1.0 else "numpy"
+            winner = "ferray" if ratio < 1.0 else "numpy"
             speedup = f"{1/ratio:.2f}x" if ratio < 1.0 else f"{ratio:.2f}x"
             sys.stdout.write(
-                f"numpy={format_time(np_us):>10}  ferrum={format_time(fe_us):>10}  "
-                f"{'<--' if winner == 'ferrum' else '   '} {speedup} {'faster' if winner == 'ferrum' else 'slower'}\n"
+                f"numpy={format_time(np_us):>10}  ferray={format_time(fe_us):>10}  "
+                f"{'<--' if winner == 'ferray' else '   '} {speedup} {'faster' if winner == 'ferray' else 'slower'}\n"
             )
         else:
             ratio = None
-            sys.stdout.write(f"numpy={format_time(np_us):>10}  ferrum=ERROR\n")
+            sys.stdout.write(f"numpy={format_time(np_us):>10}  ferray=ERROR\n")
 
         results.append({
             "name": bench["name"],
@@ -244,7 +244,7 @@ def main():
             "size": bench["size"],
             "size_str": size_str,
             "numpy_us": np_us,
-            "ferrum_us": fe_us,
+            "ferray_us": fe_us,
             "ratio": ratio,
         })
 
@@ -256,7 +256,7 @@ def main():
     print()
 
     current_cat = None
-    hdr = f"{'Function':<12} {'Size':<10} {'NumPy':>12} {'ferrum':>12} {'Ratio':>8} {'Winner':>8}"
+    hdr = f"{'Function':<12} {'Size':<10} {'NumPy':>12} {'ferray':>12} {'Ratio':>8} {'Winner':>8}"
     print(hdr)
     print("-" * 70)
 
@@ -268,12 +268,12 @@ def main():
             print(f"  [{current_cat.upper()}]")
 
         np_t = format_time(r["numpy_us"])
-        if r["ferrum_us"] is not None:
-            fe_t = format_time(r["ferrum_us"])
+        if r["ferray_us"] is not None:
+            fe_t = format_time(r["ferray_us"])
             ratio = r["ratio"]
             if ratio < 1.0:
                 ratio_str = f"{1/ratio:.1f}x"
-                winner = "ferrum"
+                winner = "ferray"
             else:
                 ratio_str = f"{ratio:.1f}x"
                 winner = "numpy"
@@ -296,7 +296,7 @@ def main():
             "size": r["size"],
             "size_str": r["size_str"],
             "numpy_us": r["numpy_us"],
-            "ferrum_us": r["ferrum_us"],
+            "ferray_us": r["ferray_us"],
             "ratio": r["ratio"],
         })
     with open(json_path, "w") as f:

@@ -1,9 +1,9 @@
-# Design Document: `ferrum` — A NumPy Equivalent for Rust
+# Design Document: `ferray` — A NumPy Equivalent for Rust
 
 **Status:** Proposal  
 **Version:** 0.1.0-draft  
 **Target Audience:** Rust library authors, scientific computing engineers, numerical programmers  
-**Companion document:** `rust-ml-design.md` (`ferrolearn`) — `ferrum` is its foundational dependency
+**Companion document:** `rust-ml-design.md` (`ferrolearn`) — `ferray` is its foundational dependency
 
 ---
 
@@ -15,21 +15,21 @@ The Rust ecosystem has fragments of this, but not the whole. `ndarray` provides 
 
 This separation of concerns causes friction for new users — where NumPy requires a single `import numpy`, using the equivalent Rust stack requires referring between documentation for several crates maintained by different sets of developers.
 
-`ferrum` closes this gap. It is a single crate providing the complete NumPy surface area, with Rust-native improvements where the language makes them possible. It does not replace `ndarray` or `faer` — it wraps and unifies them into a coherent whole that a practitioner can depend on without also depending on six other crates. `ferrolearn` depends on `ferrum` as its array primitive.
+`ferray` closes this gap. It is a single crate providing the complete NumPy surface area, with Rust-native improvements where the language makes them possible. It does not replace `ndarray` or `faer` — it wraps and unifies them into a coherent whole that a practitioner can depend on without also depending on six other crates. `ferrolearn` depends on `ferray` as its array primitive.
 
 ---
 
 ## 2. Design Philosophy
 
-`ferrum` differs from `ferrolearn` in a critical way: NumPy is a *primitive*, not a toolkit. Where `ferrolearn` algorithms are composable units that sit on top of an array layer, `ferrum` IS the array layer. Its design philosophy follows from this:
+`ferray` differs from `ferrolearn` in a critical way: NumPy is a *primitive*, not a toolkit. Where `ferrolearn` algorithms are composable units that sit on top of an array layer, `ferray` IS the array layer. Its design philosophy follows from this:
 
-**Completeness over minimalism.** Partial coverage of NumPy is the current state of the art and it isn't good enough. `ferrum` must cover all of NumPy's primary namespaces in a single dependency.
+**Completeness over minimalism.** Partial coverage of NumPy is the current state of the art and it isn't good enough. `ferray` must cover all of NumPy's primary namespaces in a single dependency.
 
-**One import.** `use ferrum::prelude::*` should cover 95% of use cases, just as `import numpy as np` does in Python.
+**One import.** `use ferray::prelude::*` should cover 95% of use cases, just as `import numpy as np` does in Python.
 
 **No mandatory system dependencies.** The default build must compile on any Rust target without requiring OpenBLAS, LAPACK, or any system library. BLAS/LAPACK acceleration is opt-in via feature flags.
 
-**Rust improvements over NumPy where possible.** The borrow checker, type generics, and const generics let `ferrum` make guarantees at compile time that NumPy cannot — dimensionality mismatches, type errors, and mutability violations should be compiler errors, not runtime exceptions. Where Rust can prove correctness statically, it must.
+**Rust improvements over NumPy where possible.** The borrow checker, type generics, and const generics let `ferray` make guarantees at compile time that NumPy cannot — dimensionality mismatches, type errors, and mutability violations should be compiler errors, not runtime exceptions. Where Rust can prove correctness statically, it must.
 
 **Numerical parity with NumPy.** The same six-layer correctness stack from `ferrolearn` applies here in full.
 
@@ -37,20 +37,20 @@ This separation of concerns causes friction for new users — where NumPy requir
 
 ## 3. Relationship to Existing Crates
 
-`ferrum` is not a fork or replacement of any existing crate. It is a unification layer.
+`ferray` is not a fork or replacement of any existing crate. It is a unification layer.
 
-| Existing crate | Role in `ferrum` |
+| Existing crate | Role in `ferray` |
 |---|---|
-| `ndarray` | Used internally as the storage engine for `ferrum-core`. `ferrum::Array` is **not** a newtype or re-export — it is an owned type with its own public API. Conversion traits (`From<ndarray::Array>`, `Into<ndarray::Array>`) are provided for interoperability, but `ndarray` does not appear in `ferrum`'s public type signatures. This insulates users from ndarray version churn and avoids the diamond-dependency problem that would arise if ndarray were part of the public ABI. |
-| `faer` | Powers all BLAS-level operations internally via the `ferrum::linalg` module |
-| `rustfft` | Powers `ferrum::fft` internally |
-| `ndarray-linalg` | Superseded by `ferrum::linalg`, which wraps `faer` directly rather than LAPACK |
-| `ndarray-rand` | Superseded by `ferrum::random`, which implements NumPy's Generator/BitGenerator model |
-| `ndarray-stats` | Superseded by `ferrum`'s statistics methods on arrays |
+| `ndarray` | Used internally as the storage engine for `ferray-core`. `ferray::Array` is **not** a newtype or re-export — it is an owned type with its own public API. Conversion traits (`From<ndarray::Array>`, `Into<ndarray::Array>`) are provided for interoperability, but `ndarray` does not appear in `ferray`'s public type signatures. This insulates users from ndarray version churn and avoids the diamond-dependency problem that would arise if ndarray were part of the public ABI. |
+| `faer` | Powers all BLAS-level operations internally via the `ferray::linalg` module |
+| `rustfft` | Powers `ferray::fft` internally |
+| `ndarray-linalg` | Superseded by `ferray::linalg`, which wraps `faer` directly rather than LAPACK |
+| `ndarray-rand` | Superseded by `ferray::random`, which implements NumPy's Generator/BitGenerator model |
+| `ndarray-stats` | Superseded by `ferray`'s statistics methods on arrays |
 | `num-complex` | `Complex<f32>` and `Complex<f64>` are the complex element types throughout |
 | `half` | `f16` support (for ML workloads) |
 
-Users who have existing code using `ndarray` can interoperate with `ferrum` directly: `ferrum::Array` implements `From<ndarray::Array>` and `Into<ndarray::Array>`. These conversions are zero-copy where memory layouts are compatible. Because `ndarray` is not part of the public API surface, users do not need to add `ndarray` as a direct dependency — `ferrum` manages the version internally.
+Users who have existing code using `ndarray` can interoperate with `ferray` directly: `ferray::Array` implements `From<ndarray::Array>` and `Into<ndarray::Array>`. These conversions are zero-copy where memory layouts are compatible. Because `ndarray` is not part of the public API surface, users do not need to add `ndarray` as a direct dependency — `ferray` manages the version internally.
 
 ---
 
@@ -91,7 +91,7 @@ pub type F64Array2 = Array2<f64>;
 
 ### 4.2 Ownership Model
 
-Unlike NumPy — which allows multiple arrays to mutably alias the same data, tracked only at runtime — `ferrum` expresses ownership in the type system:
+Unlike NumPy — which allows multiple arrays to mutably alias the same data, tracked only at runtime — `ferray` expresses ownership in the type system:
 
 | Type alias | Ownership | NumPy equivalent |
 |---|---|---|
@@ -103,11 +103,11 @@ Unlike NumPy — which allows multiple arrays to mutably alias the same data, tr
 
 **`ArcArray` copy-on-write semantics:** `ArcArray` wraps the data buffer in an `Arc`. A mutation (any operation requiring `&mut` access to elements) triggers a clone of the buffer if the `Arc` reference count is greater than 1, then proceeds on the cloned buffer. Views (`ArrayView`) derived from an `ArcArray` hold a clone of the `Arc` — they keep the buffer alive and prevent CoW from being triggered on the *view*. If the originating `ArcArray` is mutated after a view is taken, the view continues to see the old data (it holds the old `Arc`). There is no silent invalidation. The invariant: a live `ArrayView<'a, ..>` derived from an `ArcArray` always observes the data that existed at the moment the view was created, regardless of subsequent mutations to the source.
 
-This is a strict improvement over NumPy. Aliasing bugs — where two views of the same array are modified in conflicting ways — are a known source of subtle NumPy errors that `ferrum` makes impossible at compile time.
+This is a strict improvement over NumPy. Aliasing bugs — where two views of the same array are modified in conflicting ways — are a known source of subtle NumPy errors that `ferray` makes impossible at compile time.
 
 ### 4.3 Dtype System
 
-NumPy's dtype system is one of its most powerful features and the hardest to replicate in Rust. `ferrum` must support all NumPy numeric dtypes as Rust generic parameters:
+NumPy's dtype system is one of its most powerful features and the hardest to replicate in Rust. `ferray` must support all NumPy numeric dtypes as Rust generic parameters:
 
 **Floating point:** `f16`, `f32`, `f64`, `Complex<f32>`, `Complex<f64>`  
 **Signed integers:** `i8`, `i16`, `i32`, `i64`, `i128`  
@@ -125,13 +125,13 @@ struct Point {
     label: i32,
 }
 
-let points: Array1<Point> = ferrum::zeros(100);  // array-of-structs layout: [x0,y0,label0, x1,y1,label1, ...]
+let points: Array1<Point> = ferray::zeros(100);  // array-of-structs layout: [x0,y0,label0, x1,y1,label1, ...]
 let xs: ArrayView1<f64> = points.field("x");     // zero-copy strided view of the x field
 ```
 
 ### 4.4 Broadcasting
 
-`ferrum` implements NumPy's full broadcasting rules, including the cases that `ndarray` currently cannot handle. Broadcasting is implemented generically over dimension type and does not require materializing the broadcast array unless the operation demands it.
+`ferray` implements NumPy's full broadcasting rules, including the cases that `ndarray` currently cannot handle. Broadcasting is implemented generically over dimension type and does not require materializing the broadcast array unless the operation demands it.
 
 Broadcasting rules (identical to NumPy):
 1. If arrays have different numbers of dimensions, prepend `1`s to the shape of the smaller-dimensioned array
@@ -139,25 +139,25 @@ Broadcasting rules (identical to NumPy):
 3. Arrays whose sizes disagree and neither is `1` produce a `ShapeError`
 
 ```rust
-let a: Array2<f64> = ferrum::ones((4, 3));
-let b: Array1<f64> = ferrum::array([1.0, 2.0, 3.0]);
+let a: Array2<f64> = ferray::ones((4, 3));
+let b: Array1<f64> = ferray::array([1.0, 2.0, 3.0]);
 let c = &a + &b;  // Broadcasts b from (3,) to (4, 3) — works
-let d: Array2<f64> = ferrum::ones((4, 1));
+let d: Array2<f64> = ferray::ones((4, 1));
 let e = &a * &d;  // Broadcasts d from (4, 1) to (4, 3) — works
 
 // Binary broadcasting between two non-trivial shapes:
-let x: Array3<f32> = ferrum::zeros((2, 1, 4));
-let y: Array2<f32> = ferrum::ones((3, 4));
+let x: Array3<f32> = ferray::zeros((2, 1, 4));
+let y: Array2<f32> = ferray::ones((3, 4));
 let z = &x + &y;  // z.shape() == [2, 3, 4]
 ```
 
 ### 4.5 Indexing
 
-`ferrum` must support all NumPy indexing modes:
+`ferray` must support all NumPy indexing modes:
 
 **Basic indexing** — integer and slice indexing, always returns a view:
 ```rust
-let a = ferrum::arange(0.0f64, 12.0, 1.0).reshape((3, 4));
+let a = ferray::arange(0.0f64, 12.0, 1.0).reshape((3, 4));
 let row = a.slice(s![1, ..]);        // row 1
 let col = a.slice(s![.., 2]);        // column 2
 let sub = a.slice(s![..2, 1..3]);    // submatrix
@@ -165,17 +165,17 @@ let sub = a.slice(s![..2, 1..3]);    // submatrix
 
 **Advanced (fancy) indexing** — integer array or boolean array indexing, always returns a copy:
 ```rust
-let idx = ferrum::array([0usize, 2]);
+let idx = ferray::array([0usize, 2]);
 let rows = a.index_select(Axis(0), &idx);  // select rows 0 and 2
 
-let mask: Array2<bool> = &a > &ferrum::scalar(5.0);
+let mask: Array2<bool> = &a > &ferray::scalar(5.0);
 let selected = a.boolean_index(&mask);     // 1D array of elements where mask is true
 a.boolean_index_assign(&mask, 0.0);        // np.ndarray[mask] = 0
 ```
 
 **`np.newaxis` / `None` indexing:**
 ```rust
-let v: Array1<f64> = ferrum::ones(5);
+let v: Array1<f64> = ferray::ones(5);
 let col: Array2<f64> = v.insert_axis(Axis(1));  // shape (5,) → (5, 1)
 ```
 
@@ -183,54 +183,54 @@ let col: Array2<f64> = v.insert_axis(Axis(1));  // shape (5,) → (5, 1)
 
 ## 5. Array Creation
 
-All NumPy array creation routines must be present in the `ferrum` top-level namespace:
+All NumPy array creation routines must be present in the `ferray` top-level namespace:
 
 ### 5.1 From Data
 ```rust
-ferrum::array([1.0, 2.0, 3.0])               // np.array(...)
-ferrum::asarray(&existing_vec)               // np.asarray(...)
-ferrum::frombuffer(&bytes, dtype: f32)       // np.frombuffer(...)
-ferrum::fromiter(iter, count: 100)           // np.fromiter(...)
+ferray::array([1.0, 2.0, 3.0])               // np.array(...)
+ferray::asarray(&existing_vec)               // np.asarray(...)
+ferray::frombuffer(&bytes, dtype: f32)       // np.frombuffer(...)
+ferray::fromiter(iter, count: 100)           // np.fromiter(...)
 ```
 
 ### 5.2 Ones, Zeros, Empty
 ```rust
-ferrum::zeros((3, 4))                        // np.zeros
-ferrum::ones((3, 4))                         // np.ones
-ferrum::full((3, 4), 7.5f64)                // np.full
-ferrum::zeros_like(&other)                  // np.zeros_like
-ferrum::ones_like(&other)
-ferrum::full_like(&other, 0.0)
+ferray::zeros((3, 4))                        // np.zeros
+ferray::ones((3, 4))                         // np.ones
+ferray::full((3, 4), 7.5f64)                // np.full
+ferray::zeros_like(&other)                  // np.zeros_like
+ferray::ones_like(&other)
+ferray::full_like(&other, 0.0)
 
 // np.empty — uninitialized allocation.
 // Returns Array<MaybeUninit<T>, D>; caller must initialize all elements
 // before calling .assume_init() to obtain Array<T, D>.
 // This forces explicit acknowledgment of uninitialized state rather than
 // silently handing back a typed array with garbage values.
-ferrum::empty((3, 4))                        // → Array2<MaybeUninit<f64>>
-ferrum::empty_like(&other)                   // → Array<MaybeUninit<T>, D>
+ferray::empty((3, 4))                        // → Array2<MaybeUninit<f64>>
+ferray::empty_like(&other)                   // → Array<MaybeUninit<T>, D>
 ```
 
 ### 5.3 Ranges and Grids
 ```rust
-ferrum::arange(0.0, 10.0, 0.5)              // np.arange
-ferrum::linspace(0.0, 1.0, 50)             // np.linspace
-ferrum::logspace(0.0, 3.0, 10)             // np.logspace
-ferrum::geomspace(1.0, 1000.0, 4)          // np.geomspace
-ferrum::meshgrid(&[&x, &y])                // np.meshgrid
-ferrum::mgrid(s![0.0..1.0:0.1])            // np.mgrid
-ferrum::ogrid(s![0.0..1.0:0.1])            // np.ogrid
+ferray::arange(0.0, 10.0, 0.5)              // np.arange
+ferray::linspace(0.0, 1.0, 50)             // np.linspace
+ferray::logspace(0.0, 3.0, 10)             // np.logspace
+ferray::geomspace(1.0, 1000.0, 4)          // np.geomspace
+ferray::meshgrid(&[&x, &y])                // np.meshgrid
+ferray::mgrid(s![0.0..1.0:0.1])            // np.mgrid
+ferray::ogrid(s![0.0..1.0:0.1])            // np.ogrid
 ```
 
 ### 5.4 Identity and Diagonal
 ```rust
-ferrum::eye::<f64>(4)                       // np.eye(4)
-ferrum::identity::<f64>(4)                  // np.identity(4)
-ferrum::diag(&v, k: 0)                      // np.diag
-ferrum::diagflat(&v)                        // np.diagflat
-ferrum::tri::<f64>(3, 3, 0)                // np.tri
-ferrum::tril(&a, k: 0)                      // np.tril
-ferrum::triu(&a, k: 0)                      // np.triu
+ferray::eye::<f64>(4)                       // np.eye(4)
+ferray::identity::<f64>(4)                  // np.identity(4)
+ferray::diag(&v, k: 0)                      // np.diag
+ferray::diagflat(&v)                        // np.diagflat
+ferray::tri::<f64>(3, 3, 0)                // np.tri
+ferray::tril(&a, k: 0)                      // np.tril
+ferray::triu(&a, k: 0)                      // np.triu
 ```
 
 ---
@@ -249,12 +249,12 @@ a.broadcast_to((4, 3, 2))                   // np.broadcast_to — zero-copy
 
 ### 6.2 Joining and Splitting
 ```rust
-ferrum::concatenate(arrays: &[&dyn AnyArray], axis: 0)   // np.concatenate
-ferrum::stack(arrays: &[&dyn AnyArray], axis: 0)          // np.stack
-ferrum::vstack(arrays: &[&dyn AnyArray])                  // np.vstack
-ferrum::hstack(arrays: &[&dyn AnyArray])                  // np.hstack
-ferrum::dstack(arrays: &[&dyn AnyArray])                  // np.dstack
-ferrum::block(nested: &[&[&dyn AnyArray]])                // np.block
+ferray::concatenate(arrays: &[&dyn AnyArray], axis: 0)   // np.concatenate
+ferray::stack(arrays: &[&dyn AnyArray], axis: 0)          // np.stack
+ferray::vstack(arrays: &[&dyn AnyArray])                  // np.vstack
+ferray::hstack(arrays: &[&dyn AnyArray])                  // np.hstack
+ferray::dstack(arrays: &[&dyn AnyArray])                  // np.dstack
+ferray::block(nested: &[&[&dyn AnyArray]])                // np.block
 
 a.split(3, axis: 0)                                       // np.split
 a.array_split(5, axis: 0)                                 // np.array_split
@@ -280,7 +280,7 @@ a.roll(shift: 3, axis: 0)                  // np.roll
 
 ## 7. Mathematical Functions (ufuncs)
 
-NumPy's universal function (ufunc) machinery is its core performance primitive — elementwise operations that broadcast, type-promote, and support output arrays. `ferrum` must implement the complete ufunc surface.
+NumPy's universal function (ufunc) machinery is its core performance primitive — elementwise operations that broadcast, type-promote, and support output arrays. `ferray` must implement the complete ufunc surface.
 
 ### 7.1 The `Ufunc` Trait
 
@@ -365,7 +365,7 @@ All functions are available both as free functions and as array methods.
 
 ---
 
-## 8. Linear Algebra (`ferrum::linalg`)
+## 8. Linear Algebra (`ferray::linalg`)
 
 Mirrors `numpy.linalg` completely. Internally powered by `faer` with an optional BLAS backend.
 
@@ -415,16 +415,16 @@ linalg::trace(&a)                            // np.trace
 
 ### 8.5 Stacked Array Operations
 
-A key improvement over NumPy: all `linalg` functions that accept 2D arrays must also accept stacked arrays (3D+) and apply the operation along the last two axes, parallelized via Rayon. NumPy added this progressively and inconsistently; `ferrum` requires it for all linalg functions from day one.
+A key improvement over NumPy: all `linalg` functions that accept 2D arrays must also accept stacked arrays (3D+) and apply the operation along the last two axes, parallelized via Rayon. NumPy added this progressively and inconsistently; `ferray` requires it for all linalg functions from day one.
 
 ```rust
-let batch: Array3<f64> = ferrum::random::standard_normal((100, 4, 4));
+let batch: Array3<f64> = ferray::random::standard_normal((100, 4, 4));
 let det: Array1<f64> = linalg::det(&batch);  // 100 determinants, parallelized
 ```
 
 ---
 
-## 9. Fast Fourier Transform (`ferrum::fft`)
+## 9. Fast Fourier Transform (`ferray::fft`)
 
 Mirrors `numpy.fft` completely. Internally powered by `rustfft`.
 
@@ -455,7 +455,7 @@ fft::fftshift(&a, axes: None)                                  // np.fft.fftshif
 fft::ifftshift(&a, axes: None)                                 // np.fft.ifftshift
 ```
 
-**Plan caching:** `rustfft` uses planning to optimize FFTs for repeated calls with the same size. `ferrum::fft` must expose a `FftPlan` type that caches the plan and can be reused:
+**Plan caching:** `rustfft` uses planning to optimize FFTs for repeated calls with the same size. `ferray::fft` must expose a `FftPlan` type that caches the plan and can be reused:
 
 ```rust
 let plan = fft::FftPlan::new(1024);
@@ -466,7 +466,7 @@ for signal in signals.iter() {
 
 ---
 
-## 10. Random Number Generation (`ferrum::random`)
+## 10. Random Number Generation (`ferray::random`)
 
 Mirrors `numpy.random`'s modern Generator API (not the legacy `np.random.*` module functions). This is one of the most commonly needed and most scattered parts of the current Rust ecosystem.
 
@@ -553,7 +553,7 @@ rng.choice(&a, size: 10, replace: false, p: None) // np.random.choice
 
 ---
 
-## 11. Polynomial Arithmetic (`ferrum::polynomial`)
+## 11. Polynomial Arithmetic (`ferray::polynomial`)
 
 Mirrors `numpy.polynomial` completely. Provides polynomial representations with stable numerical behavior.
 
@@ -624,13 +624,13 @@ pub trait Poly: Sized + ToPowerBasis + FromPowerBasis {
 
 ---
 
-## 12. String Operations (`ferrum::strings`)
+## 12. String Operations (`ferray::strings`)
 
 Mirrors `numpy.strings` (NumPy 2.0+). Vectorized string operations on arrays of strings, operating elementwise with broadcasting.
 
 ```rust
-let a: StringArray1 = ferrum::strings::array(["hello", "world", "foo"]);
-let b: StringArray1 = ferrum::strings::array(["HELLO", "WORLD", "BAR"]);
+let a: StringArray1 = ferray::strings::array(["hello", "world", "foo"]);
+let b: StringArray1 = ferray::strings::array(["HELLO", "WORLD", "BAR"]);
 
 strings::add(&a, &b)                    // elementwise concatenation
 strings::multiply(&a, 3)               // "hellohellohello"
@@ -652,7 +652,7 @@ strings::find(&a, sub: "ll")           // → Array1<i64>
 strings::count(&a, sub: "l")           // → Array1<usize>
 strings::split(&a, sep: " ")           // → Array1<Vec<String>>
                                         //   ragged output: each element is a Vec of the split parts.
-                                        //   ferrum does not have a jagged array type; Array1<Vec<String>>
+                                        //   ferray does not have a jagged array type; Array1<Vec<String>>
                                         //   is the Rust-idiomatic representation for this case.
 strings::join(sep: "-", sequence: &a)  // → Array1<String>
 
@@ -665,7 +665,7 @@ strings::extract(&a, pattern: r"(\w+)") // → StringArray
 
 ## 13. Statistics Functions
 
-These are array methods and free functions in the top-level `ferrum` namespace, not a submodule:
+These are array methods and free functions in the top-level `ferray` namespace, not a submodule:
 
 ```rust
 a.sum(axis: None)                              // np.sum
@@ -693,25 +693,25 @@ a.nanmedian(axis: None)
 a.nanpercentile(&a, q: 50.0, axis: None)
 
 // Correlations and covariance
-ferrum::correlate(&a, &v, mode: CorrelateMode::Full)  // np.correlate
-ferrum::corrcoef(&x, rowvar: true)                    // np.corrcoef
-ferrum::cov(&m, rowvar: true, ddof: 1)                // np.cov
+ferray::correlate(&a, &v, mode: CorrelateMode::Full)  // np.correlate
+ferray::corrcoef(&x, rowvar: true)                    // np.corrcoef
+ferray::cov(&m, rowvar: true, ddof: 1)                // np.cov
 
 // Histograms
-ferrum::histogram(&a, bins: 10, range: None, density: false)   // np.histogram
-ferrum::histogram2d(&x, &y, bins: 10)                          // np.histogram2d
-ferrum::histogramdd(&sample, bins: 10)                         // np.histogramdd
-ferrum::bin_count(&x, weights: None, minlength: 0)             // np.bincount
-ferrum::digitize(&x, &bins, right: false)                      // np.digitize
+ferray::histogram(&a, bins: 10, range: None, density: false)   // np.histogram
+ferray::histogram2d(&x, &y, bins: 10)                          // np.histogram2d
+ferray::histogramdd(&sample, bins: 10)                         // np.histogramdd
+ferray::bin_count(&x, weights: None, minlength: 0)             // np.bincount
+ferray::digitize(&x, &bins, right: false)                      // np.digitize
 
 // Sorting and searching
 a.sort(axis: -1, kind: SortKind::Stable)               // np.sort
 a.argsort(axis: -1)                                    // np.argsort
-ferrum::searchsorted(&a, &v, side: Side::Left)         // np.searchsorted
-ferrum::unique(&a, return_index: false, return_counts: false)   // np.unique
-ferrum::nonzero(&a)                                    // np.nonzero
-ferrum::where_(&condition, &x, &y)                     // np.where
-ferrum::count_nonzero(&a, axis: None)                  // np.count_nonzero
+ferray::searchsorted(&a, &v, side: Side::Left)         // np.searchsorted
+ferray::unique(&a, return_index: false, return_counts: false)   // np.unique
+ferray::nonzero(&a)                                    // np.nonzero
+ferray::where_(&condition, &x, &y)                     // np.where
+ferray::count_nonzero(&a, axis: None)                  // np.count_nonzero
 ```
 
 ---
@@ -719,17 +719,17 @@ ferrum::count_nonzero(&a, axis: None)                  // np.count_nonzero
 ## 14. Set Operations
 
 ```rust
-ferrum::union1d(&a, &b)                        // np.union1d
-ferrum::intersect1d(&a, &b, assume_unique: false)  // np.intersect1d
-ferrum::setdiff1d(&a, &b, assume_unique: false)    // np.setdiff1d
-ferrum::setxor1d(&a, &b, assume_unique: false)     // np.setxor1d
-ferrum::in1d(&a, &test, assume_unique: false)      // np.in1d
-ferrum::isin(&element, &test_elements)             // np.isin
+ferray::union1d(&a, &b)                        // np.union1d
+ferray::intersect1d(&a, &b, assume_unique: false)  // np.intersect1d
+ferray::setdiff1d(&a, &b, assume_unique: false)    // np.setdiff1d
+ferray::setxor1d(&a, &b, assume_unique: false)     // np.setxor1d
+ferray::in1d(&a, &test, assume_unique: false)      // np.in1d
+ferray::isin(&element, &test_elements)             // np.isin
 ```
 
 ---
 
-## 15. I/O (`ferrum::io`)
+## 15. I/O (`ferray::io`)
 
 Mirrors `numpy.lib.npyio` — serialization to `.npy` and `.npz` formats, and text I/O.
 
@@ -776,7 +776,7 @@ pub enum DynArray {
 
 ### 16.1 Type Promotion Rules
 
-`ferrum` follows NumPy's promotion rules for mixed-type operations. The rule is: the output type is the smallest type that can represent all values of both input types without loss of precision.
+`ferray` follows NumPy's promotion rules for mixed-type operations. The rule is: the output type is the smallest type that can represent all values of both input types without loss of precision.
 
 | Lhs | Rhs | Result |
 |---|---|---|
@@ -789,32 +789,32 @@ pub enum DynArray {
 | `Complex<f32>` | `f64` | `Complex<f64>` |
 | `bool` | `i32` | `i32` |
 
-Mixed-type binary operations on arrays do **not** compile implicitly. The caller must either call `.astype()` to convert explicitly, or use `ferrum::add_promoted(&a, &b)` which returns `NdArray<promoted_type!(A, B), _>`. The `promoted_type!` macro resolves at compile time where both types are known statically; for dynamic dtypes it resolves at runtime via `ferrum::result_type`.
+Mixed-type binary operations on arrays do **not** compile implicitly. The caller must either call `.astype()` to convert explicitly, or use `ferray::add_promoted(&a, &b)` which returns `NdArray<promoted_type!(A, B), _>`. The `promoted_type!` macro resolves at compile time where both types are known statically; for dynamic dtypes it resolves at runtime via `ferray::result_type`.
 
-This is a deliberate difference from NumPy, where `np.array([1], dtype=np.int32) + np.array([1.0], dtype=np.float32)` silently promotes. Silent promotion is a footgun when the intent was to operate on same-type arrays — `ferrum` surfaces it as a type error and provides an explicit escape hatch.
+This is a deliberate difference from NumPy, where `np.array([1], dtype=np.int32) + np.array([1.0], dtype=np.float32)` silently promotes. Silent promotion is a footgun when the intent was to operate on same-type arrays — `ferray` surfaces it as a type error and provides an explicit escape hatch.
 
 ### 16.2 Cast and Inspect Functions
 
 ```rust
 a.astype::<f32>()                              // a.astype(np.float32)
 a.view::<u8>()                                 // reinterpret memory layout
-ferrum::result_type::<f32, i64>()             // np.result_type
-ferrum::can_cast::<f32, f64>(CastKind::Safe)  // np.can_cast
-ferrum::common_type(&[dtype1, dtype2])         // np.common_type
-ferrum::min_scalar_type(3.14f64)              // np.min_scalar_type
-ferrum::promote_types::<i32, f64>()           // np.promote_types
+ferray::result_type::<f32, i64>()             // np.result_type
+ferray::can_cast::<f32, f64>(CastKind::Safe)  // np.can_cast
+ferray::common_type(&[dtype1, dtype2])         // np.common_type
+ferray::min_scalar_type(3.14f64)              // np.min_scalar_type
+ferray::promote_types::<i32, f64>()           // np.promote_types
 
 // Type checking predicates
-ferrum::issubdtype::<f32, FloatingPoint>()    // np.issubdtype
-ferrum::isrealobj(&a)                          // np.isrealobj
-ferrum::iscomplexobj(&a)                       // np.iscomplexobj
+ferray::issubdtype::<f32, FloatingPoint>()    // np.issubdtype
+ferray::isrealobj(&a)                          // np.isrealobj
+ferray::iscomplexobj(&a)                       // np.iscomplexobj
 ```
 
 ---
 
-## 17. Stride Tricks and Views (`ferrum::lib::stride_tricks`)
+## 17. Stride Tricks and Views (`ferray::lib::stride_tricks`)
 
-`as_strided` is marked `unsafe` because it can construct overlapping views of the same memory, which is unsound with Rust's aliasing rules if the resulting view is used mutably. This is an explicit exception to `ferrum`'s general guarantee that aliasing bugs are impossible — it is the intentional escape hatch for operations (windowed convolution, Toeplitz construction, overlapping tiles) that require it. The safety contract is documented at the call site.
+`as_strided` is marked `unsafe` because it can construct overlapping views of the same memory, which is unsound with Rust's aliasing rules if the resulting view is used mutably. This is an explicit exception to `ferray`'s general guarantee that aliasing bugs are impossible — it is the intentional escape hatch for operations (windowed convolution, Toeplitz construction, overlapping tiles) that require it. The safety contract is documented at the call site.
 
 ```rust
 // SAFE: non-overlapping strides, equivalent to a reshape
@@ -829,19 +829,19 @@ let overlapping: ArrayView2<f64> = unsafe {
 // SAFE variants (no unsafe required):
 stride_tricks::sliding_window_view(&a, window_shape: (3,))      // np.lib.stride_tricks.sliding_window_view — read-only views only
 stride_tricks::broadcast_to(&a, shape: (10, 3, 4))              // np.broadcast_to — always read-only
-ferrum::broadcast_arrays(&[&a, &b])                             // np.broadcast_arrays
-ferrum::broadcast_shapes(&[(3, 1), (1, 4)])                     // np.broadcast_shapes
+ferray::broadcast_arrays(&[&a, &b])                             // np.broadcast_arrays
+ferray::broadcast_shapes(&[(3, 1), (1, 4)])                     // np.broadcast_shapes
 ```
 
 ---
 
-## 18. Masked Arrays (`ferrum::ma`)
+## 18. Masked Arrays (`ferray::ma`)
 
 Masked arrays allow representing missing or invalid data inline with the array — equivalent to `numpy.ma`.
 
 ```rust
-let data = ferrum::array([1.0, 2.0, f64::NAN, 4.0, 5.0]);
-let mask = ferrum::array([false, false, true, false, false]);
+let data = ferray::array([1.0, 2.0, f64::NAN, 4.0, 5.0]);
+let mask = ferray::array([false, false, true, false, false]);
 let ma = ma::MaskedArray::new(data, mask);
 
 ma.mean()                    // ignores masked elements
@@ -861,7 +861,7 @@ ma::masked_less(&a, 0.0)
 
 All inner loops that operate on contiguous memory must be SIMD-accelerated. This is not optional — it is a performance correctness requirement.
 
-**Runtime CPU dispatch is required.** Compile-time SIMD width selection alone is insufficient: a binary compiled for the `x86_64` baseline target would not use AVX2 even on a machine that has it. `ferrum` uses the `multiversion` crate (or equivalent `#[target_feature]` + runtime detection) to ship one binary that selects the widest available SIMD path at startup via `cpuid`:
+**Runtime CPU dispatch is required.** Compile-time SIMD width selection alone is insufficient: a binary compiled for the `x86_64` baseline target would not use AVX2 even on a machine that has it. `ferray` uses the `multiversion` crate (or equivalent `#[target_feature]` + runtime detection) to ship one binary that selects the widest available SIMD path at startup via `cpuid`:
 
 - 512-bit (AVX-512) if available
 - 256-bit (AVX2) if available
@@ -909,20 +909,20 @@ fn add_f64_contiguous(a: &[f64], b: &[f64], out: &mut [f64]) {
 
 ## 20. Parallelism
 
-`ferrum` uses Rayon for automatic parallelism on operations that are large enough to benefit. The threshold for parallel dispatch is calibrated so that small arrays do not incur threading overhead.
+`ferray` uses Rayon for automatic parallelism on operations that are large enough to benefit. The threshold for parallel dispatch is calibrated so that small arrays do not incur threading overhead.
 
 ```rust
 // Parallel operations are transparent to the user:
-let large: Array2<f64> = ferrum::random::standard_normal((10_000, 10_000));
+let large: Array2<f64> = ferray::random::standard_normal((10_000, 10_000));
 let result = (&large * 2.0 + 1.0).mapv(f64::exp);  // auto-parallelized via Rayon
 
-// Thread count control uses a ferrum-owned thread pool, not Rayon's global pool.
+// Thread count control uses a ferray-owned thread pool, not Rayon's global pool.
 // This avoids the "first initializer wins" problem when multiple crates share the
-// Rayon global pool. ferrum initializes its own rayon::ThreadPool at first use.
-ferrum::set_num_threads(4);
+// Rayon global pool. ferray initializes its own rayon::ThreadPool at first use.
+ferray::set_num_threads(4);
 
 // Scoped serial execution via a per-call ThreadPool:
-ferrum::with_num_threads(1, || { /* serial execution — uses a 1-thread pool */ });
+ferray::with_num_threads(1, || { /* serial execution — uses a 1-thread pool */ });
 // Note: with_num_threads creates a temporary ThreadPool per call; avoid in hot paths.
 ```
 
@@ -932,7 +932,7 @@ Parallel dispatch thresholds are calibrated empirically per operation class and 
 - Reductions (`sum`, `min`, `max`): parallel above ~10k elements with tree-reduce
 - Matrix multiplication: always parallel via `faer`'s threading model
 
-Thresholds are exposed as configurable constants (`ferrum::config::PARALLEL_THRESHOLD_ELEMENTWISE`, etc.) so downstream users can tune for their hardware. All parallel code must be deterministic when floating-point associativity is not required; reductions may differ in operand ordering across parallel runs — this is documented explicitly.
+Thresholds are exposed as configurable constants (`ferray::config::PARALLEL_THRESHOLD_ELEMENTWISE`, etc.) so downstream users can tune for their hardware. All parallel code must be deterministic when floating-point associativity is not required; reductions may differ in operand ordering across parallel runs — this is documented explicitly.
 
 ---
 
@@ -940,7 +940,7 @@ Thresholds are exposed as configurable constants (`ferrum::config::PARALLEL_THRE
 
 ### 21.1 Buffer Protocol
 
-`ferrum` arrays must implement a safe buffer protocol allowing zero-copy interoperation with other memory-owning types:
+`ferray` arrays must implement a safe buffer protocol allowing zero-copy interoperation with other memory-owning types:
 
 ```rust
 pub trait AsRawBuffer {
@@ -955,12 +955,12 @@ pub trait AsRawBuffer {
 
 ### 21.2 PyO3 / NumPy Interop
 
-A `ferrum-numpy` companion crate (feature-flagged, not part of the main crate) provides zero-copy conversion between `ferrum::Array` and NumPy arrays via PyO3:
+A `ferray-numpy` companion crate (feature-flagged, not part of the main crate) provides zero-copy conversion between `ferray::Array` and NumPy arrays via PyO3:
 
 ```rust
 #[pyo3::pyfunction]
 fn process(py: Python, np_array: PyReadonlyArray2<f64>) -> PyResult<Py<PyArray2<f64>>> {
-    let arr: ferrum::Array2<f64> = np_array.as_ferrum()?;  // zero-copy
+    let arr: ferray::Array2<f64> = np_array.as_ferray()?;  // zero-copy
     let result = arr.mapv(f64::sqrt);
     Ok(result.into_pyarray(py).into())
 }
@@ -968,11 +968,11 @@ fn process(py: Python, np_array: PyReadonlyArray2<f64>) -> PyResult<Py<PyArray2<
 
 ### 21.3 Arrow and Polars Interop
 
-`ferrum` arrays must be convertible to/from Apache Arrow `ArrayData` with zero copy where memory layouts are compatible:
+`ferray` arrays must be convertible to/from Apache Arrow `ArrayData` with zero copy where memory layouts are compatible:
 
 ```rust
-let arrow_array: arrow::array::Float64Array = ferrum_array.to_arrow()?;
-let ferrum_array: ferrum::Array1<f64> = arrow_array.into_ferrum()?;
+let arrow_array: arrow::array::Float64Array = ferray_array.to_arrow()?;
+let ferray_array: ferray::Array1<f64> = arrow_array.into_ferray()?;
 ```
 
 ---
@@ -1001,7 +1001,7 @@ pub enum FerrumError {
 
 ## 23. Correctness Verification
 
-The full six-layer correctness stack from `ferrolearn` Section 20 applies to `ferrum` in its entirety, with the following `ferrum`-specific additions:
+The full six-layer correctness stack from `ferrolearn` Section 20 applies to `ferray` in its entirety, with the following `ferray`-specific additions:
 
 **Oracle fixture generation** must use NumPy's output as ground truth. For every function, fixtures must cover all supported dtypes (`f32`, `f64`, `Complex<f64>`, relevant integer types), all valid shapes from 0-D to 5-D, and all edge cases (empty arrays, single-element arrays, NaN/Inf inputs, very large and very small values).
 
@@ -1016,20 +1016,20 @@ The full six-layer correctness stack from `ferrolearn` Section 20 applies to `fe
 ## 24. Crate Structure
 
 ```
-ferrum/
-├── ferrum/                  # Main crate — one import covers everything
-├── ferrum-core/             # NdArray type, Dimension, DType, FerrumError
-├── ferrum-ufunc/            # Ufunc trait + all elementwise math
-├── ferrum-linalg/           # numpy.linalg — wraps faer
-├── ferrum-fft/              # numpy.fft — wraps rustfft  
-├── ferrum-random/           # numpy.random — Generator/BitGenerator model
-├── ferrum-polynomial/       # numpy.polynomial — all polynomial classes
-├── ferrum-strings/          # numpy.strings — vectorized string ops
-├── ferrum-stats/            # Statistical functions
-├── ferrum-io/               # .npy/.npz, loadtxt, savetxt
-├── ferrum-ma/               # Masked arrays
-├── ferrum-stride-tricks/    # as_strided, sliding_window_view
-└── ferrum-numpy/            # PyO3 interop (optional, behind feature flag)
+ferray/
+├── ferray/                  # Main crate — one import covers everything
+├── ferray-core/             # NdArray type, Dimension, DType, FerrumError
+├── ferray-ufunc/            # Ufunc trait + all elementwise math
+├── ferray-linalg/           # numpy.linalg — wraps faer
+├── ferray-fft/              # numpy.fft — wraps rustfft  
+├── ferray-random/           # numpy.random — Generator/BitGenerator model
+├── ferray-polynomial/       # numpy.polynomial — all polynomial classes
+├── ferray-strings/          # numpy.strings — vectorized string ops
+├── ferray-stats/            # Statistical functions
+├── ferray-io/               # .npy/.npz, loadtxt, savetxt
+├── ferray-ma/               # Masked arrays
+├── ferray-stride-tricks/    # as_strided, sliding_window_view
+└── ferray-numpy/            # PyO3 interop (optional, behind feature flag)
 ```
 
 Feature flags on the main crate:
@@ -1042,8 +1042,8 @@ Feature flags on the main crate:
 | `simd` | Yes | SIMD-accelerated inner loops |
 | `complex` | Yes | Complex number support |
 | `f16` | No | Half-precision float support |
-| `strings` | Yes | `ferrum::strings` module |
-| `ma` | Yes | `ferrum::ma` masked array module |
+| `strings` | Yes | `ferray::strings` module |
+| `ma` | Yes | `ferray::ma` masked array module |
 | `io` | Yes | `.npy`/`.npz` file I/O |
 | `serde` | No | Serialize/deserialize arrays via serde |
 | `arrow` | No | Apache Arrow interop |
@@ -1057,7 +1057,7 @@ Feature flags on the main crate:
 
 **Minimum Supported Rust Version:** 1.78 (stable, May 2024) — required for stabilized `std::simd`.
 
-The public API of `ferrum` must reach 1.0 before `ferrolearn` can reach 1.0, since `ferrolearn` depends on `ferrum` as a primitive. The API stability contract at 1.0:
+The public API of `ferray` must reach 1.0 before `ferrolearn` can reach 1.0, since `ferrolearn` depends on `ferray` as a primitive. The API stability contract at 1.0:
 - No breaking changes to public types, traits, or function signatures without a major version bump
 - **Numerical output stability:** for a fixed compiler version, target architecture, and feature flag set, output does not change between patch versions. A global guarantee of ≤1 ULP across compiler and toolchain updates is not feasible — LLVM floating-point optimization passes and FMA legalization differ between LLVM versions, and locking the LLVM version across patch releases is impractical. The guarantee is scoped to a fixed build environment.
 - Changes that alter numerical output under a fixed build environment (e.g., replacing an approximation algorithm) are breaking and require a minor version bump with a changelog entry documenting the maximum observed difference.
@@ -1075,24 +1075,24 @@ The public API of `ferrum` must reach 1.0 before `ferrolearn` can reach 1.0, sin
 - All array manipulation (reshape, concatenate, stack, transpose, etc.)
 - Complete ufunc surface (all math, bitwise, comparison, logical)
 - SIMD paths for `f32` and `f64` on x86_64 and aarch64
-- `ferrum::stats` (sum, mean, var, sort, unique, etc.)
+- `ferray::stats` (sum, mean, var, sort, unique, etc.)
 - `.npy` / `.npz` I/O
 
 ### Phase 2 — Submodules (Months 5–8)
-- `ferrum::linalg` — full numpy.linalg parity including `einsum`
-- `ferrum::fft` — full numpy.fft parity with plan caching
-- `ferrum::random` — full Generator API with all distributions
-- `ferrum::polynomial` — all polynomial classes
+- `ferray::linalg` — full numpy.linalg parity including `einsum`
+- `ferray::fft` — full numpy.fft parity with plan caching
+- `ferray::random` — full Generator API with all distributions
+- `ferray::polynomial` — all polynomial classes
 - Rayon parallelism throughout
 - Fixture test suite against NumPy for all P0 functions
 
 ### Phase 3 — Completeness (Months 9–12)
-- `ferrum::strings` — full numpy.strings
-- `ferrum::ma` — masked arrays
-- `ferrum::stride_tricks`
+- `ferray::strings` — full numpy.strings
+- `ferray::ma` — masked arrays
+- `ferray::stride_tricks`
 - Structured dtype support via derive macro
 - Arrow and Polars interop
-- `ferrum-numpy` PyO3 companion crate
+- `ferray-numpy` PyO3 companion crate
 - Fuzz corpus (24 CPU-hours)
 - Statistical equivalence benchmark suite
 
@@ -1108,17 +1108,17 @@ The public API of `ferrum` must reach 1.0 before `ferrolearn` can reach 1.0, sin
 
 | Crate / Library | Relationship |
 |---|---|
-| `ndarray` | Used internally as the storage backend for `ferrum-core`. Not part of the public API; insulates users from ndarray version churn |
-| `faer` | Powers all `ferrum::linalg` operations internally |
-| `rustfft` | Powers `ferrum::fft` internally |
-| `nalgebra` | Complementary — fixed-size, compile-time-checked matrices; `ferrum` covers dynamic |
-| `ndarray-linalg` | Superseded by `ferrum::linalg` for users who want a single dependency |
-| `ndarray-rand` | Superseded by `ferrum::random` |
-| `ndarray-stats` | Superseded by `ferrum` statistics methods |
+| `ndarray` | Used internally as the storage backend for `ferray-core`. Not part of the public API; insulates users from ndarray version churn |
+| `faer` | Powers all `ferray::linalg` operations internally |
+| `rustfft` | Powers `ferray::fft` internally |
+| `nalgebra` | Complementary — fixed-size, compile-time-checked matrices; `ferray` covers dynamic |
+| `ndarray-linalg` | Superseded by `ferray::linalg` for users who want a single dependency |
+| `ndarray-rand` | Superseded by `ferray::random` |
+| `ndarray-stats` | Superseded by `ferray` statistics methods |
 | `num-complex` | `Complex<f32>` / `Complex<f64>` used as element types |
-| `candle` | Deep learning framework that could depend on `ferrum` as its array primitive |
-| `polars` | DataFrame library; `ferrum` arrays interop with Polars Series via Arrow |
-| `ferrolearn` | Depends on `ferrum` as its foundational array layer |
+| `candle` | Deep learning framework that could depend on `ferray` as its array primitive |
+| `polars` | DataFrame library; `ferray` arrays interop with Polars Series via Arrow |
+| `ferrolearn` | Depends on `ferray` as its foundational array layer |
 
 **Key improvements over NumPy itself:**
 
@@ -1128,7 +1128,7 @@ The public API of `ferrum` must reach 1.0 before `ferrolearn` can reach 1.0, sin
 - Uninitialized arrays (`empty`) return `Array<MaybeUninit<T>, D>`, forcing explicit initialization before use rather than silently handing back a typed array with garbage values
 - Broadcasting failures are compile errors for statically-known shapes (Phase 4 const generics work)
 - Mixed-type operations require explicit promotion rather than silent type coercion
-- All parallel code is explicitly opt-in via a ferrum-owned Rayon pool rather than implicitly controlled by environment variables (contrast: NumPy's `OMP_NUM_THREADS`)
+- All parallel code is explicitly opt-in via a ferray-owned Rayon pool rather than implicitly controlled by environment variables (contrast: NumPy's `OMP_NUM_THREADS`)
 - Zero-cost zero-copy views are enforced by the type system rather than tracked at runtime
 
 ---

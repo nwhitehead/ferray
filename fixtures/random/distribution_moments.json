@@ -1,6 +1,6 @@
 {
   "function": "numpy.random.Generator",
-  "ferrum_function": "ferrum_random::Generator",
+  "ferray_function": "ferray_random::Generator",
   "test_cases": [
     {
       "name": "standard_normal_moments",

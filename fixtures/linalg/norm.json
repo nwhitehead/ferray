@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.norm",
-  "ferrum_function": "ferrum_linalg::norm",
+  "ferray_function": "ferray_linalg::norm",
   "test_cases": [
     {
       "name": "vector_l2",

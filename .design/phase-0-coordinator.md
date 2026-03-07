@@ -1,12 +1,12 @@
 # Feature: Phase 0 — Build Coordinator
 
 ## Summary
-A single orchestration document that, when kicked off, autonomously builds the entire ferrum library across five phases by spawning, monitoring, and merging the work of ~27 subagents. The coordinator reads the per-crate design docs in `.design/`, spawns agents in dependency-graph order, gates phase transitions on acceptance criteria, recovers stuck agents, and merges worktrees into a coherent codebase. The human's role reduces to approving phase gates and resolving any issues the coordinator escalates.
+A single orchestration document that, when kicked off, autonomously builds the entire ferray library across five phases by spawning, monitoring, and merging the work of ~27 subagents. The coordinator reads the per-crate design docs in `.design/`, spawns agents in dependency-graph order, gates phase transitions on acceptance criteria, recovers stuck agents, and merges worktrees into a coherent codebase. The human's role reduces to approving phase gates and resolving any issues the coordinator escalates.
 
 ## Requirements
 
 ### Orchestration Core
-- REQ-1: The coordinator reads `.design/ferrum-*.md` and `.design/phase-{4,5}-*.md` as its authoritative task definitions — it does not invent work beyond what the design docs specify
+- REQ-1: The coordinator reads `.design/ferray-*.md` and `.design/phase-{4,5}-*.md` as its authoritative task definitions — it does not invent work beyond what the design docs specify
 - REQ-2: Agents are spawned using the `Agent` tool with `isolation: "worktree"` so each works on an isolated copy of the repo
 - REQ-3: The coordinator maintains the dependency DAG (documented below) and never spawns an agent before its dependencies have been merged to the integration branch
 - REQ-4: Phase transitions (1→2, 2→3, 3→4, 4→5) are gated on all acceptance criteria for the completing phase passing — verified by running `cargo test --workspace` and `cargo clippy --workspace` on the integration branch
@@ -30,7 +30,7 @@ A single orchestration document that, when kicked off, autonomously builds the e
 - REQ-18: At the end of Phase 5, create a PR from `dev` to `main`
 
 ## Acceptance Criteria
-- [ ] AC-1: Running `crosslink kickoff run "Build ferrum" --doc .design/phase-0-coordinator.md` produces a working library with no further human intervention (beyond phase gate approvals)
+- [ ] AC-1: Running `crosslink kickoff run "Build ferray" --doc .design/phase-0-coordinator.md` produces a working library with no further human intervention (beyond phase gate approvals)
 - [ ] AC-2: All acceptance criteria across phases 1-5 pass on the final `dev` branch
 - [ ] AC-3: Every agent's work is tracked via a crosslink issue with typed comments
 - [ ] AC-4: No agent is left stuck for more than 10 minutes without coordinator intervention
@@ -44,7 +44,7 @@ A single orchestration document that, when kicked off, autonomously builds the e
 ```
 Phase 1: Foundation
   ┌─────────────────────────────────────────────────────┐
-  │  Agent 1a: ferrum-core-types (BLOCKING)             │
+  │  Agent 1a: ferray-core-types (BLOCKING)             │
   │    → NdArray, Dimension, DType, Error, ownership    │
   │    → introspection, iterators, Display              │
   │    → Model: opus (architectural foundation)         │
@@ -144,24 +144,24 @@ Phase 5: Verification  ▼
 
 | Agent | Crate / Task | Model | Rationale |
 |-------|-------------|-------|-----------|
-| 1a | ferrum-core-types | opus | Architectural foundation — NdArray, ownership, traits, iterators, Display |
-| 1b | ferrum-core-indexing | opus | Broadcasting + basic/advanced/extended indexing |
-| 1c | ferrum-core-creation-manipulation | sonnet | Array creation, shape manipulation, pad/tile/repeat, constants, finfo |
-| 1d | ferrum-core-macros | sonnet | FerrumRecord proc macro, s![] macro, promoted_type! macro |
-| 2 | ferrum-ufunc | opus | SIMD dispatch via pulp, 100+ function implementations, cumsum/diff/convolve/interp |
-| 3 | ferrum-stats | sonnet | Standard reduction algorithms, cumulative ops, well-defined math |
-| 4 | ferrum-io | sonnet | Binary format parsing, straightforward I/O |
-| 5 | workspace + ferrum reexport | sonnet | Cargo.toml scaffolding, re-exports, constants, pool cache |
-| 6 | ferrum-linalg | opus | einsum parser, faer bridge, batched operations, multi_dot, matrix_power |
-| 7 | ferrum-fft | sonnet | Wraps rustfft, plan caching |
-| 8 | ferrum-random | sonnet | Well-documented distribution implementations |
-| 9 | ferrum-polynomial | sonnet | Standard polynomial arithmetic |
-| 9b | ferrum-window | sonnet | Window functions + vectorize/piecewise/apply_along_axis |
+| 1a | ferray-core-types | opus | Architectural foundation — NdArray, ownership, traits, iterators, Display |
+| 1b | ferray-core-indexing | opus | Broadcasting + basic/advanced/extended indexing |
+| 1c | ferray-core-creation-manipulation | sonnet | Array creation, shape manipulation, pad/tile/repeat, constants, finfo |
+| 1d | ferray-core-macros | sonnet | FerrumRecord proc macro, s![] macro, promoted_type! macro |
+| 2 | ferray-ufunc | opus | SIMD dispatch via pulp, 100+ function implementations, cumsum/diff/convolve/interp |
+| 3 | ferray-stats | sonnet | Standard reduction algorithms, cumulative ops, well-defined math |
+| 4 | ferray-io | sonnet | Binary format parsing, straightforward I/O |
+| 5 | workspace + ferray reexport | sonnet | Cargo.toml scaffolding, re-exports, constants, pool cache |
+| 6 | ferray-linalg | opus | einsum parser, faer bridge, batched operations, multi_dot, matrix_power |
+| 7 | ferray-fft | sonnet | Wraps rustfft, plan caching |
+| 8 | ferray-random | sonnet | Well-documented distribution implementations |
+| 9 | ferray-polynomial | sonnet | Standard polynomial arithmetic |
+| 9b | ferray-window | sonnet | Window functions + vectorize/piecewise/apply_along_axis |
 | 10 | Phase 2 integration | opus | Cross-crate interface resolution |
-| 11 | ferrum-strings | sonnet | Straightforward string operations |
-| 12 | ferrum-ma | sonnet | Mask propagation logic, ufunc support, sorting, mask ops |
-| 13 | ferrum-stride-tricks | sonnet | Small crate, well-defined semantics |
-| 14 | ferrum-numpy-interop | sonnet | PyO3 + Arrow integration plumbing |
+| 11 | ferray-strings | sonnet | Straightforward string operations |
+| 12 | ferray-ma | sonnet | Mask propagation logic, ufunc support, sorting, mask ops |
+| 13 | ferray-stride-tricks | sonnet | Small crate, well-defined semantics |
+| 14 | ferray-numpy-interop | sonnet | PyO3 + Arrow integration plumbing |
 | 15 | Phase 3 integration | opus | Cross-crate resolution, full feature flag testing |
 | 16 | f16 support | sonnet | Additions to existing crates |
 | 17 | no_std core | sonnet | Conditional compilation |
@@ -175,23 +175,23 @@ Phase 5: Verification  ▼
 
 **Breakdown: 11 opus, 16 sonnet, fixups opus (27 agents total)**
 
-**NOTE**: ferrum-core is split into 4 sub-agents (1a-1d). Agent 1a must finish before 1b/1c/1d start. The coordinator merges all 4 before starting Phase 1 parallel agents (2-5).
+**NOTE**: ferray-core is split into 4 sub-agents (1a-1d). Agent 1a must finish before 1b/1c/1d start. The coordinator merges all 4 before starting Phase 1 parallel agents (2-5).
 
 ### CLAUDE.md Project Conventions
 
 Written by the coordinator at startup:
 
 ```markdown
-# ferrum — Project Conventions
+# ferray — Project Conventions
 
 ## Rust Edition & MSRV
 - Edition: 2024
 - MSRV: 1.85 (stable)
 
 ## Import Paths
-- Core types: `use ferrum_core::{NdArray, Array1, Array2, ArrayD, ArrayView, Dimension}`
-- Errors: `use ferrum_core::FerrumError`
-- Element trait: `use ferrum_core::Element`
+- Core types: `use ferray_core::{NdArray, Array1, Array2, ArrayD, ArrayView, Dimension}`
+- Errors: `use ferray_core::FerrumError`
+- Element trait: `use ferray_core::Element`
 - Complex: `use num_complex::Complex`
 
 ## Error Handling
@@ -201,7 +201,7 @@ Written by the coordinator at startup:
 - Every error variant carries diagnostic context
 
 ## Numeric Generics
-- Element bound: `T: Element` (defined in ferrum-core)
+- Element bound: `T: Element` (defined in ferray-core)
 - Float-specific: `T: Element + Float` (uses num_traits::Float)
 - Support f32, f64, Complex<f32>, Complex<f64>, and integer types
 

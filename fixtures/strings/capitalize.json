@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.capitalize",
-  "ferrum_function": "ferrum_strings::capitalize",
+  "ferray_function": "ferray_strings::capitalize",
   "test_cases": [
     {
       "name": "standard",

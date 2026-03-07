@@ -1,6 +1,6 @@
 {
   "function": "numpy.isnan",
-  "ferrum_function": "ferrum_ufunc::isnan",
+  "ferray_function": "ferray_ufunc::isnan",
   "test_cases": [
     {
       "name": "standard",

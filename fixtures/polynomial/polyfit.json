@@ -1,6 +1,6 @@
 {
   "function": "numpy.polyfit",
-  "ferrum_function": "ferrum_polynomial::Polynomial::fit",
+  "ferray_function": "ferray_polynomial::Polynomial::fit",
   "test_cases": [
     {
       "name": "degree_1",

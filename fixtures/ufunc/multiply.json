@@ -1,6 +1,6 @@
 {
   "function": "numpy.multiply",
-  "ferrum_function": "ferrum_ufunc::multiply",
+  "ferray_function": "ferray_ufunc::multiply",
   "test_cases": [
     {
       "name": "standard_f64",

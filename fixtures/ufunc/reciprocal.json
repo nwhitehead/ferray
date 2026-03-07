@@ -1,6 +1,6 @@
 {
   "function": "numpy.reciprocal",
-  "ferrum_function": "ferrum_ufunc::reciprocal",
+  "ferray_function": "ferray_ufunc::reciprocal",
   "test_cases": [
     {
       "name": "standard_f64",

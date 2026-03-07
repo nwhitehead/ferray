@@ -1,6 +1,6 @@
 {
   "function": "numpy.fft.fftshift",
-  "ferrum_function": "ferrum_fft::fftshift",
+  "ferray_function": "ferray_fft::fftshift",
   "test_cases": [
     {
       "name": "1d_8",

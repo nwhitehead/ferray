@@ -1,13 +1,13 @@
-# ferrum — Project Conventions
+# ferray — Project Conventions
 
 ## Rust Edition & MSRV
 - Edition: 2024
 - MSRV: 1.85 (stable)
 
 ## Import Paths
-- Core types: `use ferrum_core::{NdArray, Array1, Array2, ArrayD, ArrayView, Dimension}`
-- Errors: `use ferrum_core::FerrumError`
-- Element trait: `use ferrum_core::Element`
+- Core types: `use ferray_core::{NdArray, Array1, Array2, ArrayD, ArrayView, Dimension}`
+- Errors: `use ferray_core::FerrumError`
+- Element trait: `use ferray_core::Element`
 - Complex: `use num_complex::Complex`
 
 ## Error Handling
@@ -17,7 +17,7 @@
 - Every error variant carries diagnostic context
 
 ## Numeric Generics
-- Element bound: `T: Element` (defined in ferrum-core)
+- Element bound: `T: Element` (defined in ferray-core)
 - Float-specific: `T: Element + Float` (uses num_traits::Float)
 - Support f32, f64, Complex<f32>, Complex<f64>, and integer types
 

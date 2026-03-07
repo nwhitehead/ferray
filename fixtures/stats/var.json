@@ -1,6 +1,6 @@
 {
   "function": "numpy.var",
-  "ferrum_function": "ferrum_stats::var",
+  "ferray_function": "ferray_stats::var",
   "test_cases": [
     {
       "name": "ddof0_1d",

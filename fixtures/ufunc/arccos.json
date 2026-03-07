@@ -1,6 +1,6 @@
 {
   "function": "numpy.arccos",
-  "ferrum_function": "ferrum_ufunc::arccos",
+  "ferray_function": "ferray_ufunc::arccos",
   "test_cases": [
     {
       "name": "standard_f64",

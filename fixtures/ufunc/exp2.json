@@ -1,6 +1,6 @@
 {
   "function": "numpy.exp2",
-  "ferrum_function": "ferrum_ufunc::exp2",
+  "ferray_function": "ferray_ufunc::exp2",
   "test_cases": [
     {
       "name": "standard_f64",

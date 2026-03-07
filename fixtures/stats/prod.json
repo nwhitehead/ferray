@@ -1,6 +1,6 @@
 {
   "function": "numpy.prod",
-  "ferrum_function": "ferrum_stats::prod",
+  "ferray_function": "ferray_stats::prod",
   "test_cases": [
     {
       "name": "1d_f64",

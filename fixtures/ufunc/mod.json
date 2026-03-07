@@ -1,6 +1,6 @@
 {
   "function": "numpy.mod",
-  "ferrum_function": "ferrum_ufunc::mod_",
+  "ferray_function": "ferray_ufunc::mod_",
   "test_cases": [
     {
       "name": "standard",

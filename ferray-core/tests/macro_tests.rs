@@ -1,0 +1,285 @@
+// Integration tests for ferray-core-macros
+//
+// These tests exercise the proc macros (FerrumRecord, s!, promoted_type!)
+// from the consumer perspective — i.e., they use the macros via ferray-core's
+// public re-exports, just as a downstream crate would.
+
+use ferray_core::dtype::{DType, SliceInfoElem};
+use ferray_core::record::FerrumRecord;
+
+// ---------------------------------------------------------------------------
+// #[derive(FerrumRecord)] tests
+// ---------------------------------------------------------------------------
+
+#[repr(C)]
+#[derive(Clone, Debug, ferray_core::FerrumRecord)]
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+#[repr(C)]
+#[derive(Clone, Debug, ferray_core::FerrumRecord)]
+struct Measurement {
+    time: f64,
+    value: f32,
+    count: i32,
+    flag: bool,
+}
+
+#[test]
+fn derive_record_field_count() {
+    let fields = Point::field_descriptors();
+    assert_eq!(fields.len(), 2);
+}
+
+#[test]
+fn derive_record_field_names() {
+    let fields = Point::field_descriptors();
+    assert_eq!(fields[0].name, "x");
+    assert_eq!(fields[1].name, "y");
+}
+
+#[test]
+fn derive_record_field_dtypes() {
+    let fields = Point::field_descriptors();
+    assert_eq!(fields[0].dtype, DType::F64);
+    assert_eq!(fields[1].dtype, DType::F64);
+}
+
+#[test]
+fn derive_record_field_offsets() {
+    let fields = Point::field_descriptors();
+    // #[repr(C)] struct with two f64 fields: offset 0 and 8
+    assert_eq!(fields[0].offset, 0);
+    assert_eq!(fields[1].offset, 8);
+}
+
+#[test]
+fn derive_record_field_sizes() {
+    let fields = Point::field_descriptors();
+    assert_eq!(fields[0].size, 8);
+    assert_eq!(fields[1].size, 8);
+}
+
+#[test]
+fn derive_record_size() {
+    assert_eq!(Point::record_size(), std::mem::size_of::<Point>());
+    assert_eq!(Point::record_size(), 16);
+}
+
+#[test]
+fn derive_record_field_by_name() {
+    let fd = Point::field_by_name("y").unwrap();
+    assert_eq!(fd.dtype, DType::F64);
+    assert_eq!(fd.offset, 8);
+
+    assert!(Point::field_by_name("z").is_none());
+}
+
+#[test]
+fn derive_record_multi_type() {
+    let fields = Measurement::field_descriptors();
+    assert_eq!(fields.len(), 4);
+
+    assert_eq!(fields[0].name, "time");
+    assert_eq!(fields[0].dtype, DType::F64);
+
+    assert_eq!(fields[1].name, "value");
+    assert_eq!(fields[1].dtype, DType::F32);
+
+    assert_eq!(fields[2].name, "count");
+    assert_eq!(fields[2].dtype, DType::I32);
+
+    assert_eq!(fields[3].name, "flag");
+    assert_eq!(fields[3].dtype, DType::Bool);
+}
+
+#[test]
+fn derive_record_multi_type_size() {
+    assert_eq!(
+        Measurement::record_size(),
+        std::mem::size_of::<Measurement>()
+    );
+    // f64(8) + f32(4) + i32(4) + bool(1) + padding(7) = 24 for repr(C)
+    // The exact size depends on alignment, but it's at least 17
+    assert!(Measurement::record_size() >= 17);
+}
+
+// ---------------------------------------------------------------------------
+// s![] macro tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn s_macro_single_index() {
+    let slices = ferray_core::s![3];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(slices[0], SliceInfoElem::Index(3));
+}
+
+#[test]
+fn s_macro_full_range() {
+    let slices = ferray_core::s![..];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 0,
+            end: None,
+            step: 1,
+        }
+    );
+}
+
+#[test]
+fn s_macro_range() {
+    let slices = ferray_core::s![1..5];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 1,
+            end: Some(5),
+            step: 1,
+        }
+    );
+}
+
+#[test]
+fn s_macro_range_from() {
+    let slices = ferray_core::s![2..];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 2,
+            end: None,
+            step: 1,
+        }
+    );
+}
+
+#[test]
+fn s_macro_range_to() {
+    let slices = ferray_core::s![..5];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 0,
+            end: Some(5),
+            step: 1,
+        }
+    );
+}
+
+#[test]
+fn s_macro_range_with_step() {
+    let slices = ferray_core::s![1..5;2];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 1,
+            end: Some(5),
+            step: 2,
+        }
+    );
+}
+
+#[test]
+fn s_macro_full_range_with_step() {
+    let slices = ferray_core::s![..;3];
+    assert_eq!(slices.len(), 1);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 0,
+            end: None,
+            step: 3,
+        }
+    );
+}
+
+#[test]
+fn s_macro_multi_axis() {
+    let slices = ferray_core::s![0..3, 2];
+    assert_eq!(slices.len(), 2);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 0,
+            end: Some(3),
+            step: 1,
+        }
+    );
+    assert_eq!(slices[1], SliceInfoElem::Index(2));
+}
+
+#[test]
+fn s_macro_all_rows_step_cols() {
+    let slices = ferray_core::s![.., 0..;2];
+    assert_eq!(slices.len(), 2);
+    assert_eq!(
+        slices[0],
+        SliceInfoElem::Slice {
+            start: 0,
+            end: None,
+            step: 1,
+        }
+    );
+    assert_eq!(
+        slices[1],
+        SliceInfoElem::Slice {
+            start: 0,
+            end: None,
+            step: 2,
+        }
+    );
+}
+
+// ---------------------------------------------------------------------------
+// promoted_type! macro tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn promoted_type_f32_f64() {
+    // promoted_type!(f32, f64) should resolve to f64
+    let _: ferray_core::promoted_type!(f32, f64) = 1.0f64;
+}
+
+#[test]
+fn promoted_type_i32_f32() {
+    // i32 + f32 -> f64 (because i32 needs 53-bit mantissa)
+    let _: ferray_core::promoted_type!(i32, f32) = 1.0f64;
+}
+
+#[test]
+fn promoted_type_u8_i8() {
+    // u8 + i8 -> i16
+    let _: ferray_core::promoted_type!(u8, i8) = 1i16;
+}
+
+#[test]
+fn promoted_type_same() {
+    let _: ferray_core::promoted_type!(f64, f64) = 1.0f64;
+    let _: ferray_core::promoted_type!(i32, i32) = 1i32;
+}
+
+#[test]
+fn promoted_type_bool_int() {
+    let _: ferray_core::promoted_type!(bool, i32) = 1i32;
+}
+
+#[test]
+fn promoted_type_complex() {
+    let _: ferray_core::promoted_type!(Complex<f32>, f64) =
+        num_complex::Complex::new(1.0f64, 0.0f64);
+}
+
+use num_complex::Complex;
+
+#[test]
+fn promoted_type_complex_f32() {
+    let _: ferray_core::promoted_type!(f32, Complex<f32>) = Complex::new(1.0f32, 0.0f32);
+}

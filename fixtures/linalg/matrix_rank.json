@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.matrix_rank",
-  "ferrum_function": "ferrum_linalg::matrix_rank",
+  "ferray_function": "ferray_linalg::matrix_rank",
   "test_cases": [
     {
       "name": "rank_2",

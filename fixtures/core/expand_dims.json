@@ -1,6 +1,6 @@
 {
   "function": "numpy.expand_dims",
-  "ferrum_function": "ferrum_core::expand_dims",
+  "ferray_function": "ferray_core::expand_dims",
   "test_cases": [
     {
       "name": "expand_dims_axis0",

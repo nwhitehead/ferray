@@ -1,6 +1,6 @@
 {
   "function": "numpy.sqrt",
-  "ferrum_function": "ferrum_ufunc::sqrt",
+  "ferray_function": "ferray_ufunc::sqrt",
   "test_cases": [
     {
       "name": "standard_f64",

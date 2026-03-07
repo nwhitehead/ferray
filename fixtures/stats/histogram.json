@@ -1,6 +1,6 @@
 {
   "function": "numpy.histogram",
-  "ferrum_function": "ferrum_stats::histogram",
+  "ferray_function": "ferray_stats::histogram",
   "test_cases": [
     {
       "name": "5_bins",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.arcsin",
-  "ferrum_function": "ferrum_ufunc::arcsin",
+  "ferray_function": "ferray_ufunc::arcsin",
   "test_cases": [
     {
       "name": "standard_f64",

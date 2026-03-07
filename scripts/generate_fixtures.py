@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate NumPy oracle fixtures for the ferrum test suite.
+Generate NumPy oracle fixtures for the ferray test suite.
 
 Produces JSON files under fixtures/ organized by subcrate.
 Each fixture contains inputs, expected outputs, and tolerance information.
@@ -72,11 +72,11 @@ def save_fixture(subdir, filename, fixture):
     print(f"  -> {path.relative_to(FIXTURES_DIR.parent)}")
 
 
-def make_fixture(np_func_name, ferrum_func_name, test_cases):
+def make_fixture(np_func_name, ferray_func_name, test_cases):
     """Build a fixture dict."""
     return {
         "function": np_func_name,
-        "ferrum_function": ferrum_func_name,
+        "ferray_function": ferray_func_name,
         "test_cases": test_cases,
     }
 
@@ -115,7 +115,7 @@ def generate_core_fixtures():
             array_to_dict(arr, dt),
             tolerance_ulps=0,
         ))
-    save_fixture("core", "arange.json", make_fixture("numpy.arange", "ferrum_core::arange", cases))
+    save_fixture("core", "arange.json", make_fixture("numpy.arange", "ferray_core::arange", cases))
 
     # --- linspace ---
     cases = []
@@ -134,7 +134,7 @@ def generate_core_fixtures():
             array_to_dict(arr, dt),
             tolerance_ulps=1,
         ))
-    save_fixture("core", "linspace.json", make_fixture("numpy.linspace", "ferrum_core::linspace", cases))
+    save_fixture("core", "linspace.json", make_fixture("numpy.linspace", "ferray_core::linspace", cases))
 
     # --- zeros ---
     cases = []
@@ -153,7 +153,7 @@ def generate_core_fixtures():
             array_to_dict(arr, dt),
             tolerance_ulps=0,
         ))
-    save_fixture("core", "zeros.json", make_fixture("numpy.zeros", "ferrum_core::zeros", cases))
+    save_fixture("core", "zeros.json", make_fixture("numpy.zeros", "ferray_core::zeros", cases))
 
     # --- ones ---
     cases = []
@@ -171,7 +171,7 @@ def generate_core_fixtures():
             array_to_dict(arr, dt),
             tolerance_ulps=0,
         ))
-    save_fixture("core", "ones.json", make_fixture("numpy.ones", "ferrum_core::ones", cases))
+    save_fixture("core", "ones.json", make_fixture("numpy.ones", "ferray_core::ones", cases))
 
     # --- eye ---
     cases = []
@@ -190,7 +190,7 @@ def generate_core_fixtures():
             array_to_dict(arr, dt),
             tolerance_ulps=0,
         ))
-    save_fixture("core", "eye.json", make_fixture("numpy.eye", "ferrum_core::eye", cases))
+    save_fixture("core", "eye.json", make_fixture("numpy.eye", "ferray_core::eye", cases))
 
     # --- full ---
     cases = []
@@ -208,7 +208,7 @@ def generate_core_fixtures():
             array_to_dict(arr, dt),
             tolerance_ulps=0,
         ))
-    save_fixture("core", "full.json", make_fixture("numpy.full", "ferrum_core::full", cases))
+    save_fixture("core", "full.json", make_fixture("numpy.full", "ferray_core::full", cases))
 
     # --- reshape ---
     cases = []
@@ -221,7 +221,7 @@ def generate_core_fixtures():
             array_to_dict(arr),
             tolerance_ulps=0,
         ))
-    save_fixture("core", "reshape.json", make_fixture("numpy.reshape", "ferrum_core::reshape", cases))
+    save_fixture("core", "reshape.json", make_fixture("numpy.reshape", "ferray_core::reshape", cases))
 
     # --- transpose ---
     cases = []
@@ -229,7 +229,7 @@ def generate_core_fixtures():
     cases.append(case("transpose_2d", {"x": array_to_dict(a2d)}, array_to_dict(a2d.T), tolerance_ulps=0))
     a3d = np.arange(24, dtype="float64").reshape(2, 3, 4)
     cases.append(case("transpose_3d", {"x": array_to_dict(a3d)}, array_to_dict(a3d.transpose()), tolerance_ulps=0))
-    save_fixture("core", "transpose.json", make_fixture("numpy.transpose", "ferrum_core::transpose", cases))
+    save_fixture("core", "transpose.json", make_fixture("numpy.transpose", "ferray_core::transpose", cases))
 
     # --- flatten ---
     cases = []
@@ -237,7 +237,7 @@ def generate_core_fixtures():
     cases.append(case("flatten_2d", {"x": array_to_dict(a2d)}, array_to_dict(a2d.flatten()), tolerance_ulps=0))
     a3d = np.arange(24, dtype="float64").reshape(2, 3, 4)
     cases.append(case("flatten_3d", {"x": array_to_dict(a3d)}, array_to_dict(a3d.flatten()), tolerance_ulps=0))
-    save_fixture("core", "flatten.json", make_fixture("numpy.ndarray.flatten", "ferrum_core::flatten", cases))
+    save_fixture("core", "flatten.json", make_fixture("numpy.ndarray.flatten", "ferray_core::flatten", cases))
 
     # --- squeeze ---
     cases = []
@@ -245,7 +245,7 @@ def generate_core_fixtures():
     cases.append(case("squeeze_1x6x1", {"x": array_to_dict(a)}, array_to_dict(a.squeeze()), tolerance_ulps=0))
     a2 = np.arange(4, dtype="float64").reshape(1, 1, 4)
     cases.append(case("squeeze_1x1x4", {"x": array_to_dict(a2)}, array_to_dict(a2.squeeze()), tolerance_ulps=0))
-    save_fixture("core", "squeeze.json", make_fixture("numpy.squeeze", "ferrum_core::squeeze", cases))
+    save_fixture("core", "squeeze.json", make_fixture("numpy.squeeze", "ferray_core::squeeze", cases))
 
     # --- expand_dims ---
     cases = []
@@ -253,7 +253,7 @@ def generate_core_fixtures():
     for axis in [0, 1]:
         r = np.expand_dims(a, axis)
         cases.append(case(f"expand_dims_axis{axis}", {"x": array_to_dict(a), "axis": axis}, array_to_dict(r), tolerance_ulps=0))
-    save_fixture("core", "expand_dims.json", make_fixture("numpy.expand_dims", "ferrum_core::expand_dims", cases))
+    save_fixture("core", "expand_dims.json", make_fixture("numpy.expand_dims", "ferray_core::expand_dims", cases))
 
     # --- broadcast_shapes ---
     cases = []
@@ -273,7 +273,7 @@ def generate_core_fixtures():
             {"shape": result},
             tolerance_ulps=0,
         ))
-    save_fixture("core", "broadcast_shapes.json", make_fixture("numpy.broadcast_shapes", "ferrum_core::broadcast_shapes", cases))
+    save_fixture("core", "broadcast_shapes.json", make_fixture("numpy.broadcast_shapes", "ferray_core::broadcast_shapes", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -291,7 +291,7 @@ def _standard_float_inputs():
     }
 
 
-def _generate_unary_ufunc(np_func, np_name, ferrum_name, subdir, filename,
+def _generate_unary_ufunc(np_func, np_name, ferray_name, subdir, filename,
                           inputs_override=None, tolerance=4, extra_cases=None):
     """Generate fixture for a unary ufunc."""
     cases = []
@@ -347,10 +347,10 @@ def _generate_unary_ufunc(np_func, np_name, ferrum_name, subdir, filename,
     if extra_cases:
         cases.extend(extra_cases)
 
-    save_fixture(subdir, filename, make_fixture(np_name, ferrum_name, cases))
+    save_fixture(subdir, filename, make_fixture(np_name, ferray_name, cases))
 
 
-def _generate_binary_ufunc(np_func, np_name, ferrum_name, subdir, filename,
+def _generate_binary_ufunc(np_func, np_name, ferray_name, subdir, filename,
                            inputs_override=None, tolerance=4):
     """Generate fixture for a binary ufunc."""
     cases = []
@@ -422,7 +422,7 @@ def _generate_binary_ufunc(np_func, np_name, ferrum_name, subdir, filename,
         cases.append(case("empty", {"a": array_to_dict(ae), "b": array_to_dict(be)},
                           array_to_dict(re), tolerance_ulps=0))
 
-    save_fixture(subdir, filename, make_fixture(np_name, ferrum_name, cases))
+    save_fixture(subdir, filename, make_fixture(np_name, ferray_name, cases))
 
 
 def generate_ufunc_fixtures():
@@ -439,11 +439,11 @@ def generate_ufunc_fixtures():
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0, -0.0], dtype="float64"),
     }
 
-    _generate_unary_ufunc(np.sin, "numpy.sin", "ferrum_ufunc::sin", "ufunc", "sin.json",
+    _generate_unary_ufunc(np.sin, "numpy.sin", "ferray_ufunc::sin", "ufunc", "sin.json",
                           inputs_override=trig_input)
-    _generate_unary_ufunc(np.cos, "numpy.cos", "ferrum_ufunc::cos", "ufunc", "cos.json",
+    _generate_unary_ufunc(np.cos, "numpy.cos", "ferray_ufunc::cos", "ufunc", "cos.json",
                           inputs_override=trig_input)
-    _generate_unary_ufunc(np.tan, "numpy.tan", "ferrum_ufunc::tan", "ufunc", "tan.json",
+    _generate_unary_ufunc(np.tan, "numpy.tan", "ferray_ufunc::tan", "ufunc", "tan.json",
                           inputs_override=trig_input)
 
     # arcsin/arccos need [-1, 1]
@@ -452,9 +452,9 @@ def generate_ufunc_fixtures():
         "fine_f64": np.array([-0.99, -0.1, 0.0, 0.1, 0.99], dtype="float64"),
         "special_f64": np.array([float("nan"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.arcsin, "numpy.arcsin", "ferrum_ufunc::arcsin", "ufunc", "arcsin.json",
+    _generate_unary_ufunc(np.arcsin, "numpy.arcsin", "ferray_ufunc::arcsin", "ufunc", "arcsin.json",
                           inputs_override=arc_input)
-    _generate_unary_ufunc(np.arccos, "numpy.arccos", "ferrum_ufunc::arccos", "ufunc", "arccos.json",
+    _generate_unary_ufunc(np.arccos, "numpy.arccos", "ferray_ufunc::arccos", "ufunc", "arccos.json",
                           inputs_override=arc_input)
 
     arctan_input = {
@@ -462,11 +462,11 @@ def generate_ufunc_fixtures():
         "large_f64": np.array([-1e6, -1e3, 0.0, 1e3, 1e6], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.arctan, "numpy.arctan", "ferrum_ufunc::arctan", "ufunc", "arctan.json",
+    _generate_unary_ufunc(np.arctan, "numpy.arctan", "ferray_ufunc::arctan", "ufunc", "arctan.json",
                           inputs_override=arctan_input)
 
     # arctan2
-    _generate_binary_ufunc(np.arctan2, "numpy.arctan2", "ferrum_ufunc::arctan2", "ufunc", "arctan2.json",
+    _generate_binary_ufunc(np.arctan2, "numpy.arctan2", "ferray_ufunc::arctan2", "ufunc", "arctan2.json",
                            inputs_override={
                                "standard": (np.array([0.0, 1.0, -1.0, 1.0], dtype="float64"),
                                             np.array([1.0, 0.0, 0.0, -1.0], dtype="float64")),
@@ -482,11 +482,11 @@ def generate_ufunc_fixtures():
         "large_f64": np.array([-10.0, -5.0, 0.0, 5.0, 10.0], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.sinh, "numpy.sinh", "ferrum_ufunc::sinh", "ufunc", "sinh.json",
+    _generate_unary_ufunc(np.sinh, "numpy.sinh", "ferray_ufunc::sinh", "ufunc", "sinh.json",
                           inputs_override=hyp_input)
-    _generate_unary_ufunc(np.cosh, "numpy.cosh", "ferrum_ufunc::cosh", "ufunc", "cosh.json",
+    _generate_unary_ufunc(np.cosh, "numpy.cosh", "ferray_ufunc::cosh", "ufunc", "cosh.json",
                           inputs_override=hyp_input)
-    _generate_unary_ufunc(np.tanh, "numpy.tanh", "ferrum_ufunc::tanh", "ufunc", "tanh.json",
+    _generate_unary_ufunc(np.tanh, "numpy.tanh", "ferray_ufunc::tanh", "ufunc", "tanh.json",
                           inputs_override=hyp_input)
 
     # Inverse hyperbolic
@@ -494,21 +494,21 @@ def generate_ufunc_fixtures():
         "standard_f64": np.array([-10.0, -1.0, 0.0, 1.0, 10.0], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.arcsinh, "numpy.arcsinh", "ferrum_ufunc::arcsinh", "ufunc", "arcsinh.json",
+    _generate_unary_ufunc(np.arcsinh, "numpy.arcsinh", "ferray_ufunc::arcsinh", "ufunc", "arcsinh.json",
                           inputs_override=arcsinh_input)
 
     arccosh_input = {
         "standard_f64": np.array([1.0, 1.5, 2.0, 5.0, 10.0], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), 1.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.arccosh, "numpy.arccosh", "ferrum_ufunc::arccosh", "ufunc", "arccosh.json",
+    _generate_unary_ufunc(np.arccosh, "numpy.arccosh", "ferray_ufunc::arccosh", "ufunc", "arccosh.json",
                           inputs_override=arccosh_input)
 
     arctanh_input = {
         "standard_f64": np.array([-0.99, -0.5, 0.0, 0.5, 0.99], dtype="float64"),
         "special_f64": np.array([float("nan"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.arctanh, "numpy.arctanh", "ferrum_ufunc::arctanh", "ufunc", "arctanh.json",
+    _generate_unary_ufunc(np.arctanh, "numpy.arctanh", "ferray_ufunc::arctanh", "ufunc", "arctanh.json",
                           inputs_override=arctanh_input)
 
     # --- Exp/log ---
@@ -518,11 +518,11 @@ def generate_ufunc_fixtures():
         "small_f64": np.array([1e-15, 1e-10, 1e-7, 1e-3, 0.5], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.exp, "numpy.exp", "ferrum_ufunc::exp", "ufunc", "exp.json",
+    _generate_unary_ufunc(np.exp, "numpy.exp", "ferray_ufunc::exp", "ufunc", "exp.json",
                           inputs_override=exp_input)
-    _generate_unary_ufunc(np.exp2, "numpy.exp2", "ferrum_ufunc::exp2", "ufunc", "exp2.json",
+    _generate_unary_ufunc(np.exp2, "numpy.exp2", "ferray_ufunc::exp2", "ufunc", "exp2.json",
                           inputs_override=exp_input)
-    _generate_unary_ufunc(np.expm1, "numpy.expm1", "ferrum_ufunc::expm1", "ufunc", "expm1.json",
+    _generate_unary_ufunc(np.expm1, "numpy.expm1", "ferray_ufunc::expm1", "ufunc", "expm1.json",
                           inputs_override=exp_input)
 
     log_input = {
@@ -531,11 +531,11 @@ def generate_ufunc_fixtures():
         "small_f64": np.array([1e-15, 1e-10, 1e-7, 1e-3], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), 0.0, -1.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.log, "numpy.log", "ferrum_ufunc::log", "ufunc", "log.json",
+    _generate_unary_ufunc(np.log, "numpy.log", "ferray_ufunc::log", "ufunc", "log.json",
                           inputs_override=log_input)
-    _generate_unary_ufunc(np.log2, "numpy.log2", "ferrum_ufunc::log2", "ufunc", "log2.json",
+    _generate_unary_ufunc(np.log2, "numpy.log2", "ferray_ufunc::log2", "ufunc", "log2.json",
                           inputs_override=log_input)
-    _generate_unary_ufunc(np.log10, "numpy.log10", "ferrum_ufunc::log10", "ufunc", "log10.json",
+    _generate_unary_ufunc(np.log10, "numpy.log10", "ferray_ufunc::log10", "ufunc", "log10.json",
                           inputs_override=log_input)
 
     log1p_input = {
@@ -543,7 +543,7 @@ def generate_ufunc_fixtures():
         "tiny_f64": np.array([1e-15, 1e-10, 1e-7, 1e-3], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), -1.0, 0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.log1p, "numpy.log1p", "ferrum_ufunc::log1p", "ufunc", "log1p.json",
+    _generate_unary_ufunc(np.log1p, "numpy.log1p", "ferray_ufunc::log1p", "ufunc", "log1p.json",
                           inputs_override=log1p_input)
 
     # --- Rounding ---
@@ -553,25 +553,25 @@ def generate_ufunc_fixtures():
         "tiny_f64": np.array([1e-10, -1e-10, 0.4999999999999999, 0.5000000000000001], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.round, "numpy.round", "ferrum_ufunc::round", "ufunc", "round.json",
+    _generate_unary_ufunc(np.round, "numpy.round", "ferray_ufunc::round", "ufunc", "round.json",
                           inputs_override=round_input, tolerance=0)
-    _generate_unary_ufunc(np.floor, "numpy.floor", "ferrum_ufunc::floor", "ufunc", "floor.json",
+    _generate_unary_ufunc(np.floor, "numpy.floor", "ferray_ufunc::floor", "ufunc", "floor.json",
                           inputs_override=round_input, tolerance=0)
-    _generate_unary_ufunc(np.ceil, "numpy.ceil", "ferrum_ufunc::ceil", "ufunc", "ceil.json",
+    _generate_unary_ufunc(np.ceil, "numpy.ceil", "ferray_ufunc::ceil", "ufunc", "ceil.json",
                           inputs_override=round_input, tolerance=0)
-    _generate_unary_ufunc(np.trunc, "numpy.trunc", "ferrum_ufunc::trunc", "ufunc", "trunc.json",
+    _generate_unary_ufunc(np.trunc, "numpy.trunc", "ferray_ufunc::trunc", "ufunc", "trunc.json",
                           inputs_override=round_input, tolerance=0)
-    _generate_unary_ufunc(np.fix, "numpy.fix", "ferrum_ufunc::fix", "ufunc", "fix.json",
+    _generate_unary_ufunc(np.fix, "numpy.fix", "ferray_ufunc::fix", "ufunc", "fix.json",
                           inputs_override=round_input, tolerance=0)
-    _generate_unary_ufunc(np.rint, "numpy.rint", "ferrum_ufunc::rint", "ufunc", "rint.json",
+    _generate_unary_ufunc(np.rint, "numpy.rint", "ferray_ufunc::rint", "ufunc", "rint.json",
                           inputs_override=round_input, tolerance=0)
 
     # --- Arithmetic (binary) ---
-    _generate_binary_ufunc(np.add, "numpy.add", "ferrum_ufunc::add", "ufunc", "add.json", tolerance=0)
-    _generate_binary_ufunc(np.subtract, "numpy.subtract", "ferrum_ufunc::subtract", "ufunc", "subtract.json", tolerance=0)
-    _generate_binary_ufunc(np.multiply, "numpy.multiply", "ferrum_ufunc::multiply", "ufunc", "multiply.json", tolerance=0)
-    _generate_binary_ufunc(np.divide, "numpy.divide", "ferrum_ufunc::divide", "ufunc", "divide.json")
-    _generate_binary_ufunc(np.power, "numpy.power", "ferrum_ufunc::power", "ufunc", "power.json",
+    _generate_binary_ufunc(np.add, "numpy.add", "ferray_ufunc::add", "ufunc", "add.json", tolerance=0)
+    _generate_binary_ufunc(np.subtract, "numpy.subtract", "ferray_ufunc::subtract", "ufunc", "subtract.json", tolerance=0)
+    _generate_binary_ufunc(np.multiply, "numpy.multiply", "ferray_ufunc::multiply", "ufunc", "multiply.json", tolerance=0)
+    _generate_binary_ufunc(np.divide, "numpy.divide", "ferray_ufunc::divide", "ufunc", "divide.json")
+    _generate_binary_ufunc(np.power, "numpy.power", "ferray_ufunc::power", "ufunc", "power.json",
                            inputs_override={
                                "standard": (np.array([1.0, 2.0, 3.0, 4.0], dtype="float64"),
                                             np.array([0.0, 1.0, 2.0, 3.0], dtype="float64")),
@@ -582,7 +582,7 @@ def generate_ufunc_fixtures():
                                "special": (np.array([0.0, 1.0, float("inf"), float("nan")], dtype="float64"),
                                            np.array([0.0, float("inf"), 0.0, 1.0], dtype="float64")),
                            })
-    _generate_binary_ufunc(np.remainder, "numpy.remainder", "ferrum_ufunc::remainder", "ufunc", "remainder.json",
+    _generate_binary_ufunc(np.remainder, "numpy.remainder", "ferray_ufunc::remainder", "ufunc", "remainder.json",
                            inputs_override={
                                "standard": (np.array([7.0, 8.0, 9.0, 10.0], dtype="float64"),
                                             np.array([3.0, 3.0, 3.0, 3.0], dtype="float64")),
@@ -591,7 +591,7 @@ def generate_ufunc_fixtures():
                                "float": (np.array([5.5, 6.7, 8.1], dtype="float64"),
                                          np.array([2.3, 2.3, 2.3], dtype="float64")),
                            })
-    _generate_binary_ufunc(np.mod, "numpy.mod", "ferrum_ufunc::mod_", "ufunc", "mod.json",
+    _generate_binary_ufunc(np.mod, "numpy.mod", "ferray_ufunc::mod_", "ufunc", "mod.json",
                            inputs_override={
                                "standard": (np.array([7.0, 8.0, 9.0], dtype="float64"),
                                             np.array([3.0, 3.0, 3.0], dtype="float64")),
@@ -602,11 +602,11 @@ def generate_ufunc_fixtures():
         "standard_f64": np.array([-3.0, -1.5, 0.0, 1.5, 3.0], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.absolute, "numpy.absolute", "ferrum_ufunc::absolute", "ufunc", "absolute.json",
+    _generate_unary_ufunc(np.absolute, "numpy.absolute", "ferray_ufunc::absolute", "ufunc", "absolute.json",
                           inputs_override=abs_input, tolerance=0)
-    _generate_unary_ufunc(np.negative, "numpy.negative", "ferrum_ufunc::negative", "ufunc", "negative.json",
+    _generate_unary_ufunc(np.negative, "numpy.negative", "ferray_ufunc::negative", "ufunc", "negative.json",
                           tolerance=0)
-    _generate_unary_ufunc(np.square, "numpy.square", "ferrum_ufunc::square", "ufunc", "square.json",
+    _generate_unary_ufunc(np.square, "numpy.square", "ferray_ufunc::square", "ufunc", "square.json",
                           tolerance=0)
 
     sqrt_input = {
@@ -614,16 +614,16 @@ def generate_ufunc_fixtures():
         "small_f64": np.array([1e-14, 1e-7, 0.01, 0.5], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), 0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.sqrt, "numpy.sqrt", "ferrum_ufunc::sqrt", "ufunc", "sqrt.json",
+    _generate_unary_ufunc(np.sqrt, "numpy.sqrt", "ferray_ufunc::sqrt", "ufunc", "sqrt.json",
                           inputs_override=sqrt_input)
-    _generate_unary_ufunc(np.cbrt, "numpy.cbrt", "ferrum_ufunc::cbrt", "ufunc", "cbrt.json")
+    _generate_unary_ufunc(np.cbrt, "numpy.cbrt", "ferray_ufunc::cbrt", "ufunc", "cbrt.json")
 
     recip_input = {
         "standard_f64": np.array([0.5, 1.0, 2.0, 4.0, 10.0], dtype="float64"),
         "negative_f64": np.array([-0.5, -1.0, -2.0], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), 0.0, -0.0], dtype="float64"),
     }
-    _generate_unary_ufunc(np.reciprocal, "numpy.reciprocal", "ferrum_ufunc::reciprocal", "ufunc", "reciprocal.json",
+    _generate_unary_ufunc(np.reciprocal, "numpy.reciprocal", "ferray_ufunc::reciprocal", "ufunc", "reciprocal.json",
                           inputs_override=recip_input)
 
     # --- Special ---
@@ -632,11 +632,11 @@ def generate_ufunc_fixtures():
         "small_f64": np.array([1e-10, 1e-7, 0.001, 0.01], dtype="float64"),
         "special_f64": np.array([float("nan"), float("inf"), float("-inf")], dtype="float64"),
     }
-    _generate_unary_ufunc(np.sinc, "numpy.sinc", "ferrum_ufunc::sinc", "ufunc", "sinc.json",
+    _generate_unary_ufunc(np.sinc, "numpy.sinc", "ferray_ufunc::sinc", "ufunc", "sinc.json",
                           inputs_override=sinc_input)
 
     # heaviside
-    _generate_binary_ufunc(np.heaviside, "numpy.heaviside", "ferrum_ufunc::heaviside", "ufunc", "heaviside.json",
+    _generate_binary_ufunc(np.heaviside, "numpy.heaviside", "ferray_ufunc::heaviside", "ufunc", "heaviside.json",
                            inputs_override={
                                "standard": (np.array([-2.0, -1.0, 0.0, 1.0, 2.0], dtype="float64"),
                                             np.array([0.5, 0.5, 0.5, 0.5, 0.5], dtype="float64")),
@@ -661,7 +661,7 @@ def generate_ufunc_fixtures():
     cases.append(case("2d_f64",
                       {"x": array_to_dict(arr2), "a_min": 2.0, "a_max": 8.0},
                       array_to_dict(r2), tolerance_ulps=0))
-    save_fixture("ufunc", "clip.json", make_fixture("numpy.clip", "ferrum_ufunc::clip", cases))
+    save_fixture("ufunc", "clip.json", make_fixture("numpy.clip", "ferray_ufunc::clip", cases))
 
     # nan_to_num
     cases = []
@@ -674,21 +674,21 @@ def generate_ufunc_fixtures():
     cases.append(case("defaults",
                       {"x": array_to_dict(arr)},
                       array_to_dict(r2), tolerance_ulps=0))
-    save_fixture("ufunc", "nan_to_num.json", make_fixture("numpy.nan_to_num", "ferrum_ufunc::nan_to_num", cases))
+    save_fixture("ufunc", "nan_to_num.json", make_fixture("numpy.nan_to_num", "ferray_ufunc::nan_to_num", cases))
 
     # isnan, isinf, isfinite
     bool_input = np.array([float("nan"), float("inf"), float("-inf"), 0.0, 1.0, -1.0], dtype="float64")
     for func_name, np_func in [("isnan", np.isnan), ("isinf", np.isinf), ("isfinite", np.isfinite)]:
         r = np_func(bool_input)
         save_fixture("ufunc", f"{func_name}.json",
-                     make_fixture(f"numpy.{func_name}", f"ferrum_ufunc::{func_name}",
+                     make_fixture(f"numpy.{func_name}", f"ferray_ufunc::{func_name}",
                                   [case("standard", {"x": array_to_dict(bool_input)},
                                         array_to_dict(r), tolerance_ulps=0)]))
 
     # maximum, minimum, fmax, fmin
     for func_name, np_func in [("maximum", np.maximum), ("minimum", np.minimum),
                                 ("fmax", np.fmax), ("fmin", np.fmin)]:
-        _generate_binary_ufunc(np_func, f"numpy.{func_name}", f"ferrum_ufunc::{func_name}",
+        _generate_binary_ufunc(np_func, f"numpy.{func_name}", f"ferray_ufunc::{func_name}",
                                "ufunc", f"{func_name}.json", tolerance=0)
 
 
@@ -732,7 +732,7 @@ def generate_stats_fixtures():
         cases.append(case("f32", {"x": array_to_dict(arr32, "float32")},
                           array_to_dict(np.array(np_func(arr32)), "float32"), tolerance_ulps=0))
         save_fixture("stats", f"{func_name}.json",
-                     make_fixture(f"numpy.{func_name}", f"ferrum_stats::{func_name}", cases))
+                     make_fixture(f"numpy.{func_name}", f"ferray_stats::{func_name}", cases))
 
     # --- argmin, argmax ---
     for func_name, np_func in [("argmin", np.argmin), ("argmax", np.argmax)]:
@@ -744,7 +744,7 @@ def generate_stats_fixtures():
         cases.append(case("2d_axis1", {"x": array_to_dict(arr2d), "axis": 1},
                           array_to_dict(np_func(arr2d, axis=1).astype("int64"), "int64"), tolerance_ulps=0))
         save_fixture("stats", f"{func_name}.json",
-                     make_fixture(f"numpy.{func_name}", f"ferrum_stats::{func_name}", cases))
+                     make_fixture(f"numpy.{func_name}", f"ferray_stats::{func_name}", cases))
 
     # --- mean ---
     cases = []
@@ -761,7 +761,7 @@ def generate_stats_fixtures():
     arr_large = np.array([1e15, 1e15, 1e15, 1.0], dtype="float64")
     cases.append(case("large_values", {"x": array_to_dict(arr_large)},
                       array_to_dict(np.array(np.mean(arr_large))), tolerance_ulps=4))
-    save_fixture("stats", "mean.json", make_fixture("numpy.mean", "ferrum_stats::mean", cases))
+    save_fixture("stats", "mean.json", make_fixture("numpy.mean", "ferray_stats::mean", cases))
 
     # --- var ---
     cases = []
@@ -773,7 +773,7 @@ def generate_stats_fixtures():
                       array_to_dict(np.array(0.0)), tolerance_ulps=0))
     cases.append(case("2d_axis0", {"x": array_to_dict(arr2d), "axis": 0, "ddof": 0},
                       array_to_dict(np.var(arr2d, axis=0, ddof=0)), tolerance_ulps=4))
-    save_fixture("stats", "var.json", make_fixture("numpy.var", "ferrum_stats::var", cases))
+    save_fixture("stats", "var.json", make_fixture("numpy.var", "ferray_stats::var", cases))
 
     # --- std ---
     cases = []
@@ -783,7 +783,7 @@ def generate_stats_fixtures():
                       array_to_dict(np.array(np.std(arr1d, ddof=1))), tolerance_ulps=4))
     cases.append(case("constant", {"x": array_to_dict(np.array([5.0, 5.0, 5.0, 5.0])), "ddof": 0},
                       array_to_dict(np.array(0.0)), tolerance_ulps=0))
-    save_fixture("stats", "std.json", make_fixture("numpy.std", "ferrum_stats::std", cases))
+    save_fixture("stats", "std.json", make_fixture("numpy.std", "ferray_stats::std", cases))
 
     # --- median ---
     cases = []
@@ -795,7 +795,7 @@ def generate_stats_fixtures():
                       array_to_dict(np.array(7.0)), tolerance_ulps=0))
     cases.append(case("2d_axis0", {"x": array_to_dict(arr2d), "axis": 0},
                       array_to_dict(np.median(arr2d, axis=0)), tolerance_ulps=4))
-    save_fixture("stats", "median.json", make_fixture("numpy.median", "ferrum_stats::median", cases))
+    save_fixture("stats", "median.json", make_fixture("numpy.median", "ferray_stats::median", cases))
 
     # --- percentile / quantile ---
     arr_pct = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0], dtype="float64")
@@ -804,14 +804,14 @@ def generate_stats_fixtures():
         r = np.percentile(arr_pct, q)
         cases.append(case(f"p{q}", {"x": array_to_dict(arr_pct), "q": q},
                           array_to_dict(np.array(r)), tolerance_ulps=4))
-    save_fixture("stats", "percentile.json", make_fixture("numpy.percentile", "ferrum_stats::percentile", cases))
+    save_fixture("stats", "percentile.json", make_fixture("numpy.percentile", "ferray_stats::percentile", cases))
 
     cases = []
     for q in [0.0, 0.25, 0.5, 0.75, 1.0]:
         r = np.quantile(arr_pct, q)
         cases.append(case(f"q{q}", {"x": array_to_dict(arr_pct), "q": q},
                           array_to_dict(np.array(r)), tolerance_ulps=4))
-    save_fixture("stats", "quantile.json", make_fixture("numpy.quantile", "ferrum_stats::quantile", cases))
+    save_fixture("stats", "quantile.json", make_fixture("numpy.quantile", "ferray_stats::quantile", cases))
 
     # --- cumsum / cumprod ---
     cs_arr = np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")
@@ -822,7 +822,7 @@ def generate_stats_fixtures():
                       array_to_dict(np.cumsum(arr2d, axis=0)), tolerance_ulps=0))
     cases.append(case("2d_axis1", {"x": array_to_dict(arr2d), "axis": 1},
                       array_to_dict(np.cumsum(arr2d, axis=1)), tolerance_ulps=0))
-    save_fixture("stats", "cumsum.json", make_fixture("numpy.cumsum", "ferrum_stats::cumsum", cases))
+    save_fixture("stats", "cumsum.json", make_fixture("numpy.cumsum", "ferray_stats::cumsum", cases))
 
     cases = []
     cp_arr = np.array([1.0, 2.0, 3.0, 4.0], dtype="float64")
@@ -830,7 +830,7 @@ def generate_stats_fixtures():
                       array_to_dict(np.cumprod(cp_arr)), tolerance_ulps=0))
     cases.append(case("2d_axis0", {"x": array_to_dict(arr2d), "axis": 0},
                       array_to_dict(np.cumprod(arr2d + 1, axis=0)), tolerance_ulps=0))
-    save_fixture("stats", "cumprod.json", make_fixture("numpy.cumprod", "ferrum_stats::cumprod", cases))
+    save_fixture("stats", "cumprod.json", make_fixture("numpy.cumprod", "ferray_stats::cumprod", cases))
 
     # --- histogram ---
     cases = []
@@ -848,7 +848,7 @@ def generate_stats_fixtures():
                       {"counts": array_to_dict(counts2.astype("int64"), "int64"),
                        "bin_edges": array_to_dict(edges2)},
                       tolerance_ulps=4))
-    save_fixture("stats", "histogram.json", make_fixture("numpy.histogram", "ferrum_stats::histogram", cases))
+    save_fixture("stats", "histogram.json", make_fixture("numpy.histogram", "ferray_stats::histogram", cases))
 
     # --- histogram_bin_edges ---
     cases = []
@@ -856,7 +856,7 @@ def generate_stats_fixtures():
     cases.append(case("5_bins", {"x": array_to_dict(hist_arr), "bins": 5},
                       array_to_dict(edges), tolerance_ulps=4))
     save_fixture("stats", "histogram_bin_edges.json",
-                 make_fixture("numpy.histogram_bin_edges", "ferrum_stats::histogram_bin_edges", cases))
+                 make_fixture("numpy.histogram_bin_edges", "ferray_stats::histogram_bin_edges", cases))
 
     # --- sort ---
     sort_arr = np.array([3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0], dtype="float64")
@@ -868,13 +868,13 @@ def generate_stats_fixtures():
                       array_to_dict(np.sort(sort_2d, axis=0)), tolerance_ulps=0))
     cases.append(case("2d_axis1", {"x": array_to_dict(sort_2d), "axis": 1},
                       array_to_dict(np.sort(sort_2d, axis=1)), tolerance_ulps=0))
-    save_fixture("stats", "sort.json", make_fixture("numpy.sort", "ferrum_stats::sort", cases))
+    save_fixture("stats", "sort.json", make_fixture("numpy.sort", "ferray_stats::sort", cases))
 
     # --- argsort ---
     cases = []
     cases.append(case("1d", {"x": array_to_dict(sort_arr)},
                       array_to_dict(np.argsort(sort_arr).astype("int64"), "int64"), tolerance_ulps=0))
-    save_fixture("stats", "argsort.json", make_fixture("numpy.argsort", "ferrum_stats::argsort", cases))
+    save_fixture("stats", "argsort.json", make_fixture("numpy.argsort", "ferray_stats::argsort", cases))
 
     # --- unique ---
     uniq_arr = np.array([3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0, 5.0, 3.0], dtype="float64")
@@ -888,7 +888,7 @@ def generate_stats_fixtures():
                       {"values": array_to_dict(u_vals),
                        "counts": array_to_dict(u_cnt.astype("int64"), "int64")},
                       tolerance_ulps=0))
-    save_fixture("stats", "unique.json", make_fixture("numpy.unique", "ferrum_stats::unique", cases))
+    save_fixture("stats", "unique.json", make_fixture("numpy.unique", "ferray_stats::unique", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -916,7 +916,7 @@ def generate_linalg_fixtures():
     b32 = b1.astype("float32")
     cases.append(case("1d_f32", {"a": array_to_dict(a32, "float32"), "b": array_to_dict(b32, "float32")},
                       array_to_dict(np.array(np.dot(a32, b32)), "float32"), tolerance_ulps=4))
-    save_fixture("linalg", "dot.json", make_fixture("numpy.dot", "ferrum_linalg::dot", cases))
+    save_fixture("linalg", "dot.json", make_fixture("numpy.dot", "ferray_linalg::dot", cases))
 
     # --- matmul ---
     cases = []
@@ -931,19 +931,19 @@ def generate_linalg_fixtures():
     m3 = np.arange(9, dtype="float64").reshape(3, 3)
     cases.append(case("identity", {"a": array_to_dict(eye2), "b": array_to_dict(m3)},
                       array_to_dict(np.matmul(eye2, m3)), tolerance_ulps=0))
-    save_fixture("linalg", "matmul.json", make_fixture("numpy.matmul", "ferrum_linalg::matmul", cases))
+    save_fixture("linalg", "matmul.json", make_fixture("numpy.matmul", "ferray_linalg::matmul", cases))
 
     # --- inner ---
     cases = []
     cases.append(case("1d", {"a": array_to_dict(a1), "b": array_to_dict(b1)},
                       array_to_dict(np.array(np.inner(a1, b1))), tolerance_ulps=4))
-    save_fixture("linalg", "inner.json", make_fixture("numpy.inner", "ferrum_linalg::inner", cases))
+    save_fixture("linalg", "inner.json", make_fixture("numpy.inner", "ferray_linalg::inner", cases))
 
     # --- outer ---
     cases = []
     cases.append(case("1d", {"a": array_to_dict(a1), "b": array_to_dict(b1)},
                       array_to_dict(np.outer(a1, b1)), tolerance_ulps=0))
-    save_fixture("linalg", "outer.json", make_fixture("numpy.outer", "ferrum_linalg::outer", cases))
+    save_fixture("linalg", "outer.json", make_fixture("numpy.outer", "ferray_linalg::outer", cases))
 
     # --- vdot ---
     cases = []
@@ -955,7 +955,7 @@ def generate_linalg_fixtures():
     r = np.vdot(ac, bc)
     cases.append(case("complex128", {"a": array_to_dict(ac, "complex128"), "b": array_to_dict(bc, "complex128")},
                       array_to_dict(np.array(r), "complex128"), tolerance_ulps=4))
-    save_fixture("linalg", "vdot.json", make_fixture("numpy.vdot", "ferrum_linalg::vdot", cases))
+    save_fixture("linalg", "vdot.json", make_fixture("numpy.vdot", "ferray_linalg::vdot", cases))
 
     # --- inv ---
     inv_m = np.array([[1.0, 2.0], [3.0, 4.0]], dtype="float64")
@@ -965,7 +965,7 @@ def generate_linalg_fixtures():
     inv_m3 = np.array([[2.0, 1.0, 1.0], [1.0, 3.0, 2.0], [1.0, 0.0, 0.0]], dtype="float64")
     cases.append(case("3x3", {"a": array_to_dict(inv_m3)},
                       array_to_dict(np.linalg.inv(inv_m3)), tolerance_ulps=4))
-    save_fixture("linalg", "inv.json", make_fixture("numpy.linalg.inv", "ferrum_linalg::inv", cases))
+    save_fixture("linalg", "inv.json", make_fixture("numpy.linalg.inv", "ferray_linalg::inv", cases))
 
     # --- solve ---
     A = np.array([[3.0, 1.0], [1.0, 2.0]], dtype="float64")
@@ -979,7 +979,7 @@ def generate_linalg_fixtures():
     x3 = np.linalg.solve(A3, b3)
     cases.append(case("3x3", {"a": array_to_dict(A3), "b": array_to_dict(b3)},
                       array_to_dict(x3), tolerance_ulps=4))
-    save_fixture("linalg", "solve.json", make_fixture("numpy.linalg.solve", "ferrum_linalg::solve", cases))
+    save_fixture("linalg", "solve.json", make_fixture("numpy.linalg.solve", "ferray_linalg::solve", cases))
 
     # --- lstsq ---
     A_ls = np.array([[1.0, 1.0], [1.0, 2.0], [1.0, 3.0]], dtype="float64")
@@ -991,7 +991,7 @@ def generate_linalg_fixtures():
                       {"x": array_to_dict(x_ls),
                        "rank": int(rank)},
                       tolerance_ulps=4))
-    save_fixture("linalg", "lstsq.json", make_fixture("numpy.linalg.lstsq", "ferrum_linalg::lstsq", cases))
+    save_fixture("linalg", "lstsq.json", make_fixture("numpy.linalg.lstsq", "ferray_linalg::lstsq", cases))
 
     # --- det ---
     cases = []
@@ -1002,7 +1002,7 @@ def generate_linalg_fixtures():
     eye3 = np.eye(3, dtype="float64")
     cases.append(case("identity", {"a": array_to_dict(eye3)},
                       array_to_dict(np.array(np.linalg.det(eye3))), tolerance_ulps=0))
-    save_fixture("linalg", "det.json", make_fixture("numpy.linalg.det", "ferrum_linalg::det", cases))
+    save_fixture("linalg", "det.json", make_fixture("numpy.linalg.det", "ferray_linalg::det", cases))
 
     # --- norm ---
     cases = []
@@ -1016,7 +1016,7 @@ def generate_linalg_fixtures():
     m_norm = np.array([[1.0, 2.0], [3.0, 4.0]], dtype="float64")
     cases.append(case("matrix_fro", {"a": array_to_dict(m_norm), "ord": "fro"},
                       array_to_dict(np.array(np.linalg.norm(m_norm, "fro"))), tolerance_ulps=4))
-    save_fixture("linalg", "norm.json", make_fixture("numpy.linalg.norm", "ferrum_linalg::norm", cases))
+    save_fixture("linalg", "norm.json", make_fixture("numpy.linalg.norm", "ferray_linalg::norm", cases))
 
     # --- trace ---
     cases = []
@@ -1024,7 +1024,7 @@ def generate_linalg_fixtures():
                       array_to_dict(np.array(np.trace(m3))), tolerance_ulps=0))
     cases.append(case("2x2", {"a": array_to_dict(inv_m)},
                       array_to_dict(np.array(np.trace(inv_m))), tolerance_ulps=0))
-    save_fixture("linalg", "trace.json", make_fixture("numpy.trace", "ferrum_linalg::trace", cases))
+    save_fixture("linalg", "trace.json", make_fixture("numpy.trace", "ferray_linalg::trace", cases))
 
     # --- matrix_rank ---
     cases = []
@@ -1036,7 +1036,7 @@ def generate_linalg_fixtures():
                       {"data": int(np.linalg.matrix_rank(inv_m3)), "shape": [], "dtype": "int64"},
                       tolerance_ulps=0))
     save_fixture("linalg", "matrix_rank.json",
-                 make_fixture("numpy.linalg.matrix_rank", "ferrum_linalg::matrix_rank", cases))
+                 make_fixture("numpy.linalg.matrix_rank", "ferray_linalg::matrix_rank", cases))
 
     # --- cond ---
     cases = []
@@ -1044,7 +1044,7 @@ def generate_linalg_fixtures():
                       array_to_dict(np.array(np.linalg.cond(eye3))), tolerance_ulps=4))
     cases.append(case("2x2", {"a": array_to_dict(inv_m)},
                       array_to_dict(np.array(np.linalg.cond(inv_m))), tolerance_ulps=4))
-    save_fixture("linalg", "cond.json", make_fixture("numpy.linalg.cond", "ferrum_linalg::cond", cases))
+    save_fixture("linalg", "cond.json", make_fixture("numpy.linalg.cond", "ferray_linalg::cond", cases))
 
     # --- SVD ---
     svd_m = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], dtype="float64")
@@ -1059,7 +1059,7 @@ def generate_linalg_fixtures():
                       {"a": array_to_dict(svd_m), "full_matrices": True},
                       {"U": array_to_dict(U_full), "S": array_to_dict(S_full), "Vt": array_to_dict(Vt_full)},
                       tolerance_ulps=4))
-    save_fixture("linalg", "svd.json", make_fixture("numpy.linalg.svd", "ferrum_linalg::svd", cases))
+    save_fixture("linalg", "svd.json", make_fixture("numpy.linalg.svd", "ferray_linalg::svd", cases))
 
     # --- QR ---
     qr_m = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]], dtype="float64")
@@ -1074,7 +1074,7 @@ def generate_linalg_fixtures():
                       {"a": array_to_dict(qr_m), "mode": "complete"},
                       {"Q": array_to_dict(Q_c), "R": array_to_dict(R_c)},
                       tolerance_ulps=4))
-    save_fixture("linalg", "qr.json", make_fixture("numpy.linalg.qr", "ferrum_linalg::qr", cases))
+    save_fixture("linalg", "qr.json", make_fixture("numpy.linalg.qr", "ferray_linalg::qr", cases))
 
     # --- Cholesky ---
     chol_m = np.array([[4.0, 2.0], [2.0, 3.0]], dtype="float64")
@@ -1086,7 +1086,7 @@ def generate_linalg_fixtures():
     L3 = np.linalg.cholesky(chol3)
     cases.append(case("3x3_spd", {"a": array_to_dict(chol3)},
                       array_to_dict(L3), tolerance_ulps=4))
-    save_fixture("linalg", "cholesky.json", make_fixture("numpy.linalg.cholesky", "ferrum_linalg::cholesky", cases))
+    save_fixture("linalg", "cholesky.json", make_fixture("numpy.linalg.cholesky", "ferray_linalg::cholesky", cases))
 
     # --- eig ---
     eig_m = np.array([[1.0, 2.0], [3.0, 4.0]], dtype="float64")
@@ -1096,7 +1096,7 @@ def generate_linalg_fixtures():
                       {"a": array_to_dict(eig_m)},
                       {"eigenvalues": array_to_dict(vals), "eigenvectors": array_to_dict(vecs)},
                       tolerance_ulps=4))
-    save_fixture("linalg", "eig.json", make_fixture("numpy.linalg.eig", "ferrum_linalg::eig", cases))
+    save_fixture("linalg", "eig.json", make_fixture("numpy.linalg.eig", "ferray_linalg::eig", cases))
 
     # --- eigh ---
     eigh_m = np.array([[2.0, 1.0], [1.0, 3.0]], dtype="float64")
@@ -1106,14 +1106,14 @@ def generate_linalg_fixtures():
                       {"a": array_to_dict(eigh_m)},
                       {"eigenvalues": array_to_dict(vals_h), "eigenvectors": array_to_dict(vecs_h)},
                       tolerance_ulps=4))
-    save_fixture("linalg", "eigh.json", make_fixture("numpy.linalg.eigh", "ferrum_linalg::eigh", cases))
+    save_fixture("linalg", "eigh.json", make_fixture("numpy.linalg.eigh", "ferray_linalg::eigh", cases))
 
     # --- eigvals ---
     cases = []
     ev = np.linalg.eigvals(eig_m)
     cases.append(case("2x2", {"a": array_to_dict(eig_m)},
                       array_to_dict(ev), tolerance_ulps=4))
-    save_fixture("linalg", "eigvals.json", make_fixture("numpy.linalg.eigvals", "ferrum_linalg::eigvals", cases))
+    save_fixture("linalg", "eigvals.json", make_fixture("numpy.linalg.eigvals", "ferray_linalg::eigvals", cases))
 
     # --- kron ---
     ka = np.array([[1.0, 2.0], [3.0, 4.0]], dtype="float64")
@@ -1121,7 +1121,7 @@ def generate_linalg_fixtures():
     cases = []
     cases.append(case("2x2", {"a": array_to_dict(ka), "b": array_to_dict(kb)},
                       array_to_dict(np.kron(ka, kb)), tolerance_ulps=0))
-    save_fixture("linalg", "kron.json", make_fixture("numpy.kron", "ferrum_linalg::kron", cases))
+    save_fixture("linalg", "kron.json", make_fixture("numpy.kron", "ferray_linalg::kron", cases))
 
     # --- tensordot ---
     ta = np.arange(60, dtype="float64").reshape(3, 4, 5)
@@ -1139,7 +1139,7 @@ def generate_linalg_fixtures():
     cases.append(case("2d_axes1",
                       {"a": array_to_dict(ta2), "b": array_to_dict(tb2), "axes": 1},
                       array_to_dict(r2), tolerance_ulps=4))
-    save_fixture("linalg", "tensordot.json", make_fixture("numpy.tensordot", "ferrum_linalg::tensordot", cases))
+    save_fixture("linalg", "tensordot.json", make_fixture("numpy.tensordot", "ferray_linalg::tensordot", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -1177,7 +1177,7 @@ def generate_fft_fixtures():
     r64 = np.fft.fft(sig64)
     cases.append(case("sine_64", {"x": array_to_dict(sig64)},
                       array_to_dict(r64, "complex128"), tolerance_ulps=4))
-    save_fixture("fft", "fft.json", make_fixture("numpy.fft.fft", "ferrum_fft::fft", cases))
+    save_fixture("fft", "fft.json", make_fixture("numpy.fft.fft", "ferray_fft::fft", cases))
 
     # --- ifft ---
     cases = []
@@ -1188,7 +1188,7 @@ def generate_fft_fixtures():
     cases.append(case("roundtrip_7",
                       {"x": array_to_dict(r7, "complex128")},
                       array_to_dict(np.fft.ifft(r7), "complex128"), tolerance_ulps=4))
-    save_fixture("fft", "ifft.json", make_fixture("numpy.fft.ifft", "ferrum_fft::ifft", cases))
+    save_fixture("fft", "ifft.json", make_fixture("numpy.fft.ifft", "ferray_fft::ifft", cases))
 
     # --- rfft ---
     cases = []
@@ -1198,14 +1198,14 @@ def generate_fft_fixtures():
     rr7 = np.fft.rfft(sig7)
     cases.append(case("real_7", {"x": array_to_dict(sig7)},
                       array_to_dict(rr7, "complex128"), tolerance_ulps=4))
-    save_fixture("fft", "rfft.json", make_fixture("numpy.fft.rfft", "ferrum_fft::rfft", cases))
+    save_fixture("fft", "rfft.json", make_fixture("numpy.fft.rfft", "ferray_fft::rfft", cases))
 
     # --- irfft ---
     cases = []
     irr8 = np.fft.irfft(rr8)
     cases.append(case("roundtrip_8", {"x": array_to_dict(rr8, "complex128")},
                       array_to_dict(irr8), tolerance_ulps=4))
-    save_fixture("fft", "irfft.json", make_fixture("numpy.fft.irfft", "ferrum_fft::irfft", cases))
+    save_fixture("fft", "irfft.json", make_fixture("numpy.fft.irfft", "ferray_fft::irfft", cases))
 
     # --- fft2 ---
     cases = []
@@ -1213,14 +1213,14 @@ def generate_fft_fixtures():
     r2d = np.fft.fft2(m2d)
     cases.append(case("4x4", {"x": array_to_dict(m2d)},
                       array_to_dict(r2d, "complex128"), tolerance_ulps=4))
-    save_fixture("fft", "fft2.json", make_fixture("numpy.fft.fft2", "ferrum_fft::fft2", cases))
+    save_fixture("fft", "fft2.json", make_fixture("numpy.fft.fft2", "ferray_fft::fft2", cases))
 
     # --- ifft2 ---
     cases = []
     ir2d = np.fft.ifft2(r2d)
     cases.append(case("roundtrip_4x4", {"x": array_to_dict(r2d, "complex128")},
                       array_to_dict(ir2d, "complex128"), tolerance_ulps=4))
-    save_fixture("fft", "ifft2.json", make_fixture("numpy.fft.ifft2", "ferrum_fft::ifft2", cases))
+    save_fixture("fft", "ifft2.json", make_fixture("numpy.fft.ifft2", "ferray_fft::ifft2", cases))
 
     # --- fftfreq ---
     cases = []
@@ -1228,7 +1228,7 @@ def generate_fft_fixtures():
         freq = np.fft.fftfreq(n, d)
         cases.append(case(f"n{n}_d{d}", {"n": n, "d": d},
                           array_to_dict(freq), tolerance_ulps=0))
-    save_fixture("fft", "fftfreq.json", make_fixture("numpy.fft.fftfreq", "ferrum_fft::fftfreq", cases))
+    save_fixture("fft", "fftfreq.json", make_fixture("numpy.fft.fftfreq", "ferray_fft::fftfreq", cases))
 
     # --- rfftfreq ---
     cases = []
@@ -1236,7 +1236,7 @@ def generate_fft_fixtures():
         freq = np.fft.rfftfreq(n, d)
         cases.append(case(f"n{n}_d{d}", {"n": n, "d": d},
                           array_to_dict(freq), tolerance_ulps=0))
-    save_fixture("fft", "rfftfreq.json", make_fixture("numpy.fft.rfftfreq", "ferrum_fft::rfftfreq", cases))
+    save_fixture("fft", "rfftfreq.json", make_fixture("numpy.fft.rfftfreq", "ferray_fft::rfftfreq", cases))
 
     # --- fftshift / ifftshift ---
     cases = []
@@ -1248,13 +1248,13 @@ def generate_fft_fixtures():
     shifted2d = np.fft.fftshift(x2d)
     cases.append(case("2d_3x3", {"x": array_to_dict(x2d)},
                       array_to_dict(shifted2d), tolerance_ulps=0))
-    save_fixture("fft", "fftshift.json", make_fixture("numpy.fft.fftshift", "ferrum_fft::fftshift", cases))
+    save_fixture("fft", "fftshift.json", make_fixture("numpy.fft.fftshift", "ferray_fft::fftshift", cases))
 
     cases = []
     unshifted = np.fft.ifftshift(shifted)
     cases.append(case("roundtrip_1d", {"x": array_to_dict(shifted)},
                       array_to_dict(unshifted), tolerance_ulps=0))
-    save_fixture("fft", "ifftshift.json", make_fixture("numpy.fft.ifftshift", "ferrum_fft::ifftshift", cases))
+    save_fixture("fft", "ifftshift.json", make_fixture("numpy.fft.ifftshift", "ferray_fft::ifftshift", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -1337,7 +1337,7 @@ def generate_random_fixtures():
                       tolerance_ulps=0))
 
     save_fixture("random", "distribution_moments.json",
-                 make_fixture("numpy.random.Generator", "ferrum_random::Generator", cases))
+                 make_fixture("numpy.random.Generator", "ferray_random::Generator", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -1385,7 +1385,7 @@ def generate_io_fixtures():
                       tolerance_ulps=0))
 
     save_fixture("io", "npy_dtypes.json",
-                 make_fixture("numpy.save/load", "ferrum_io::save/load", cases))
+                 make_fixture("numpy.save/load", "ferray_io::save/load", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -1399,11 +1399,11 @@ def generate_polynomial_fixtures():
     cases = []
     # p(x) = 1 + 2x + 3x^2  -> numpy polyval uses highest-degree-first: [3, 2, 1]
     coeffs_np = np.array([3.0, 2.0, 1.0], dtype="float64")  # numpy convention
-    coeffs_ferrum = np.array([1.0, 2.0, 3.0], dtype="float64")  # ferrum convention (low-to-high)
+    coeffs_ferray = np.array([1.0, 2.0, 3.0], dtype="float64")  # ferray convention (low-to-high)
     x = np.array([-2.0, -1.0, 0.0, 1.0, 2.0], dtype="float64")
     r = np.polyval(coeffs_np, x)
     cases.append(case("quadratic",
-                      {"coefficients": array_to_dict(coeffs_ferrum),
+                      {"coefficients": array_to_dict(coeffs_ferray),
                        "coefficients_numpy_order": array_to_dict(coeffs_np),
                        "x": array_to_dict(x)},
                       array_to_dict(r), tolerance_ulps=4))
@@ -1438,7 +1438,7 @@ def generate_polynomial_fixtures():
                       array_to_dict(r4), tolerance_ulps=4))
 
     save_fixture("polynomial", "polyval.json",
-                 make_fixture("numpy.polyval", "ferrum_polynomial::Polynomial::eval", cases))
+                 make_fixture("numpy.polyval", "ferray_polynomial::Polynomial::eval", cases))
 
     # --- polyfit ---
     cases = []
@@ -1451,7 +1451,7 @@ def generate_polynomial_fixtures():
                           {"coefficients_numpy_order": array_to_dict(coeffs)},
                           tolerance_ulps=4))
     save_fixture("polynomial", "polyfit.json",
-                 make_fixture("numpy.polyfit", "ferrum_polynomial::Polynomial::fit", cases))
+                 make_fixture("numpy.polyfit", "ferray_polynomial::Polynomial::fit", cases))
 
     # --- roots ---
     cases = []
@@ -1482,7 +1482,7 @@ def generate_polynomial_fixtures():
                       tolerance_ulps=4))
 
     save_fixture("polynomial", "roots.json",
-                 make_fixture("numpy.roots", "ferrum_polynomial::Polynomial::roots", cases))
+                 make_fixture("numpy.roots", "ferray_polynomial::Polynomial::roots", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -1522,7 +1522,7 @@ def generate_strings_fixtures():
                           {"data": r_e.tolist(), "shape": [3], "dtype": "str"},
                           tolerance_ulps=0))
         save_fixture("strings", f"{op_name}.json",
-                     make_fixture(f"numpy.strings.{op_name}", f"ferrum_strings::{op_name}", cases))
+                     make_fixture(f"numpy.strings.{op_name}", f"ferray_strings::{op_name}", cases))
 
     # --- Strip operations ---
     strip_arr = np.array(["  hello  ", "\tworld\t", "  foo", "bar  ", "none"], dtype="U20")
@@ -1545,7 +1545,7 @@ def generate_strings_fixtures():
                           {"data": r_c.tolist(), "shape": list(r_c.shape), "dtype": "str"},
                           tolerance_ulps=0))
         save_fixture("strings", f"{op_name}.json",
-                     make_fixture(f"numpy.strings.{op_name}", f"ferrum_strings::{op_name}", cases))
+                     make_fixture(f"numpy.strings.{op_name}", f"ferray_strings::{op_name}", cases))
 
     # --- startswith / endswith ---
     sw_arr = np.array(["hello", "help", "world", "helm"], dtype="U10")
@@ -1558,7 +1558,7 @@ def generate_strings_fixtures():
                        array_to_dict(result, "bool"),
                        tolerance_ulps=0)]
         save_fixture("strings", f"{op_name}.json",
-                     make_fixture(f"numpy.strings.{op_name}", f"ferrum_strings::{op_name}", cases))
+                     make_fixture(f"numpy.strings.{op_name}", f"ferray_strings::{op_name}", cases))
 
     # --- find ---
     find_arr = np.array(["hello world", "foobar", "hello", "hi"], dtype="U20")
@@ -1569,7 +1569,7 @@ def generate_strings_fixtures():
                    array_to_dict(result.astype("int64"), "int64"),
                    tolerance_ulps=0)]
     save_fixture("strings", "find.json",
-                 make_fixture("numpy.strings.find", "ferrum_strings::find", cases))
+                 make_fixture("numpy.strings.find", "ferray_strings::find", cases))
 
     # --- count ---
     count_arr = np.array(["aabaa", "abab", "cccc", ""], dtype="U10")
@@ -1580,7 +1580,7 @@ def generate_strings_fixtures():
                    array_to_dict(result.astype("int64"), "int64"),
                    tolerance_ulps=0)]
     save_fixture("strings", "count.json",
-                 make_fixture("numpy.strings.count", "ferrum_strings::count", cases))
+                 make_fixture("numpy.strings.count", "ferray_strings::count", cases))
 
     # --- replace ---
     repl_arr = np.array(["hello world", "foo bar foo", "aaa"], dtype="U30")
@@ -1598,7 +1598,7 @@ def generate_strings_fixtures():
                       {"data": result2.tolist(), "shape": list(result2.shape), "dtype": "str"},
                       tolerance_ulps=0))
     save_fixture("strings", "replace.json",
-                 make_fixture("numpy.strings.replace", "ferrum_strings::replace", cases))
+                 make_fixture("numpy.strings.replace", "ferray_strings::replace", cases))
 
     # --- contains (isin for strings - use find >= 0) ---
     contains_arr = np.array(["hello", "world", "help", "foo"], dtype="U10")
@@ -1609,7 +1609,7 @@ def generate_strings_fixtures():
                    array_to_dict(result, "bool"),
                    tolerance_ulps=0)]
     save_fixture("strings", "contains.json",
-                 make_fixture("numpy.strings (find>=0)", "ferrum_strings::contains", cases))
+                 make_fixture("numpy.strings (find>=0)", "ferray_strings::contains", cases))
 
 
 # ---------------------------------------------------------------------------
@@ -1636,7 +1636,7 @@ def generate_ma_fixtures():
                       {"filled": array_to_dict(filled_99)},
                       tolerance_ulps=0))
     save_fixture("ma", "creation_filled.json",
-                 make_fixture("numpy.ma.array + filled", "ferrum_ma::MaskedArray", cases))
+                 make_fixture("numpy.ma.array + filled", "ferray_ma::MaskedArray", cases))
 
     # --- compressed ---
     compressed = ma_arr.compressed()
@@ -1663,7 +1663,7 @@ def generate_ma_fixtures():
                       array_to_dict(comp_none),
                       tolerance_ulps=0))
     save_fixture("ma", "compressed.json",
-                 make_fixture("numpy.ma.compressed", "ferrum_ma::MaskedArray::compressed", cases))
+                 make_fixture("numpy.ma.compressed", "ferray_ma::MaskedArray::compressed", cases))
 
     # --- Masked reductions ---
     for func_name in ["mean", "sum", "min", "max"]:
@@ -1692,7 +1692,7 @@ def generate_ma_fixtures():
                           tolerance_ulps=4))
 
         save_fixture("ma", f"masked_{func_name}.json",
-                     make_fixture(f"numpy.ma.{func_name}", f"ferrum_ma::MaskedArray::{func_name}", cases))
+                     make_fixture(f"numpy.ma.{func_name}", f"ferray_ma::MaskedArray::{func_name}", cases))
 
     # --- getmask / getdata ---
     cases = []
@@ -1701,7 +1701,7 @@ def generate_ma_fixtures():
                       {"mask": array_to_dict(mask, "bool"), "data": array_to_dict(data)},
                       tolerance_ulps=0))
     save_fixture("ma", "getmask_getdata.json",
-                 make_fixture("numpy.ma.getmask/getdata", "ferrum_ma::getmask/getdata", cases))
+                 make_fixture("numpy.ma.getmask/getdata", "ferray_ma::getmask/getdata", cases))
 
     # --- masked_invalid ---
     invalid_data = np.array([1.0, float("nan"), 3.0, float("inf"), 5.0, float("-inf")], dtype="float64")
@@ -1712,7 +1712,7 @@ def generate_ma_fixtures():
                       {"mask": array_to_dict(np.array(ma_inv.mask, dtype="bool"), "bool")},
                       tolerance_ulps=0))
     save_fixture("ma", "masked_invalid.json",
-                 make_fixture("numpy.ma.masked_invalid", "ferrum_ma::masked_invalid", cases))
+                 make_fixture("numpy.ma.masked_invalid", "ferray_ma::masked_invalid", cases))
 
 
 # ---------------------------------------------------------------------------

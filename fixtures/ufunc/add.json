@@ -1,6 +1,6 @@
 {
   "function": "numpy.add",
-  "ferrum_function": "ferrum_ufunc::add",
+  "ferray_function": "ferray_ufunc::add",
   "test_cases": [
     {
       "name": "standard_f64",

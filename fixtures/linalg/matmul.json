@@ -1,6 +1,6 @@
 {
   "function": "numpy.matmul",
-  "ferrum_function": "ferrum_linalg::matmul",
+  "ferray_function": "ferray_linalg::matmul",
   "test_cases": [
     {
       "name": "2d",

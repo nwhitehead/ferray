@@ -1,6 +1,6 @@
 {
   "function": "numpy.arange",
-  "ferrum_function": "ferrum_core::arange",
+  "ferray_function": "ferray_core::arange",
   "test_cases": [
     {
       "name": "arange_0_10_1_float64",

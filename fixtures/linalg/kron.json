@@ -1,6 +1,6 @@
 {
   "function": "numpy.kron",
-  "ferrum_function": "ferrum_linalg::kron",
+  "ferray_function": "ferray_linalg::kron",
   "test_cases": [
     {
       "name": "2x2",

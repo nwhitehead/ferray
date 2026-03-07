@@ -1,6 +1,6 @@
 {
   "function": "numpy.sinc",
-  "ferrum_function": "ferrum_ufunc::sinc",
+  "ferray_function": "ferray_ufunc::sinc",
   "test_cases": [
     {
       "name": "standard_f64",

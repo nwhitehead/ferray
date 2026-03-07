@@ -1,6 +1,6 @@
 {
   "function": "numpy.heaviside",
-  "ferrum_function": "ferrum_ufunc::heaviside",
+  "ferray_function": "ferray_ufunc::heaviside",
   "test_cases": [
     {
       "name": "standard",

@@ -1,0 +1,18 @@
+[package]
+name = "ferray-autodiff"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+description = "Forward-mode automatic differentiation for ferray"
+
+[dependencies]
+num-traits = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

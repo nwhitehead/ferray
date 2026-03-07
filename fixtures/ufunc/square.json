@@ -1,6 +1,6 @@
 {
   "function": "numpy.square",
-  "ferrum_function": "ferrum_ufunc::square",
+  "ferray_function": "ferray_ufunc::square",
   "test_cases": [
     {
       "name": "small_f64",

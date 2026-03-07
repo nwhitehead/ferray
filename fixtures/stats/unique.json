@@ -1,6 +1,6 @@
 {
   "function": "numpy.unique",
-  "ferrum_function": "ferrum_stats::unique",
+  "ferray_function": "ferray_stats::unique",
   "test_cases": [
     {
       "name": "basic",

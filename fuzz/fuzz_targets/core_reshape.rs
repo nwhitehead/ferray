@@ -3,13 +3,13 @@
 //! Fuzz target for core reshape/manipulation: reshape, flatten, ravel,
 //! transpose, squeeze, expand_dims.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::{Ix1, IxDyn};
-use ferrum_core::manipulation;
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::{Ix1, IxDyn};
+use ferray_core::manipulation;
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)

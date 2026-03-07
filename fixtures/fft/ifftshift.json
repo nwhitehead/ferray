@@ -1,6 +1,6 @@
 {
   "function": "numpy.fft.ifftshift",
-  "ferrum_function": "ferrum_fft::ifftshift",
+  "ferray_function": "ferray_fft::ifftshift",
   "test_cases": [
     {
       "name": "roundtrip_1d",

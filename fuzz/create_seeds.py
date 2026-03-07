@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate seed corpus files for ferrum fuzz targets.
+"""Generate seed corpus files for ferray fuzz targets.
 
 Each seed file contains raw bytes that the fuzz targets interpret as f64 values.
 The seeds cover important edge cases: zeros, NaN, infinities, subnormals,

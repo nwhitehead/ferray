@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.eig",
-  "ferrum_function": "ferrum_linalg::eig",
+  "ferray_function": "ferray_linalg::eig",
   "test_cases": [
     {
       "name": "2x2",

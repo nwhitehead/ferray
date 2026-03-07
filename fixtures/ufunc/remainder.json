@@ -1,6 +1,6 @@
 {
   "function": "numpy.remainder",
-  "ferrum_function": "ferrum_ufunc::remainder",
+  "ferray_function": "ferray_ufunc::remainder",
   "test_cases": [
     {
       "name": "standard",

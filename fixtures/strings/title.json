@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.title",
-  "ferrum_function": "ferrum_strings::title",
+  "ferray_function": "ferray_strings::title",
   "test_cases": [
     {
       "name": "standard",

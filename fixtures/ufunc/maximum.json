@@ -1,6 +1,6 @@
 {
   "function": "numpy.maximum",
-  "ferrum_function": "ferrum_ufunc::maximum",
+  "ferray_function": "ferray_ufunc::maximum",
   "test_cases": [
     {
       "name": "standard_f64",

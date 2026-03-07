@@ -6,14 +6,14 @@
 //! for any finite input. We verify no panics and check the round-trip
 //! for non-NaN finite inputs.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 use num_complex::Complex;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::{Ix1, IxDyn};
-use ferrum_fft::FftNorm;
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::{Ix1, IxDyn};
+use ferray_fft::FftNorm;
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)
@@ -50,38 +50,38 @@ fuzz_target!(|data: &[u8]| {
         };
 
         // fft with default norm
-        let fft_result = ferrum_fft::fft(&arr, None, None, FftNorm::Backward);
+        let fft_result = ferray_fft::fft(&arr, None, None, FftNorm::Backward);
 
         // ifft on the fft result (round-trip)
         if let Ok(ref fft_arr) = fft_result {
-            let _ = ferrum_fft::ifft(fft_arr, None, None, FftNorm::Backward);
+            let _ = ferray_fft::ifft(fft_arr, None, None, FftNorm::Backward);
         }
 
         // fft with different normalizations
-        let _ = ferrum_fft::fft(&arr, None, None, FftNorm::Forward);
-        let _ = ferrum_fft::fft(&arr, None, None, FftNorm::Ortho);
+        let _ = ferray_fft::fft(&arr, None, None, FftNorm::Forward);
+        let _ = ferray_fft::fft(&arr, None, None, FftNorm::Ortho);
 
         // fft with explicit n (zero-pad or truncate)
-        let _ = ferrum_fft::fft(&arr, Some(n * 2), None, FftNorm::Backward);
+        let _ = ferray_fft::fft(&arr, Some(n * 2), None, FftNorm::Backward);
         if n > 1 {
-            let _ = ferrum_fft::fft(&arr, Some(n / 2), None, FftNorm::Backward);
+            let _ = ferray_fft::fft(&arr, Some(n / 2), None, FftNorm::Backward);
         }
         // n=0 — should return an error, not panic
-        let _ = ferrum_fft::fft(&arr, Some(0), None, FftNorm::Backward);
+        let _ = ferray_fft::fft(&arr, Some(0), None, FftNorm::Backward);
 
         // fft with explicit axis
-        let _ = ferrum_fft::fft(&arr, None, Some(0), FftNorm::Backward);
+        let _ = ferray_fft::fft(&arr, None, Some(0), FftNorm::Backward);
         // out-of-bounds axis
-        let _ = ferrum_fft::fft(&arr, None, Some(99), FftNorm::Backward);
+        let _ = ferray_fft::fft(&arr, None, Some(99), FftNorm::Backward);
 
         // Frequency utilities
-        let _ = ferrum_fft::fftfreq(n, 1.0);
-        let _ = ferrum_fft::rfftfreq(n, 1.0);
+        let _ = ferray_fft::fftfreq(n, 1.0);
+        let _ = ferray_fft::rfftfreq(n, 1.0);
 
         // fftshift / ifftshift on a dynamic array
         if let Ok(dyn_arr) = Array::from_vec(IxDyn::new(&[n]), complex_vals) {
-            let _ = ferrum_fft::fftshift(&dyn_arr, None);
-            let _ = ferrum_fft::ifftshift(&dyn_arr, None);
+            let _ = ferray_fft::fftshift(&dyn_arr, None);
+            let _ = ferray_fft::ifftshift(&dyn_arr, None);
         }
     }));
 });

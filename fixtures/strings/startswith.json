@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.startswith",
-  "ferrum_function": "ferrum_strings::startswith",
+  "ferray_function": "ferray_strings::startswith",
   "test_cases": [
     {
       "name": "standard",

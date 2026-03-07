@@ -1,0 +1,20 @@
+[package]
+name = "ferray-random"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+description = "Random number generation and distributions for ferray"
+
+[dependencies]
+ferray-core = { workspace = true }
+rayon = { workspace = true }
+rand_core = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

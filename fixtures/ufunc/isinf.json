@@ -1,6 +1,6 @@
 {
   "function": "numpy.isinf",
-  "ferrum_function": "ferrum_ufunc::isinf",
+  "ferray_function": "ferray_ufunc::isinf",
   "test_cases": [
     {
       "name": "standard",

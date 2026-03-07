@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.qr",
-  "ferrum_function": "ferrum_linalg::qr",
+  "ferray_function": "ferray_linalg::qr",
   "test_cases": [
     {
       "name": "3x2_reduced",

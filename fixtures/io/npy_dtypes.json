@@ -1,6 +1,6 @@
 {
   "function": "numpy.save/load",
-  "ferrum_function": "ferrum_io::save/load",
+  "ferray_function": "ferray_io::save/load",
   "test_cases": [
     {
       "name": "dtype_float32",

@@ -1,0 +1,579 @@
+// ferray-core: Type casting and inspection (REQ-25, REQ-26)
+//
+// Provides:
+// - CastKind enum (No, Equiv, Safe, SameKind, Unsafe) mirroring NumPy's casting rules
+// - can_cast(from, to, casting) — check if a cast is allowed
+// - promote_types(a, b) — runtime promotion (delegates to promotion::result_type)
+// - common_type(a, b) — alias for promote_types
+// - min_scalar_type(dtype) — smallest type that can hold the range of dtype
+// - issubdtype(child, parent) — type hierarchy check
+// - isrealobj / iscomplexobj — type inspection predicates
+// - astype() / view_cast() — methods on Array for explicit casting
+
+#[cfg(not(feature = "no_std"))]
+use crate::dimension::Dimension;
+use crate::dtype::{DType, Element};
+#[cfg(not(feature = "no_std"))]
+use crate::error::FerrumError;
+use crate::error::FerrumResult;
+
+#[cfg(not(feature = "no_std"))]
+use super::promotion::PromoteTo;
+
+// ---------------------------------------------------------------------------
+// CastKind — mirrors NumPy's casting parameter
+// ---------------------------------------------------------------------------
+
+/// Describes the safety level of a type cast.
+///
+/// Mirrors NumPy's `casting` parameter for `np.can_cast`, `np.result_type`, etc.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CastKind {
+    /// No casting allowed — types must be identical.
+    No,
+    /// Types must have the same byte-level representation (e.g., byte order only).
+    /// In ferray (native endian only), this is the same as `No`.
+    Equiv,
+    /// Safe cast: no information loss (e.g., i32 -> i64, f32 -> f64).
+    Safe,
+    /// Same kind: both are the same category (int->int, float->float) regardless
+    /// of size (e.g., i64 -> i32 is allowed but may truncate).
+    SameKind,
+    /// Any cast is allowed (may lose information, e.g., f64 -> i32).
+    Unsafe,
+}
+
+// ---------------------------------------------------------------------------
+// can_cast — check if a cast between DTypes is allowed
+// ---------------------------------------------------------------------------
+
+/// Check whether a cast from `from` to `to` is allowed under the given `casting` rule.
+///
+/// # Errors
+/// Returns `FerrumError::InvalidDtype` if the combination is not recognized.
+pub fn can_cast(from: DType, to: DType, casting: CastKind) -> FerrumResult<bool> {
+    Ok(match casting {
+        CastKind::No | CastKind::Equiv => from == to,
+        CastKind::Safe => is_safe_cast(from, to),
+        CastKind::SameKind => is_same_kind(from, to),
+        CastKind::Unsafe => true, // anything goes
+    })
+}
+
+/// Check if `from` can be safely cast to `to` without information loss.
+fn is_safe_cast(from: DType, to: DType) -> bool {
+    if from == to {
+        return true;
+    }
+    // A safe cast exists when promoting from + to yields `to`.
+    // That means `to` can represent all values of `from`.
+    match super::promotion::result_type(from, to) {
+        Ok(promoted) => promoted == to,
+        Err(_) => false,
+    }
+}
+
+/// Check if `from` and `to` are the same "kind" (integer, float, complex).
+fn is_same_kind(from: DType, to: DType) -> bool {
+    if from == to {
+        return true;
+    }
+    dtype_kind(from) == dtype_kind(to)
+}
+
+/// Return a "kind" category for a DType.
+fn dtype_kind(dt: DType) -> u8 {
+    if dt == DType::Bool {
+        0 // bool is its own kind but also considered integer-compatible
+    } else if dt.is_integer() {
+        1
+    } else if dt.is_float() {
+        2
+    } else if dt.is_complex() {
+        3
+    } else {
+        255
+    }
+}
+
+// ---------------------------------------------------------------------------
+// promote_types — runtime type promotion
+// ---------------------------------------------------------------------------
+
+/// Determine the promoted type for two dtypes (runtime version).
+///
+/// This is the runtime equivalent of the `promoted_type!()` compile-time macro.
+/// Returns the smallest type that can represent both `a` and `b` without
+/// precision loss.
+///
+/// # Errors
+/// Returns `FerrumError::InvalidDtype` if promotion fails.
+pub fn promote_types(a: DType, b: DType) -> FerrumResult<DType> {
+    super::promotion::result_type(a, b)
+}
+
+// ---------------------------------------------------------------------------
+// common_type — alias for promote_types
+// ---------------------------------------------------------------------------
+
+/// Determine the common type for two dtypes. This is an alias for [`promote_types`].
+///
+/// # Errors
+/// Returns `FerrumError::InvalidDtype` if promotion fails.
+pub fn common_type(a: DType, b: DType) -> FerrumResult<DType> {
+    promote_types(a, b)
+}
+
+// ---------------------------------------------------------------------------
+// min_scalar_type — smallest type for a given dtype
+// ---------------------------------------------------------------------------
+
+/// Return the smallest scalar type that can hold the full range of `dt`.
+///
+/// This is analogous to NumPy's `np.min_scalar_type`. For example:
+/// - `min_scalar_type(DType::I64)` returns `DType::I8` (the smallest signed int)
+/// - `min_scalar_type(DType::F64)` returns `DType::F32` (smallest float that is lossless for the kind)
+///
+/// Note: without a concrete value, we return the smallest type of the same kind.
+pub fn min_scalar_type(dt: DType) -> DType {
+    use DType::*;
+    match dt {
+        Bool => Bool,
+        U8 | U16 | U32 | U64 | U128 => U8,
+        I8 | I16 | I32 | I64 | I128 => I8,
+        F32 | F64 => F32,
+        Complex32 | Complex64 => Complex32,
+        #[cfg(feature = "f16")]
+        F16 => F16,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// issubdtype — type hierarchy check (REQ-26)
+// ---------------------------------------------------------------------------
+
+/// Category for dtype hierarchy checks, matching NumPy's abstract type categories.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DTypeCategory {
+    /// Any numeric type (integer, float, or complex).
+    Number,
+    /// Integer types (signed or unsigned, including bool).
+    Integer,
+    /// Signed integer types.
+    SignedInteger,
+    /// Unsigned integer types (including bool).
+    UnsignedInteger,
+    /// Floating-point types.
+    Floating,
+    /// Complex floating-point types.
+    ComplexFloating,
+}
+
+/// Check if a dtype is a sub-type of a given category.
+///
+/// Analogous to NumPy's `np.issubdtype(dtype, category)`.
+///
+/// # Examples
+/// ```
+/// use ferray_core::dtype::DType;
+/// use ferray_core::dtype::casting::{issubdtype, DTypeCategory};
+///
+/// assert!(issubdtype(DType::I32, DTypeCategory::Integer));
+/// assert!(issubdtype(DType::I32, DTypeCategory::SignedInteger));
+/// assert!(issubdtype(DType::I32, DTypeCategory::Number));
+/// assert!(!issubdtype(DType::I32, DTypeCategory::Floating));
+/// ```
+pub fn issubdtype(dt: DType, category: DTypeCategory) -> bool {
+    match category {
+        DTypeCategory::Number => true, // all our dtypes are numeric
+        DTypeCategory::Integer => dt.is_integer(),
+        DTypeCategory::SignedInteger => dt.is_signed() && dt.is_integer(),
+        DTypeCategory::UnsignedInteger => dt.is_integer() && !dt.is_signed(),
+        DTypeCategory::Floating => dt.is_float(),
+        DTypeCategory::ComplexFloating => dt.is_complex(),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// isrealobj / iscomplexobj — type inspection predicates (REQ-26)
+// ---------------------------------------------------------------------------
+
+/// Check if an array's element type is a real (non-complex) type.
+///
+/// Analogous to NumPy's `np.isrealobj`.
+pub fn isrealobj<T: Element>() -> bool {
+    !T::dtype().is_complex()
+}
+
+/// Check if an array's element type is a complex type.
+///
+/// Analogous to NumPy's `np.iscomplexobj`.
+pub fn iscomplexobj<T: Element>() -> bool {
+    T::dtype().is_complex()
+}
+
+// ===========================================================================
+// Everything below requires std (depends on Array / ndarray)
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// astype() — explicit type casting on Array (REQ-25)
+// ---------------------------------------------------------------------------
+
+/// Trait providing the `astype()` method for arrays.
+///
+/// This is intentionally a separate trait so that mixed-type binary operations
+/// do NOT compile implicitly (REQ-24). Users must call `.astype::<T>()` or use
+/// `add_promoted()` etc.
+#[cfg(not(feature = "no_std"))]
+pub trait AsType<D: Dimension> {
+    /// Cast all elements to type `U`, returning a new array.
+    ///
+    /// # Errors
+    /// Returns `FerrumError::InvalidDtype` if the cast is not possible.
+    fn astype<U: Element>(&self) -> FerrumResult<crate::array::owned::Array<U, D>>
+    where
+        Self: AsTypeInner<U, D>;
+}
+
+/// Internal trait that performs the actual casting. Implemented for specific
+/// (T, U) pairs where `T: PromoteTo<U>` or where unsafe casting is valid.
+#[cfg(not(feature = "no_std"))]
+pub trait AsTypeInner<U: Element, D: Dimension> {
+    /// Perform the cast.
+    fn astype_inner(&self) -> FerrumResult<crate::array::owned::Array<U, D>>;
+}
+
+#[cfg(not(feature = "no_std"))]
+impl<T: Element, D: Dimension> AsType<D> for crate::array::owned::Array<T, D> {
+    fn astype<U: Element>(&self) -> FerrumResult<crate::array::owned::Array<U, D>>
+    where
+        Self: AsTypeInner<U, D>,
+    {
+        self.astype_inner()
+    }
+}
+
+/// Blanket implementation: any T that can PromoteTo<U> can astype.
+#[cfg(not(feature = "no_std"))]
+impl<T, U, D> AsTypeInner<U, D> for crate::array::owned::Array<T, D>
+where
+    T: Element + PromoteTo<U>,
+    U: Element,
+    D: Dimension,
+{
+    fn astype_inner(&self) -> FerrumResult<crate::array::owned::Array<U, D>> {
+        let mapped = self.inner.mapv(|x| x.promote());
+        Ok(crate::array::owned::Array::from_ndarray(mapped))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// view_cast() — reinterpret cast (zero-copy where possible)
+// ---------------------------------------------------------------------------
+
+/// Reinterpret the raw bytes of an array as a different element type.
+///
+/// This is analogous to NumPy's `.view(dtype)`. It requires that the element
+/// sizes match (or the last dimension is adjusted accordingly).
+///
+/// # Safety
+/// This is a reinterpret cast: the bit patterns are preserved but interpreted
+/// as a different type. The caller must ensure this is meaningful.
+///
+/// # Errors
+/// Returns `FerrumError::InvalidDtype` if the element sizes are incompatible.
+#[cfg(not(feature = "no_std"))]
+pub fn view_cast<T: Element, U: Element, D: Dimension>(
+    arr: &crate::array::owned::Array<T, D>,
+) -> FerrumResult<crate::array::owned::Array<U, D>> {
+    let t_size = core::mem::size_of::<T>();
+    let u_size = core::mem::size_of::<U>();
+
+    if t_size != u_size {
+        return Err(FerrumError::invalid_dtype(format!(
+            "view cast requires equal element sizes: {} ({} bytes) vs {} ({} bytes)",
+            T::dtype(),
+            t_size,
+            U::dtype(),
+            u_size,
+        )));
+    }
+
+    // Both types have the same size, so we can safely reinterpret
+    let data: Vec<T> = arr.inner.iter().cloned().collect();
+    let len = data.len();
+
+    // Safety: T and U have the same size, we're doing a byte-level reinterpret
+    let reinterpreted: Vec<U> = unsafe {
+        let mut data = core::mem::ManuallyDrop::new(data);
+        Vec::from_raw_parts(data.as_mut_ptr() as *mut U, len, len)
+    };
+
+    crate::array::owned::Array::from_vec(arr.dim().clone(), reinterpreted)
+}
+
+// ---------------------------------------------------------------------------
+// add_promoted / mul_promoted etc. — promoted binary operations (REQ-24)
+// ---------------------------------------------------------------------------
+
+#[cfg(not(feature = "no_std"))]
+impl<T: Element, D: Dimension> crate::array::owned::Array<T, D> {
+    /// Add two arrays after promoting both to their common type.
+    ///
+    /// This is the explicit way to perform mixed-type addition (REQ-24).
+    /// Implicit mixed-type `+` does not compile.
+    pub fn add_promoted<U>(
+        &self,
+        other: &crate::array::owned::Array<U, D>,
+    ) -> FerrumResult<crate::array::owned::Array<<T as super::promotion::Promoted<U>>::Output, D>>
+    where
+        U: Element,
+        T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Add<Output = <T as super::promotion::Promoted<U>>::Output>,
+    {
+        type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
+
+        let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
+
+        let result = a_promoted + b_promoted;
+        Ok(crate::array::owned::Array::from_ndarray(result))
+    }
+
+    /// Subtract two arrays after promoting both to their common type.
+    pub fn sub_promoted<U>(
+        &self,
+        other: &crate::array::owned::Array<U, D>,
+    ) -> FerrumResult<crate::array::owned::Array<<T as super::promotion::Promoted<U>>::Output, D>>
+    where
+        U: Element,
+        T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Sub<Output = <T as super::promotion::Promoted<U>>::Output>,
+    {
+        type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
+
+        let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
+
+        let result = a_promoted - b_promoted;
+        Ok(crate::array::owned::Array::from_ndarray(result))
+    }
+
+    /// Multiply two arrays after promoting both to their common type.
+    pub fn mul_promoted<U>(
+        &self,
+        other: &crate::array::owned::Array<U, D>,
+    ) -> FerrumResult<crate::array::owned::Array<<T as super::promotion::Promoted<U>>::Output, D>>
+    where
+        U: Element,
+        T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Mul<Output = <T as super::promotion::Promoted<U>>::Output>,
+    {
+        type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
+
+        let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
+
+        let result = a_promoted * b_promoted;
+        Ok(crate::array::owned::Array::from_ndarray(result))
+    }
+
+    /// Divide two arrays after promoting both to their common type.
+    pub fn div_promoted<U>(
+        &self,
+        other: &crate::array::owned::Array<U, D>,
+    ) -> FerrumResult<crate::array::owned::Array<<T as super::promotion::Promoted<U>>::Output, D>>
+    where
+        U: Element,
+        T: super::promotion::Promoted<U> + PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        U: PromoteTo<<T as super::promotion::Promoted<U>>::Output>,
+        <T as super::promotion::Promoted<U>>::Output:
+            Element + core::ops::Div<Output = <T as super::promotion::Promoted<U>>::Output>,
+    {
+        type Out<A, B> = <A as super::promotion::Promoted<B>>::Output;
+
+        let a_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> = self.inner.mapv(|x| x.promote());
+        let b_promoted: ndarray::Array<Out<T, U>, D::NdarrayDim> =
+            other.inner.mapv(|x| x.promote());
+
+        let result = a_promoted / b_promoted;
+        Ok(crate::array::owned::Array::from_ndarray(result))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::dimension::Ix1;
+    use num_complex::Complex;
+
+    #[test]
+    fn can_cast_no() {
+        assert!(can_cast(DType::F64, DType::F64, CastKind::No).unwrap());
+        assert!(!can_cast(DType::F32, DType::F64, CastKind::No).unwrap());
+    }
+
+    #[test]
+    fn can_cast_safe() {
+        assert!(can_cast(DType::F32, DType::F64, CastKind::Safe).unwrap());
+        assert!(can_cast(DType::I32, DType::I64, CastKind::Safe).unwrap());
+        assert!(can_cast(DType::U8, DType::I16, CastKind::Safe).unwrap());
+        // Downcast is not safe
+        assert!(!can_cast(DType::F64, DType::F32, CastKind::Safe).unwrap());
+        assert!(!can_cast(DType::I64, DType::I32, CastKind::Safe).unwrap());
+    }
+
+    #[test]
+    fn can_cast_same_kind() {
+        // int -> int (different size) is same_kind
+        assert!(can_cast(DType::I64, DType::I32, CastKind::SameKind).unwrap());
+        assert!(can_cast(DType::F64, DType::F32, CastKind::SameKind).unwrap());
+        // float -> int is not same_kind
+        assert!(!can_cast(DType::F64, DType::I32, CastKind::SameKind).unwrap());
+    }
+
+    #[test]
+    fn can_cast_unsafe_allows_all() {
+        assert!(can_cast(DType::F64, DType::I8, CastKind::Unsafe).unwrap());
+        assert!(can_cast(DType::Complex64, DType::Bool, CastKind::Unsafe).unwrap());
+    }
+
+    #[test]
+    fn promote_types_basic() {
+        assert_eq!(promote_types(DType::F32, DType::F64).unwrap(), DType::F64);
+        assert_eq!(promote_types(DType::I32, DType::F32).unwrap(), DType::F64);
+        assert_eq!(promote_types(DType::U8, DType::I8).unwrap(), DType::I16);
+    }
+
+    #[test]
+    fn common_type_is_promote_types() {
+        assert_eq!(
+            common_type(DType::I32, DType::F64).unwrap(),
+            promote_types(DType::I32, DType::F64).unwrap()
+        );
+    }
+
+    #[test]
+    fn min_scalar_type_basics() {
+        assert_eq!(min_scalar_type(DType::I64), DType::I8);
+        assert_eq!(min_scalar_type(DType::F64), DType::F32);
+        assert_eq!(min_scalar_type(DType::Complex64), DType::Complex32);
+        assert_eq!(min_scalar_type(DType::Bool), DType::Bool);
+        assert_eq!(min_scalar_type(DType::U32), DType::U8);
+    }
+
+    #[test]
+    fn issubdtype_checks() {
+        assert!(issubdtype(DType::I32, DTypeCategory::Integer));
+        assert!(issubdtype(DType::I32, DTypeCategory::SignedInteger));
+        assert!(issubdtype(DType::I32, DTypeCategory::Number));
+        assert!(!issubdtype(DType::I32, DTypeCategory::Floating));
+        assert!(!issubdtype(DType::I32, DTypeCategory::ComplexFloating));
+
+        assert!(issubdtype(DType::U16, DTypeCategory::UnsignedInteger));
+        assert!(!issubdtype(DType::U16, DTypeCategory::SignedInteger));
+
+        assert!(issubdtype(DType::F64, DTypeCategory::Floating));
+        assert!(issubdtype(DType::F64, DTypeCategory::Number));
+        assert!(!issubdtype(DType::F64, DTypeCategory::Integer));
+
+        assert!(issubdtype(DType::Complex64, DTypeCategory::ComplexFloating));
+        assert!(issubdtype(DType::Complex64, DTypeCategory::Number));
+    }
+
+    #[test]
+    fn isrealobj_iscomplexobj() {
+        assert!(isrealobj::<f64>());
+        assert!(isrealobj::<i32>());
+        assert!(!isrealobj::<Complex<f64>>());
+
+        assert!(iscomplexobj::<Complex<f64>>());
+        assert!(iscomplexobj::<Complex<f32>>());
+        assert!(!iscomplexobj::<f64>());
+    }
+
+    #[test]
+    fn astype_widen() {
+        let arr =
+            crate::array::owned::Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![1, 2, 3]).unwrap();
+        let result = arr.astype::<f64>().unwrap();
+        assert_eq!(result.as_slice().unwrap(), &[1.0, 2.0, 3.0]);
+        assert_eq!(result.dtype(), DType::F64);
+    }
+
+    #[test]
+    fn astype_same_type() {
+        let arr = crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.5, 2.5])
+            .unwrap();
+        let result = arr.astype::<f64>().unwrap();
+        assert_eq!(result.as_slice().unwrap(), &[1.5, 2.5]);
+    }
+
+    #[test]
+    fn view_cast_same_size() {
+        // f32 and i32 are both 4 bytes
+        let arr = crate::array::owned::Array::<f32, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0])
+            .unwrap();
+        let result = view_cast::<f32, i32, Ix1>(&arr);
+        assert!(result.is_ok());
+        let casted = result.unwrap();
+        assert_eq!(casted.shape(), &[2]);
+    }
+
+    #[test]
+    fn view_cast_different_size_fails() {
+        let arr = crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0])
+            .unwrap();
+        let result = view_cast::<f64, f32, Ix1>(&arr);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn add_promoted_i32_f64() {
+        let a =
+            crate::array::owned::Array::<i32, Ix1>::from_vec(Ix1::new([3]), vec![1, 2, 3]).unwrap();
+        let b =
+            crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([3]), vec![0.5, 1.5, 2.5])
+                .unwrap();
+        let result = a.add_promoted(&b).unwrap();
+        assert_eq!(result.dtype(), DType::F64);
+        assert_eq!(result.as_slice().unwrap(), &[1.5, 3.5, 5.5]);
+    }
+
+    #[test]
+    fn mul_promoted_u8_i16() {
+        let a =
+            crate::array::owned::Array::<u8, Ix1>::from_vec(Ix1::new([3]), vec![2, 3, 4]).unwrap();
+        let b = crate::array::owned::Array::<i16, Ix1>::from_vec(Ix1::new([3]), vec![10, 20, 30])
+            .unwrap();
+        let result = a.mul_promoted(&b).unwrap();
+        // u8 + i16 => i16
+        assert_eq!(result.dtype(), DType::I16);
+        assert_eq!(result.as_slice().unwrap(), &[20i16, 60, 120]);
+    }
+
+    #[test]
+    fn sub_promoted_f32_f64() {
+        let a = crate::array::owned::Array::<f32, Ix1>::from_vec(Ix1::new([2]), vec![10.0, 20.0])
+            .unwrap();
+        let b = crate::array::owned::Array::<f64, Ix1>::from_vec(Ix1::new([2]), vec![1.0, 2.0])
+            .unwrap();
+        let result = a.sub_promoted(&b).unwrap();
+        assert_eq!(result.dtype(), DType::F64);
+        assert_eq!(result.as_slice().unwrap(), &[9.0, 18.0]);
+    }
+}

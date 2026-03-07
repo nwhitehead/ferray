@@ -3,12 +3,12 @@
 //! Fuzz target for exponential and logarithmic ufuncs: exp, exp2, expm1,
 //! log, log2, log10, log1p, logaddexp, logaddexp2.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::Ix1;
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::Ix1;
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)
@@ -30,21 +30,21 @@ fuzz_target!(|data: &[u8]| {
 
     let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         // Unary exp/log functions
-        let _ = ferrum_ufunc::exp(&arr);
-        let _ = ferrum_ufunc::exp2(&arr);
-        let _ = ferrum_ufunc::expm1(&arr);
-        let _ = ferrum_ufunc::log(&arr);
-        let _ = ferrum_ufunc::log2(&arr);
-        let _ = ferrum_ufunc::log10(&arr);
-        let _ = ferrum_ufunc::log1p(&arr);
+        let _ = ferray_ufunc::exp(&arr);
+        let _ = ferray_ufunc::exp2(&arr);
+        let _ = ferray_ufunc::expm1(&arr);
+        let _ = ferray_ufunc::log(&arr);
+        let _ = ferray_ufunc::log2(&arr);
+        let _ = ferray_ufunc::log10(&arr);
+        let _ = ferray_ufunc::log1p(&arr);
 
         // Binary: logaddexp, logaddexp2 — split input in half
         if n >= 2 {
             let half = n / 2;
             let a = Array::from_vec(Ix1::new([half]), values[..half].to_vec()).unwrap();
             let b = Array::from_vec(Ix1::new([half]), values[half..half * 2].to_vec()).unwrap();
-            let _ = ferrum_ufunc::logaddexp(&a, &b);
-            let _ = ferrum_ufunc::logaddexp2(&a, &b);
+            let _ = ferray_ufunc::logaddexp(&a, &b);
+            let _ = ferray_ufunc::logaddexp2(&a, &b);
         }
     }));
 });

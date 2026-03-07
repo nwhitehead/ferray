@@ -1,6 +1,6 @@
 {
   "function": "numpy.polyval",
-  "ferrum_function": "ferrum_polynomial::Polynomial::eval",
+  "ferray_function": "ferray_polynomial::Polynomial::eval",
   "test_cases": [
     {
       "name": "quadratic",

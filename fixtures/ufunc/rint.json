@@ -1,6 +1,6 @@
 {
   "function": "numpy.rint",
-  "ferrum_function": "ferrum_ufunc::rint",
+  "ferray_function": "ferray_ufunc::rint",
   "test_cases": [
     {
       "name": "standard_f64",

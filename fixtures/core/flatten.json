@@ -1,6 +1,6 @@
 {
   "function": "numpy.ndarray.flatten",
-  "ferrum_function": "ferrum_core::flatten",
+  "ferray_function": "ferray_core::flatten",
   "test_cases": [
     {
       "name": "flatten_2d",

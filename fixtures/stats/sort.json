@@ -1,6 +1,6 @@
 {
   "function": "numpy.sort",
-  "ferrum_function": "ferrum_stats::sort",
+  "ferray_function": "ferray_stats::sort",
   "test_cases": [
     {
       "name": "1d",

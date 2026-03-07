@@ -1,6 +1,6 @@
 {
   "function": "numpy.tan",
-  "ferrum_function": "ferrum_ufunc::tan",
+  "ferray_function": "ferray_ufunc::tan",
   "test_cases": [
     {
       "name": "standard_f64",

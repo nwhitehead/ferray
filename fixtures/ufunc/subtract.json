@@ -1,6 +1,6 @@
 {
   "function": "numpy.subtract",
-  "ferrum_function": "ferrum_ufunc::subtract",
+  "ferray_function": "ferray_ufunc::subtract",
   "test_cases": [
     {
       "name": "standard_f64",

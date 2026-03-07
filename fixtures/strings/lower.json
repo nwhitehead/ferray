@@ -1,6 +1,6 @@
 {
   "function": "numpy.strings.lower",
-  "ferrum_function": "ferrum_strings::lower",
+  "ferray_function": "ferray_strings::lower",
   "test_cases": [
     {
       "name": "standard",

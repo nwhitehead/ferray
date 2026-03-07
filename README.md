@@ -1,8 +1,8 @@
-# ferrum
+# ferray
 
 A NumPy-equivalent scientific computing library for Rust. Correctly-rounded math, SIMD-accelerated operations, and zero panics.
 
-## Why ferrum?
+## Why ferray?
 
 - **More accurate than NumPy** on every transcendental function (CORE-MATH, < 0.5 ULP)
 - **Faster than NumPy** on 23 of 55 benchmarks — all FFT sizes, all variance/std, small reductions
@@ -14,33 +14,33 @@ A NumPy-equivalent scientific computing library for Rust. Correctly-rounded math
 
 ```toml
 [dependencies]
-ferrum = "0.1"
+ferray = "0.1"
 ```
 
 ```rust
-use ferrum::prelude::*;
+use ferray::prelude::*;
 
 // Create arrays
 let a = Array1::<f64>::linspace(0.0, 1.0, 1000)?;
-let b = ferrum::ufunc::sin(&a)?;
+let b = ferray::ufunc::sin(&a)?;
 
 // Linear algebra
 let m = Array2::<f64>::eye(3)?;
-let det = ferrum::linalg::det(&m)?;
+let det = ferray::linalg::det(&m)?;
 
 // FFT
-let spectrum = ferrum::fft::fft(&b, None, None, None)?;
+let spectrum = ferray::fft::fft(&b, None, None, None)?;
 
 // Statistics
-let mean = ferrum::stats::mean(&a, None)?;
-let std = ferrum::stats::std(&a, None, None)?;
+let mean = ferray::stats::mean(&a, None)?;
+let std = ferray::stats::std(&a, None, None)?;
 ```
 
 ## Performance
 
 Benchmarked against NumPy 2.3.5 on Linux (Rust 1.85, LTO, target-cpu=native).
 
-### Where ferrum dominates
+### Where ferray dominates
 
 | Operation | Speedup vs NumPy |
 |-----------|-----------------|
@@ -63,27 +63,27 @@ Benchmarked against NumPy 2.3.5 on Linux (Rust 1.85, LTO, target-cpu=native).
 | matmul 50x50-100x100 | 4.0-4.6x | OpenBLAS/MKL hand-tuned assembly vs faer pure Rust |
 | sqrt 1M | 3.7x | Memory bandwidth bound at 8MB |
 
-**Scorecard: ferrum 23, NumPy 32.** All NumPy wins are transcendentals (accuracy tradeoff) or matmul (BLAS gap). GPU acceleration via CUDA is planned for Phase 6.
+**Scorecard: ferray 23, NumPy 32.** All NumPy wins are transcendentals (accuracy tradeoff) or matmul (BLAS gap). GPU acceleration via CUDA is planned for Phase 6.
 
 ### Fast mode: `exp_fast`
 
-For throughput-sensitive workloads, ferrum offers `exp_fast()` — an Even/Odd Remez decomposition that is **~30% faster than CORE-MATH** while maintaining ≤1 ULP accuracy (faithfully rounded). It auto-vectorizes for SSE/AVX2/AVX-512/NEON with no lookup tables.
+For throughput-sensitive workloads, ferray offers `exp_fast()` — an Even/Odd Remez decomposition that is **~30% faster than CORE-MATH** while maintaining ≤1 ULP accuracy (faithfully rounded). It auto-vectorizes for SSE/AVX2/AVX-512/NEON with no lookup tables.
 
 ```rust
 // Default: correctly rounded (≤0.5 ULP, CORE-MATH)
-let result = ferrum::exp(&array)?;
+let result = ferray::exp(&array)?;
 
 // Fast mode: faithfully rounded (≤1 ULP, ~30% faster)
-let result = ferrum::exp_fast(&array)?;
+let result = ferray::exp_fast(&array)?;
 ```
 
 Both are more accurate than NumPy's libm-based `exp()` (which can be up to 8 ULP).
 
 ### Accuracy
 
-ferrum uses [CORE-MATH](https://core-math.gitlabpages.inria.fr/) — the only correctly-rounded math library in production. Every transcendental returns the closest representable floating-point value to the mathematical truth.
+ferray uses [CORE-MATH](https://core-math.gitlabpages.inria.fr/) — the only correctly-rounded math library in production. Every transcendental returns the closest representable floating-point value to the mathematical truth.
 
-| | ferrum | NumPy (glibc) |
+| | ferray | NumPy (glibc) |
 |---|---|---|
 | sin accuracy | < 0.5 ULP | up to 8,192 ULP at edge cases |
 | exp accuracy | < 0.5 ULP | up to 8 ULP |
@@ -91,25 +91,25 @@ ferrum uses [CORE-MATH](https://core-math.gitlabpages.inria.fr/) — the only co
 
 ## Crate Structure
 
-ferrum is a workspace of 15 focused crates:
+ferray is a workspace of 15 focused crates:
 
 | Crate | Description |
 |-------|-------------|
-| `ferrum-core` | `NdArray<T, D>`, broadcasting, indexing, shape manipulation |
-| `ferrum-ufunc` | SIMD-accelerated universal functions (sin, cos, exp, sqrt, ...) |
-| `ferrum-stats` | Reductions, sorting, histograms, set operations |
-| `ferrum-linalg` | Matrix products, decompositions, solvers, einsum |
-| `ferrum-fft` | FFT/IFFT with plan caching, real FFTs |
-| `ferrum-random` | Generator API, 30+ distributions, permutations |
-| `ferrum-io` | NumPy .npy/.npz file I/O with memory mapping |
-| `ferrum-polynomial` | 6 basis classes, fitting, root-finding |
-| `ferrum-window` | Window functions, vectorize, piecewise |
-| `ferrum-strings` | StringArray with vectorized operations |
-| `ferrum-ma` | MaskedArray with mask propagation |
-| `ferrum-stride-tricks` | sliding_window_view, as_strided |
-| `ferrum-numpy-interop` | PyO3 zero-copy, Arrow/Polars conversion |
-| `ferrum-autodiff` | Forward-mode automatic differentiation |
-| `ferrum` | Re-export crate with prelude |
+| `ferray-core` | `NdArray<T, D>`, broadcasting, indexing, shape manipulation |
+| `ferray-ufunc` | SIMD-accelerated universal functions (sin, cos, exp, sqrt, ...) |
+| `ferray-stats` | Reductions, sorting, histograms, set operations |
+| `ferray-linalg` | Matrix products, decompositions, solvers, einsum |
+| `ferray-fft` | FFT/IFFT with plan caching, real FFTs |
+| `ferray-random` | Generator API, 30+ distributions, permutations |
+| `ferray-io` | NumPy .npy/.npz file I/O with memory mapping |
+| `ferray-polynomial` | 6 basis classes, fitting, root-finding |
+| `ferray-window` | Window functions, vectorize, piecewise |
+| `ferray-strings` | StringArray with vectorized operations |
+| `ferray-ma` | MaskedArray with mask propagation |
+| `ferray-stride-tricks` | sliding_window_view, as_strided |
+| `ferray-numpy-interop` | PyO3 zero-copy, Arrow/Polars conversion |
+| `ferray-autodiff` | Forward-mode automatic differentiation |
+| `ferray` | Re-export crate with prelude |
 
 ## Key Design Decisions
 
@@ -125,14 +125,14 @@ ferrum is a workspace of 15 focused crates:
 Features that go beyond NumPy's capabilities:
 
 - **f16 support** — half-precision floats as first-class citizens across all crates
-- **no_std core** — `ferrum-core` and `ferrum-ufunc` compile without `std` (requires `alloc`)
+- **no_std core** — `ferray-core` and `ferray-ufunc` compile without `std` (requires `alloc`)
 - **Const generic shapes** — `Shape1<N>` through `Shape6` for compile-time dimension checking
 - **Automatic differentiation** — forward-mode autodiff via `DualNumber<T>`
 - **Memory safety** — guaranteed by Rust's type system + Kani formal verification
 
 ## GPU Acceleration (Planned)
 
-Phase 6 design complete (`.design/ferrum-gpu.md`). Architecture:
+Phase 6 design complete (`.design/ferray-gpu.md`). Architecture:
 
 - **CubeCL** for cross-platform GPU kernels (write once, compile to CUDA/Vulkan/Metal/WebGPU)
 - **cudarc** for NVIDIA vendor libraries (cuBLAS 100x matmul, cuFFT, cuSOLVER)

@@ -1,6 +1,6 @@
 {
   "function": "numpy.log",
-  "ferrum_function": "ferrum_ufunc::log",
+  "ferray_function": "ferray_ufunc::log",
   "test_cases": [
     {
       "name": "standard_f64",

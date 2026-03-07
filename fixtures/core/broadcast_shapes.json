@@ -1,6 +1,6 @@
 {
   "function": "numpy.broadcast_shapes",
-  "ferrum_function": "ferrum_core::broadcast_shapes",
+  "ferray_function": "ferray_core::broadcast_shapes",
   "test_cases": [
     {
       "name": "broadcast_4x3_3",

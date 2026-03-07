@@ -3,12 +3,12 @@
 //! Fuzz target for trigonometric ufuncs: sin, cos, tan, arcsin, arccos, arctan,
 //! sinh, cosh, tanh, arcsinh, arccosh, arctanh.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::Ix1;
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::Ix1;
 
 /// Interpret raw bytes as a Vec<f64>.  Returns an empty vec if fewer than 8 bytes.
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
@@ -31,17 +31,17 @@ fuzz_target!(|data: &[u8]| {
 
     // Catch panics — any panic is a fuzz failure
     let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        let _ = ferrum_ufunc::sin(&arr);
-        let _ = ferrum_ufunc::cos(&arr);
-        let _ = ferrum_ufunc::tan(&arr);
-        let _ = ferrum_ufunc::arcsin(&arr);
-        let _ = ferrum_ufunc::arccos(&arr);
-        let _ = ferrum_ufunc::arctan(&arr);
-        let _ = ferrum_ufunc::sinh(&arr);
-        let _ = ferrum_ufunc::cosh(&arr);
-        let _ = ferrum_ufunc::tanh(&arr);
-        let _ = ferrum_ufunc::arcsinh(&arr);
-        let _ = ferrum_ufunc::arccosh(&arr);
-        let _ = ferrum_ufunc::arctanh(&arr);
+        let _ = ferray_ufunc::sin(&arr);
+        let _ = ferray_ufunc::cos(&arr);
+        let _ = ferray_ufunc::tan(&arr);
+        let _ = ferray_ufunc::arcsin(&arr);
+        let _ = ferray_ufunc::arccos(&arr);
+        let _ = ferray_ufunc::arctan(&arr);
+        let _ = ferray_ufunc::sinh(&arr);
+        let _ = ferray_ufunc::cosh(&arr);
+        let _ = ferray_ufunc::tanh(&arr);
+        let _ = ferray_ufunc::arcsinh(&arr);
+        let _ = ferray_ufunc::arccosh(&arr);
+        let _ = ferray_ufunc::arctanh(&arr);
     }));
 });

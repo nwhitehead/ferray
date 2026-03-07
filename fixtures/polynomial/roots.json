@@ -1,6 +1,6 @@
 {
   "function": "numpy.roots",
-  "ferrum_function": "ferrum_polynomial::Polynomial::roots",
+  "ferray_function": "ferray_polynomial::Polynomial::roots",
   "test_cases": [
     {
       "name": "quadratic_real",

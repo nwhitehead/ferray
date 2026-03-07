@@ -3,12 +3,12 @@
 //! Fuzz target for core array creation: Array::from_vec with various shapes,
 //! Array::zeros, Array::ones, Array::from_elem.
 //!
-//! Contract: ferrum either returns Ok or Err(FerrumError) — never panics.
+//! Contract: ferray either returns Ok or Err(FerrumError) — never panics.
 
 use libfuzzer_sys::fuzz_target;
 
-use ferrum_core::array::owned::Array;
-use ferrum_core::dimension::{Ix1, Ix2, IxDyn};
+use ferray_core::array::owned::Array;
+use ferray_core::dimension::{Ix1, Ix2, IxDyn};
 
 fn bytes_to_f64s(data: &[u8]) -> Vec<f64> {
     data.chunks_exact(8)

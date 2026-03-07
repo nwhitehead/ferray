@@ -1,6 +1,6 @@
 {
   "function": "numpy.linalg.eigh",
-  "ferrum_function": "ferrum_linalg::eigh",
+  "ferray_function": "ferray_linalg::eigh",
   "test_cases": [
     {
       "name": "2x2_symmetric",

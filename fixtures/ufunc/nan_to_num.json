@@ -1,6 +1,6 @@
 {
   "function": "numpy.nan_to_num",
-  "ferrum_function": "ferrum_ufunc::nan_to_num",
+  "ferray_function": "ferray_ufunc::nan_to_num",
   "test_cases": [
     {
       "name": "standard_f64",

@@ -1,6 +1,6 @@
 {
   "function": "numpy.mean",
-  "ferrum_function": "ferrum_stats::mean",
+  "ferray_function": "ferray_stats::mean",
   "test_cases": [
     {
       "name": "1d_f64",

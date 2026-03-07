@@ -1,6 +1,6 @@
 {
   "function": "numpy.fft.fftfreq",
-  "ferrum_function": "ferrum_fft::fftfreq",
+  "ferray_function": "ferray_fft::fftfreq",
   "test_cases": [
     {
       "name": "n8_d1.0",

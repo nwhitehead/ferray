@@ -1,6 +1,6 @@
 {
   "function": "numpy.clip",
-  "ferrum_function": "ferrum_ufunc::clip",
+  "ferray_function": "ferray_ufunc::clip",
   "test_cases": [
     {
       "name": "standard_f64",

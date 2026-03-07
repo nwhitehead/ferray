@@ -1,6 +1,6 @@
 {
   "function": "numpy.floor",
-  "ferrum_function": "ferrum_ufunc::floor",
+  "ferray_function": "ferray_ufunc::floor",
   "test_cases": [
     {
       "name": "standard_f64",

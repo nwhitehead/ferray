@@ -1,0 +1,42 @@
+[package]
+name = "ferray-numpy-interop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+description = "Python/NumPy interop via PyO3 and Arrow/Polars for ferray"
+
+[dependencies]
+ferray-core = { workspace = true }
+
+[dependencies.pyo3]
+workspace = true
+optional = true
+
+[dependencies.numpy]
+workspace = true
+optional = true
+
+[dependencies.arrow]
+workspace = true
+optional = true
+
+[dependencies.polars]
+version = "0.46"
+optional = true
+default-features = false
+features = ["dtype-i8", "dtype-i16", "dtype-u8", "dtype-u16"]
+
+[features]
+default = []
+python = ["dep:pyo3", "dep:numpy"]
+arrow = ["dep:arrow"]
+polars = ["dep:polars"]
+
+[dev-dependencies]
+proptest = { workspace = true }

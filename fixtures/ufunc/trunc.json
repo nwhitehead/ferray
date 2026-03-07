@@ -1,6 +1,6 @@
 {
   "function": "numpy.trunc",
-  "ferrum_function": "ferrum_ufunc::trunc",
+  "ferray_function": "ferray_ufunc::trunc",
   "test_cases": [
     {
       "name": "standard_f64",

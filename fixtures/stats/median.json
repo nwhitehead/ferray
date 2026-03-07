@@ -1,6 +1,6 @@
 {
   "function": "numpy.median",
-  "ferrum_function": "ferrum_stats::median",
+  "ferray_function": "ferray_stats::median",
   "test_cases": [
     {
       "name": "odd_len",

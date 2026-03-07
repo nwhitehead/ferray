@@ -1,6 +1,6 @@
 {
   "function": "numpy.minimum",
-  "ferrum_function": "ferrum_ufunc::minimum",
+  "ferray_function": "ferray_ufunc::minimum",
   "test_cases": [
     {
       "name": "standard_f64",
