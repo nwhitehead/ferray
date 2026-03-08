@@ -38,6 +38,8 @@ pub mod indexing;
 #[cfg(not(feature = "no_std"))]
 pub mod manipulation;
 #[cfg(not(feature = "no_std"))]
+pub mod ops;
+#[cfg(not(feature = "no_std"))]
 pub mod prelude;
 
 // Re-export key types at crate root for ergonomics (std only)
