@@ -5,7 +5,7 @@
 // where W is a diagonal weight matrix.
 
 use ferray_core::Array;
-use ferray_core::dimension::{Ix1, Ix2, IxDyn};
+use ferray_core::dimension::{Ix2, IxDyn};
 use ferray_core::error::FerrayError;
 
 /// Build a Vandermonde matrix for power basis fitting.
@@ -228,138 +228,6 @@ pub fn least_squares_fit(
                 x[j] += dx[j];
             }
         }
-    }
-
-    Ok(x)
-}
-
-/// Solve A x = b using Cholesky decomposition where A is symmetric positive definite.
-///
-/// `a` is an m x m matrix in row-major order.
-///
-/// # Errors
-/// Returns `FerrayError::SingularMatrix` if A is not positive definite.
-fn cholesky_solve(a: &[f64], m: usize, b: &[f64]) -> Result<Vec<f64>, FerrayError> {
-    // Cholesky decomposition: A = L L^T
-    let mut l = vec![0.0; m * m];
-
-    for i in 0..m {
-        for j in 0..=i {
-            let mut sum = 0.0;
-            for k in 0..j {
-                sum += l[i * m + k] * l[j * m + k];
-            }
-            if i == j {
-                let diag = a[i * m + i] - sum;
-                if diag <= 0.0 {
-                    // Fall back to LU-like solver for ill-conditioned systems
-                    return lu_solve(a, m, b);
-                }
-                l[i * m + j] = diag.sqrt();
-            } else {
-                let ljj = l[j * m + j];
-                if ljj.abs() < f64::EPSILON * 1e6 {
-                    return lu_solve(a, m, b);
-                }
-                l[i * m + j] = (a[i * m + j] - sum) / ljj;
-            }
-        }
-    }
-
-    // Forward solve: L y = b
-    let mut y = vec![0.0; m];
-    for i in 0..m {
-        let mut sum = 0.0;
-        for j in 0..i {
-            sum += l[i * m + j] * y[j];
-        }
-        let lii = l[i * m + i];
-        if lii.abs() < f64::EPSILON * 1e6 {
-            return lu_solve(a, m, b);
-        }
-        y[i] = (b[i] - sum) / lii;
-    }
-
-    // Back solve: L^T x = y
-    let mut x = vec![0.0; m];
-    for i in (0..m).rev() {
-        let mut sum = 0.0;
-        for j in (i + 1)..m {
-            sum += l[j * m + i] * x[j];
-        }
-        let lii = l[i * m + i];
-        if lii.abs() < f64::EPSILON * 1e6 {
-            return lu_solve(a, m, b);
-        }
-        x[i] = (y[i] - sum) / lii;
-    }
-
-    Ok(x)
-}
-
-/// Solve A x = b using LU decomposition with partial pivoting.
-///
-/// Fallback for cases where Cholesky fails (ill-conditioned systems).
-///
-/// # Errors
-/// Returns `FerrayError::SingularMatrix` if A is singular.
-fn lu_solve(a: &[f64], m: usize, b: &[f64]) -> Result<Vec<f64>, FerrayError> {
-    let mut lu = a.to_vec();
-    let mut perm: Vec<usize> = (0..m).collect();
-
-    for k in 0..m {
-        // Find pivot
-        let mut max_val = lu[perm[k] * m + k].abs();
-        let mut max_idx = k;
-        for i in (k + 1)..m {
-            let v = lu[perm[i] * m + k].abs();
-            if v > max_val {
-                max_val = v;
-                max_idx = i;
-            }
-        }
-        if max_val < f64::EPSILON * 1e6 {
-            return Err(FerrayError::SingularMatrix {
-                message: "normal equations matrix is singular or nearly singular".to_string(),
-            });
-        }
-        perm.swap(k, max_idx);
-
-        let pivot = lu[perm[k] * m + k];
-        for i in (k + 1)..m {
-            let factor = lu[perm[i] * m + k] / pivot;
-            lu[perm[i] * m + k] = factor;
-            for j in (k + 1)..m {
-                let val = lu[perm[k] * m + j];
-                lu[perm[i] * m + j] -= factor * val;
-            }
-        }
-    }
-
-    // Forward substitution (L y = P b)
-    let mut y = vec![0.0; m];
-    for i in 0..m {
-        let mut sum = 0.0;
-        for j in 0..i {
-            sum += lu[perm[i] * m + j] * y[j];
-        }
-        y[i] = b[perm[i]] - sum;
-    }
-
-    // Back substitution (U x = y)
-    let mut x = vec![0.0; m];
-    for i in (0..m).rev() {
-        let mut sum = 0.0;
-        for j in (i + 1)..m {
-            sum += lu[perm[i] * m + j] * x[j];
-        }
-        let diag = lu[perm[i] * m + i];
-        if diag.abs() < f64::EPSILON * 1e10 {
-            return Err(FerrayError::SingularMatrix {
-                message: "normal equations matrix is singular".to_string(),
-            });
-        }
-        x[i] = (y[i] - sum) / diag;
     }
 
     Ok(x)

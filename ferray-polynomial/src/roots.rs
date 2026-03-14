@@ -5,8 +5,6 @@
 // yet be available. When ferray-linalg::eigvals is ready, this can delegate
 // to it for improved performance.
 
-use ferray_core::Array;
-use ferray_core::dimension::Ix2;
 use ferray_core::error::FerrayError;
 use num_complex::Complex;
 
@@ -67,8 +65,14 @@ pub fn find_roots_from_power_coeffs(coeffs: &[f64]) -> Result<Vec<Complex<f64>>,
         }
         _ => {
             // Use companion matrix eigenvalues via QR iteration.
-            let mat = companion_matrix(&coeffs[..n])?;
-            let eigenvalues = qr_eigenvalues(&mat, deg)?;
+            let mut mat = companion_matrix(&coeffs[..n])?;
+            // Balance the companion matrix to improve eigenvalue accuracy
+            balance_matrix(&mut mat, deg);
+            let mut eigenvalues = qr_eigenvalues(&mat, deg)?;
+            // Polish each root with Newton's method for full f64 precision
+            for root in &mut eigenvalues {
+                newton_polish(&coeffs[..n], root);
+            }
             Ok(eigenvalues)
         }
     }
@@ -180,7 +184,7 @@ fn balance_matrix(a: &mut [f64], n: usize) {
             }
 
             // Find the power-of-two scaling factor
-            let mut s = col_norm + row_norm;
+            let s = col_norm + row_norm;
             let mut f = 1.0;
             let mut c = col_norm;
 
