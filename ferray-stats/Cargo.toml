@@ -20,3 +20,4 @@ pulp = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
+ferray-test-oracle = { path = "../ferray-test-oracle" }

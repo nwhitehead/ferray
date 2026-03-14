@@ -39,3 +39,4 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }
 
 [dev-dependencies]
 proptest = { workspace = true }
+ferray-test-oracle = { path = "../ferray-test-oracle" }

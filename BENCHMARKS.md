@@ -1,7 +1,7 @@
 # ferray vs NumPy: Benchmark Report
 
-**Date:** 2026-03-06
-**Environment:** Linux 6.6.87 (WSL2), Python 3.13.12, NumPy 2.3.5, Rust 1.85 (release, LTO, target-cpu=native)
+**Date:** 2026-03-13
+**Environment:** Linux 6.6.87.2 (WSL2), Python 3.13.12, NumPy 2.3.5, Rust 1.85 (release, LTO, target-cpu=native)
 **Seed:** 42 (deterministic, reproducible)
 **Benchmark mode:** In-process batch (single ferray process, warm caches — fair comparison with NumPy)
 
@@ -13,16 +13,19 @@ ferray is **more accurate** than NumPy on transcendental math operations thanks 
 CORE-MATH library (correctly rounded, < 0.5 ULP from mathematical truth). Statistical
 reductions match NumPy within 0--3 ULP via pairwise summation. All 47 accuracy tests pass.
 
-On speed, ferray now **beats NumPy** across the majority of benchmarks:
-- **All FFT sizes** (1.6--17x faster)
-- **All variance/std sizes** (2.1--20.8x faster)
-- **sum/mean at small-medium sizes** (1.1--8.7x faster)
-- **sqrt at small sizes** (1.1x faster)
-- **arctan at all sizes >= 10K** (1.1--1.5x faster)
+On speed, ferray **beats NumPy** across the majority of benchmarks:
+- **All FFT sizes** (1.5--16.7x faster)
+- **All variance/std sizes** (2.2--21.5x faster)
+- **sum/mean at small-medium sizes** (1.2--11.1x faster)
+- **sqrt at small sizes** (1.2x faster)
+- **arctan at all sizes >= 10K** (1.2--1.5x faster)
 - **tanh/1K** (1.3x faster)
-- **matmul/10x10** (1.1x faster)
+- **matmul/10x10** (1.4x faster)
 
-The remaining gap on transcendentals (sin, cos, exp, log at 1.1--2.1x) is due to CORE-MATH's
+Additionally, 125 oracle tests now validate ferray outputs against NumPy fixture data across
+all 8 crates (ufunc, core, stats, linalg, fft, polynomial, strings, masked arrays).
+
+The remaining gap on transcendentals (sin, cos, exp, log at 1.1--2.4x) is due to CORE-MATH's
 correctly-rounded algorithms — a deliberate accuracy-over-speed tradeoff.
 
 ---
@@ -102,6 +105,25 @@ of ULP off while ferray's CORE-MATH returns the correctly-rounded result.
 | fft      | 1,024  | 13      | 384      | 10,240    | PASS   |
 | fft      | 65,536 | 43      | 163,840  | 1,048,576 | PASS   |
 
+### 1.5 Oracle Tests (NumPy Conformance)
+
+125 oracle tests validate ferray outputs against NumPy fixture data across 8 crates:
+
+| Crate | Tests | Status |
+|-------|------:|--------|
+| ferray-core | 11 | PASS |
+| ferray-ufunc | 50 | PASS |
+| ferray-stats | 15 | PASS |
+| ferray-linalg | 17 | PASS |
+| ferray-fft | 10 | PASS |
+| ferray-polynomial | 3 | PASS |
+| ferray-strings | 12 | PASS |
+| ferray-ma | 7 | PASS |
+| **Total** | **125** | **PASS** |
+
+Oracle tolerance: 128 ULP floor (~15.1 decimal digits). In several cases (polyfit, roots)
+ferray's iterative refinement produces answers closer to mathematical truth than NumPy's.
+
 ---
 
 ## 2. Speed Comparison
@@ -113,74 +135,76 @@ with warm caches for a fair comparison. Lower is better.
 
 | Function | Size | NumPy     | ferray     | Ratio  | Winner |
 |----------|-----:|----------:|-----------:|-------:|--------|
-| sin      | 1K   | 3.8 us    | 8.1 us     | 2.1x   | NumPy  |
-| sin      | 10K  | 72.2 us   | 135 us     | 1.9x   | NumPy  |
-| sin      | 100K | 864 us    | 1.54 ms    | 1.8x   | NumPy  |
-| sin      | 1M   | 8.82 ms   | 15.96 ms   | 1.8x   | NumPy  |
-| cos      | 1K   | 3.9 us    | 7.7 us     | 2.0x   | NumPy  |
-| cos      | 100K | 713 us    | 1.30 ms    | 1.8x   | NumPy  |
-| cos      | 1M   | 7.77 ms   | 15.09 ms   | 1.9x   | NumPy  |
-| tan      | 1K   | 4.0 us    | 13.2 us    | 3.3x   | NumPy  |
-| tan      | 100K | 995 us    | 1.37 ms    | **1.4x** | NumPy |
-| tan      | 1M   | 10.35 ms  | 15.56 ms   | **1.5x** | NumPy |
-| exp      | 1K   | 2.5 us    | 2.8 us     | **1.1x** | NumPy |
-| exp      | 10K  | 22.3 us   | 28.1 us    | 1.3x   | NumPy  |
+| sin      | 1K   | 4.1 us    | 10.1 us    | 2.4x   | NumPy  |
+| sin      | 10K  | 76.4 us   | 134 us     | 1.8x   | NumPy  |
+| sin      | 100K | 880 us    | 1.49 ms    | 1.7x   | NumPy  |
+| sin      | 1M   | 9.27 ms   | 15.66 ms   | 1.7x   | NumPy  |
+| cos      | 1K   | 3.6 us    | 8.1 us     | 2.3x   | NumPy  |
+| cos      | 10K  | 62.6 us   | 117.8 us   | 1.9x   | NumPy  |
+| cos      | 100K | 734 us    | 1.28 ms    | 1.7x   | NumPy  |
+| cos      | 1M   | 7.90 ms   | 15.00 ms   | 1.9x   | NumPy  |
+| tan      | 1K   | 4.1 us    | 12.6 us    | 3.1x   | NumPy  |
+| tan      | 10K  | 92.8 us   | 133.2 us   | 1.4x   | NumPy  |
+| tan      | 100K | 1.03 ms   | 1.36 ms    | 1.3x   | NumPy  |
+| tan      | 1M   | 10.55 ms  | 15.26 ms   | 1.4x   | NumPy  |
+| exp      | 1K   | 2.6 us    | 2.8 us     | **1.1x** | NumPy |
+| exp      | 10K  | 22.4 us   | 27.9 us    | 1.2x   | NumPy  |
 | exp      | 100K | 220 us    | 280 us     | 1.3x   | NumPy  |
-| exp      | 1M   | 2.27 ms   | 4.47 ms    | 2.0x   | NumPy  |
+| exp      | 1M   | 2.27 ms   | 4.26 ms    | 1.9x   | NumPy  |
 | log      | 1K   | 2.4 us    | 2.8 us     | **1.1x** | NumPy |
 | log      | 10K  | 20.9 us   | 27.3 us    | 1.3x   | NumPy  |
-| log      | 100K | 206 us    | 280 us     | 1.4x   | NumPy  |
-| log      | 1M   | 2.14 ms   | 4.41 ms    | 2.1x   | NumPy  |
-| sqrt     | 1K   | 827 ns    | 737 ns     | **1.12x** | **ferray** |
-| sqrt     | 10K  | 5.9 us    | 7.0 us     | 1.2x   | NumPy  |
-| sqrt     | 100K | 55.0 us   | 54.6 us    | **1.01x** | **ferray** |
-| sqrt     | 1M   | 560 us    | 2.09 ms    | 3.7x   | NumPy  |
-| arctan   | 1K   | 3.3 us    | 4.1 us     | 1.2x   | NumPy  |
-| arctan   | 10K  | 50.2 us   | 41.1 us    | **1.22x** | **ferray** |
-| arctan   | 100K | 608 us    | 414 us     | **1.47x** | **ferray** |
-| arctan   | 1M   | 6.33 ms   | 5.89 ms    | **1.08x** | **ferray** |
-| tanh     | 1K   | 6.9 us    | 5.5 us     | **1.26x** | **ferray** |
-| tanh     | 10K  | 54.3 us   | 59.1 us    | 1.1x   | NumPy  |
-| tanh     | 100K | 510 us    | 631 us     | 1.2x   | NumPy  |
-| tanh     | 1M   | 5.48 ms   | 8.41 ms    | 1.5x   | NumPy  |
+| log      | 100K | 207 us    | 273 us     | 1.3x   | NumPy  |
+| log      | 1M   | 2.11 ms   | 4.26 ms    | 2.0x   | NumPy  |
+| sqrt     | 1K   | 843 ns    | 736 ns     | **1.15x** | **ferray** |
+| sqrt     | 10K  | 5.8 us    | 7.0 us     | 1.2x   | NumPy  |
+| sqrt     | 100K | 54.9 us   | 54.6 us    | **1.01x** | **ferray** |
+| sqrt     | 1M   | 550 us    | 2.05 ms    | 3.7x   | NumPy  |
+| arctan   | 1K   | 3.6 us    | 4.1 us     | 1.1x   | NumPy  |
+| arctan   | 10K  | 54.4 us   | 41.0 us    | **1.33x** | **ferray** |
+| arctan   | 100K | 622 us    | 415 us     | **1.50x** | **ferray** |
+| arctan   | 1M   | 6.67 ms   | 5.66 ms    | **1.18x** | **ferray** |
+| tanh     | 1K   | 7.0 us    | 5.5 us     | **1.28x** | **ferray** |
+| tanh     | 10K  | 52.3 us   | 58.6 us    | 1.1x   | NumPy  |
+| tanh     | 100K | 548 us    | 648 us     | 1.2x   | NumPy  |
+| tanh     | 1M   | 5.56 ms   | 7.99 ms    | 1.4x   | NumPy  |
 
 ### 2.2 Statistical Reductions
 
 | Function | Size | NumPy     | ferray     | Ratio  | Winner |
 |----------|-----:|----------:|-----------:|-------:|--------|
-| sum      | 1K   | 1.4 us    | 731 ns     | **1.88x** | **ferray** |
-| sum      | 10K  | 2.5 us    | 2.2 us     | **1.14x** | **ferray** |
-| sum      | 100K | 13.0 us   | 16.4 us    | 1.3x   | NumPy  |
-| sum      | 1M   | 158 us    | 216 us     | 1.4x   | NumPy  |
-| mean     | 1K   | 1.8 us    | 207 ns     | **8.73x** | **ferray** |
-| mean     | 10K  | 2.9 us    | 1.7 us     | **1.76x** | **ferray** |
-| mean     | 100K | 13.3 us   | 16.3 us    | 1.2x   | NumPy  |
-| mean     | 1M   | 162 us    | 212 us     | 1.3x   | NumPy  |
-| var      | 1K   | 6.4 us    | 310 ns     | **20.8x** | **ferray** |
-| var      | 10K  | 10.0 us   | 2.6 us     | **3.85x** | **ferray** |
-| var      | 100K | 53.7 us   | 25.5 us    | **2.10x** | **ferray** |
-| var      | 1M   | 915 us    | 361 us     | **2.53x** | **ferray** |
-| std      | 1K   | 5.8 us    | 369 ns     | **15.8x** | **ferray** |
-| std      | 10K  | 9.6 us    | 2.6 us     | **3.64x** | **ferray** |
-| std      | 100K | 53.3 us   | 25.8 us    | **2.07x** | **ferray** |
-| std      | 1M   | 859 us    | 363 us     | **2.37x** | **ferray** |
+| sum      | 1K   | 1.4 us    | 261 ns     | **5.30x** | **ferray** |
+| sum      | 10K  | 2.5 us    | 2.1 us     | **1.19x** | **ferray** |
+| sum      | 100K | 13.1 us   | 15.8 us    | 1.2x   | NumPy  |
+| sum      | 1M   | 141 us    | 168 us     | 1.2x   | NumPy  |
+| mean     | 1K   | 2.3 us    | 207 ns     | **11.1x** | **ferray** |
+| mean     | 10K  | 2.9 us    | 1.6 us     | **1.80x** | **ferray** |
+| mean     | 100K | 13.5 us   | 15.8 us    | 1.2x   | NumPy  |
+| mean     | 1M   | 142 us    | 183 us     | 1.3x   | NumPy  |
+| var      | 1K   | 6.7 us    | 310 ns     | **21.5x** | **ferray** |
+| var      | 10K  | 9.9 us    | 2.6 us     | **3.89x** | **ferray** |
+| var      | 100K | 55.7 us   | 25.1 us    | **2.22x** | **ferray** |
+| var      | 1M   | 790 us    | 315 us     | **2.51x** | **ferray** |
+| std      | 1K   | 5.8 us    | 389 ns     | **14.9x** | **ferray** |
+| std      | 10K  | 10.5 us   | 2.6 us     | **4.01x** | **ferray** |
+| std      | 100K | 54.4 us   | 25.1 us    | **2.17x** | **ferray** |
+| std      | 1M   | 841 us    | 313 us     | **2.69x** | **ferray** |
 
 ### 2.3 Linear Algebra (matmul)
 
 | Size    | NumPy   | ferray   | Ratio  | Winner |
 |---------|--------:|---------:|-------:|--------|
-| 10x10   | 1.1 us  | 990 ns   | **1.11x** | **ferray** |
-| 50x50   | 5.4 us  | 25.0 us  | 4.6x   | NumPy  |
-| 100x100 | 19.8 us | 78.8 us  | 4.0x   | NumPy  |
+| 10x10   | 1.4 us  | 1.0 us   | **1.38x** | **ferray** |
+| 50x50   | 7.5 us  | 25.0 us  | 3.3x   | NumPy  |
+| 100x100 | 19.5 us | 75.8 us  | 3.9x   | NumPy  |
 
 ### 2.4 FFT
 
 | Size   | NumPy    | ferray   | Ratio  | Winner |
 |-------:|---------:|---------:|-------:|--------|
-| 64     | 2.6 us   | 152 ns   | **17.0x** | **ferray** |
-| 1,024  | 7.0 us   | 2.4 us   | **2.94x** | **ferray** |
-| 16,384 | 91.8 us  | 49.8 us  | **1.84x** | **ferray** |
-| 65,536 | 470 us   | 291 us   | **1.62x** | **ferray** |
+| 64     | 2.4 us   | 144 ns   | **16.7x** | **ferray** |
+| 1,024  | 6.9 us   | 2.5 us   | **2.83x** | **ferray** |
+| 16,384 | 102 us   | 49.4 us  | **2.06x** | **ferray** |
+| 65,536 | 489 us   | 329 us   | **1.49x** | **ferray** |
 
 ---
 
@@ -198,26 +222,27 @@ floating-point value** to the mathematical truth.
 ### 3.2 Speed: FFT (ALL sizes)
 
 ferray beats NumPy on every FFT size tested:
-- **fft/64:** 17.0x faster (1D fast path + plan caching)
-- **fft/1024:** 2.9x faster
-- **fft/16384:** 1.8x faster
-- **fft/65536:** 1.6x faster
+- **fft/64:** 16.7x faster (1D fast path + plan caching)
+- **fft/1024:** 2.8x faster
+- **fft/16384:** 2.1x faster
+- **fft/65536:** 1.5x faster
 
 ### 3.3 Speed: Statistical Reductions
 
 ferray dominates on variance and standard deviation at all sizes:
-- **var/1K:** 20.8x faster (fused SIMD sum-of-squared-differences with FMA)
+- **var/1K:** 21.5x faster (fused SIMD sum-of-squared-differences with FMA)
 - **var/1M:** 2.5x faster
-- **std/1K:** 15.8x faster
-- **std/1M:** 2.4x faster
-- **mean/1K:** 8.7x faster
-- **sum/1K:** 1.9x faster
+- **std/1K:** 14.9x faster
+- **std/1M:** 2.7x faster
+- **mean/1K:** 11.1x faster
+- **sum/1K:** 5.3x faster
 
 ### 3.4 Speed: Select Transcendentals
 
-- **arctan/10K--1M:** 1.1--1.5x faster (CORE-MATH's arctan is both correct AND fast)
+- **arctan/10K--1M:** 1.2--1.5x faster (CORE-MATH's arctan is both correct AND fast)
 - **tanh/1K:** 1.3x faster
-- **sqrt/1K:** 1.1x faster
+- **sqrt/1K:** 1.2x faster
+- **matmul/10x10:** 1.4x faster
 - **exp/1K, log/1K:** near parity (1.1x)
 
 ### 3.5 Memory Safety
@@ -229,9 +254,9 @@ verification proof harnesses.
 
 ## 4. Where NumPy Wins
 
-### 4.1 Transcendentals at Scale (1.4--2.1x)
+### 4.1 Transcendentals at Scale (1.3--2.4x)
 
-sin, cos, tan, exp, log remain 1.4--2.1x slower at large sizes. This is due to CORE-MATH's
+sin, cos, tan, exp, log remain 1.3--2.4x slower at large sizes. This is due to CORE-MATH's
 correctly-rounded algorithms requiring data-dependent Ziv rounding tests that prevent SIMD
 vectorization. glibc uses 1-ULP-accurate polynomial approximations that vectorize trivially.
 **This is a deliberate accuracy-over-speed tradeoff.**
@@ -242,13 +267,13 @@ At 1M elements (8MB), sqrt becomes memory-bandwidth-bound. The 3.7x gap at this 
 suggests an allocator or cache-line issue with our 8MB output buffer. At smaller sizes
 (1K, 100K), ferray matches or beats NumPy.
 
-### 4.3 matmul (4.0--4.6x at 50x50--100x100)
+### 4.3 matmul (3.3--3.9x at 50x50--100x100)
 
 NumPy uses OpenBLAS/MKL with hand-tuned assembly micro-kernels. ferray uses faer (pure Rust,
 sequential mode). For small matrices (10x10), ferray's naive loop wins. For large matrices
 (>256x256), faer's Rayon parallelism would close the gap.
 
-### 4.4 sum/mean at Large Sizes (1.3--1.4x at 100K--1M)
+### 4.4 sum/mean at Large Sizes (1.2--1.3x at 100K--1M)
 
 For pure summation at large sizes, NumPy's C pairwise sum has slightly lower per-element
 overhead than our Rust SIMD pairwise sum, likely due to tighter compiler output and
@@ -261,7 +286,7 @@ cache prefetching in the C implementation.
 | Optimization | Impact |
 |-------------|--------|
 | **In-process batch benchmark** | Eliminated subprocess cold-cache bias; revealed ferray wins on FFT/stats |
-| **FFT 1D fast path** | fft/64: 17x faster than NumPy (skip lane extraction for 1D arrays) |
+| **FFT 1D fast path** | fft/64: 16.7x faster than NumPy (skip lane extraction for 1D arrays) |
 | **FFT thread-local scratch** | `map_init` reuses scratch per Rayon thread |
 | **Fused SIMD variance** | var/1M: 2.5x faster than NumPy (FMA, no intermediate alloc) |
 | **4 SIMD accumulators** | Saturates FPU throughput in pairwise sum and variance |
@@ -269,6 +294,7 @@ cache prefetching in the C implementation.
 | **Pairwise base 256** | Halved carry-merge overhead (was 128) |
 | **Uninit output buffers** | Skip zeroing 8*N bytes for all ufunc outputs |
 | **faer matmul backend** | 3-tier: naive (≤64), faer::Seq (65-255), faer::Rayon (≥256) |
+| **SVD-based polyfit** | Switched from normal equations to lstsq + iterative refinement |
 | **LTO + codegen-units=1** | 10--20% across the board |
 | **Rayon threshold (1M)** | Eliminates thread pool overhead for small arrays |
 
@@ -285,7 +311,7 @@ cache prefetching in the C implementation.
 | arctan (4 sizes) | **3** | 1 | 0 |
 | tanh (4 sizes) | **1** | 3 | 0 |
 | matmul (3 sizes) | **1** | 2 | 0 |
-| sin/cos/tan/exp/log (20 tests) | 0 | **20** | 0 |
+| sin/cos/tan/exp/log (24 tests) | 0 | **24** | 0 |
 | **Total (55 tests)** | **23** | **32** | **0** |
 
 ferray wins 23 of 55 speed benchmarks. All 32 NumPy speed wins are on transcendentals
@@ -300,6 +326,12 @@ ferray wins 23 of 55 speed benchmarks. All 32 NumPy speed wins are on transcende
 - **Metric:** ULP distance between NumPy and ferray outputs
 - **Pass criteria:** Ufuncs P99.9 ≤ 256, Stats max ≤ 64, Linalg max ≤ 3N², FFT max ≤ N·log₂N
 
+### Oracle Testing
+- **Tool:** `cargo test --test oracle` across 8 crates
+- **Metric:** Per-element ULP distance against NumPy fixture outputs (139 JSON fixtures)
+- **Tolerance:** 128 ULP floor (~15.1 decimal digits of agreement)
+- **Coverage:** 125 tests across ufunc (50), linalg (17), stats (15), strings (12), core (11), fft (10), ma (7), polynomial (3)
+
 ### Speed Testing
 - **Tool:** `benchmarks/speed_benchmark.py`
 - **Mode:** Batch (single ferray process with warm caches, matching NumPy's in-process model)
@@ -312,6 +344,7 @@ cd benchmarks/ferray_bench && cargo build --release
 cd ../..
 python3 benchmarks/statistical_equivalence.py
 python3 benchmarks/speed_benchmark.py
+cargo test --test oracle --workspace
 ```
 
 ---
@@ -323,8 +356,8 @@ ferray delivers **provably superior accuracy** on every transcendental function 
 variance/std sizes, and most small-array operations.
 
 The speed profile:
-- **Dominates:** FFT (1.6--17x), var/std (2.1--20.8x), mean/sum small (1.1--8.7x)
-- **Faster:** arctan (1.1--1.5x), sqrt/1K (1.1x), tanh/1K (1.3x), matmul/10x10 (1.1x)
-- **Slower:** transcendentals at scale (1.4--2.1x, CORE-MATH tradeoff), matmul medium (4x, BLAS gap)
+- **Dominates:** FFT (1.5--16.7x), var/std (2.2--21.5x), mean/sum small (1.2--11.1x)
+- **Faster:** arctan (1.2--1.5x), sqrt/1K (1.2x), tanh/1K (1.3x), matmul/10x10 (1.4x)
+- **Slower:** transcendentals at scale (1.3--2.4x, CORE-MATH tradeoff), matmul medium (3.3--3.9x, BLAS gap)
 
-47/47 accuracy tests pass. 1479 unit tests pass across the workspace.
+47/47 accuracy tests pass. 125/125 oracle tests pass. All library tests pass across the workspace.

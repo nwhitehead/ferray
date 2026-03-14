@@ -167,7 +167,32 @@ pub fn cond(a: &Array<f64, Ix2>, p: NormOrder) -> FerrayResult<f64> {
 
     match p {
         NormOrder::L2 | NormOrder::Fro => {
-            // cond = largest_sv / smallest_sv
+            let n = shape[0];
+            // For 2x2, use the closed-form singular value formula which is
+            // more accurate than going through a full SVD decomposition.
+            if n == 2 {
+                // Closed-form 2x2 condition number via A^T A eigenvalues.
+                // cond = sqrt(λ_max / λ_min) where λ are eigenvalues of A^T A.
+                // For [[a,b],[c,d]]:
+                //   S = a²+b²+c²+d²
+                //   D = det(A^T A) = (ad-bc)²
+                //   cond² = (S + √(S²-4D)) / (S - √(S²-4D))
+                // Using the identity cond = (S + √(S²-4D)) / (2|det(A)|)
+                // avoids cancellation in the denominator.
+                let s = a.as_slice().unwrap();
+                let (a11, a12, a21, a22) = (s[0], s[1], s[2], s[3]);
+                let det_a = a11 * a22 - a12 * a21;
+                if det_a.abs() < f64::EPSILON * 1e-100 {
+                    return Ok(f64::INFINITY);
+                }
+                let sum_sq = a11 * a11 + a12 * a12 + a21 * a21 + a22 * a22;
+                let four_det_sq = 4.0 * det_a * det_a;
+                let disc = (sum_sq * sum_sq - four_det_sq).max(0.0).sqrt();
+                let s_max = ((sum_sq + disc) / 2.0).sqrt();
+                let s_min = det_a.abs() / s_max; // det = s1*s2, so s2 = det/s1
+                return Ok(s_max / s_min);
+            }
+            // General case: cond = largest_sv / smallest_sv
             let (_u, s, _vt) = crate::decomp::svd(a, false)?;
             let svals = s.as_slice().unwrap();
             if svals.is_empty() {

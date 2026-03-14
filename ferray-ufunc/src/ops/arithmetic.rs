@@ -293,7 +293,9 @@ where
     D: Dimension,
 {
     binary_float_op(x, h0, |xi, h0i| {
-        if xi < <T as Element>::zero() {
+        if xi.is_nan() {
+            xi
+        } else if xi < <T as Element>::zero() {
             <T as Element>::zero()
         } else if xi == <T as Element>::zero() {
             h0i

@@ -5,6 +5,8 @@
 // yet be available. When ferray-linalg::eigvals is ready, this can delegate
 // to it for improved performance.
 
+use ferray_core::Array;
+use ferray_core::dimension::Ix2;
 use ferray_core::error::FerrayError;
 use num_complex::Complex;
 
@@ -64,10 +66,145 @@ pub fn find_roots_from_power_coeffs(coeffs: &[f64]) -> Result<Vec<Complex<f64>>,
             }
         }
         _ => {
-            // Use companion matrix eigenvalues
+            // Use companion matrix eigenvalues via QR iteration.
             let mat = companion_matrix(&coeffs[..n])?;
             let eigenvalues = qr_eigenvalues(&mat, deg)?;
             Ok(eigenvalues)
+        }
+    }
+}
+
+/// Refine a root estimate using Newton's method on the polynomial.
+///
+/// Performs up to 8 iterations of z ← z − p(z)/p'(z), stopping early when
+/// the correction is below machine epsilon. For roots with negligible
+/// imaginary part, uses real arithmetic to avoid complex rounding noise.
+fn newton_polish(coeffs: &[f64], z: &mut Complex<f64>) {
+    let n = coeffs.len(); // n = degree + 1
+
+    // Evaluate |p(z)| to track whether Newton is improving
+    let eval_poly = |z: &Complex<f64>| -> f64 {
+        let mut p = Complex::new(coeffs[n - 1], 0.0);
+        for i in (0..n - 1).rev() {
+            p = p * *z + Complex::new(coeffs[i], 0.0);
+        }
+        p.norm()
+    };
+
+    // For nearly-real roots, polish in real arithmetic for better precision.
+    // Use a generous threshold: QR can leave imaginary residuals up to ~1e-12
+    // for real roots of ill-conditioned companion matrices.
+    if z.im.abs() <= 1e-10 * z.re.abs().max(1.0) {
+        let mut x = z.re;
+        let mut best_x = x;
+        let mut best_res = eval_poly(&Complex::new(x, 0.0));
+        for _ in 0..8 {
+            let mut p = coeffs[n - 1];
+            let mut dp = 0.0;
+            for i in (0..n - 1).rev() {
+                dp = dp * x + p;
+                p = p * x + coeffs[i];
+            }
+            if dp.abs() < f64::EPSILON * 1e-100 {
+                break;
+            }
+            let correction = p / dp;
+            let candidate = x - correction;
+            let res = eval_poly(&Complex::new(candidate, 0.0));
+            if res < best_res {
+                best_x = candidate;
+                best_res = res;
+            }
+            x = candidate;
+            if correction.abs() <= f64::EPSILON * x.abs() * 2.0 {
+                break;
+            }
+        }
+        z.re = best_x;
+        z.im = 0.0;
+        return;
+    }
+
+    // Complex Newton for genuinely complex roots
+    let mut best_z = *z;
+    let mut best_res = eval_poly(z);
+    for _ in 0..8 {
+        let mut p = Complex::new(coeffs[n - 1], 0.0);
+        let mut dp = Complex::new(0.0, 0.0);
+        for i in (0..n - 1).rev() {
+            dp = dp * *z + p;
+            p = p * *z + Complex::new(coeffs[i], 0.0);
+        }
+        let dp_norm = dp.norm();
+        if dp_norm < f64::EPSILON * 1e-100 {
+            break;
+        }
+        let correction = p / dp;
+        *z -= correction;
+        let res = eval_poly(z);
+        if res < best_res {
+            best_z = *z;
+            best_res = res;
+        }
+        if correction.norm() <= f64::EPSILON * z.norm() * 2.0 {
+            break;
+        }
+    }
+    *z = best_z;
+}
+
+/// Balance a matrix by diagonal similarity transformations to equalise row
+/// and column norms.  This is a simplified version of LAPACK's DGEBAL that
+/// improves eigenvalue accuracy by reducing the spread of matrix entries.
+fn balance_matrix(a: &mut [f64], n: usize) {
+    let radix: f64 = 2.0;
+    let base_sq = radix * radix;
+    let mut converged = false;
+
+    while !converged {
+        converged = true;
+        for i in 0..n {
+            // Compute row and column norms (excluding diagonal)
+            let mut row_norm = 0.0;
+            let mut col_norm = 0.0;
+            for j in 0..n {
+                if i == j {
+                    continue;
+                }
+                col_norm += a[j * n + i].abs();
+                row_norm += a[i * n + j].abs();
+            }
+
+            if col_norm < f64::EPSILON * 1e-100 || row_norm < f64::EPSILON * 1e-100 {
+                continue;
+            }
+
+            // Find the power-of-two scaling factor
+            let mut s = col_norm + row_norm;
+            let mut f = 1.0;
+            let mut c = col_norm;
+
+            while c < s / base_sq {
+                c *= base_sq;
+                f *= radix;
+            }
+            while c >= s * base_sq {
+                c /= base_sq;
+                f /= radix;
+            }
+
+            // Only apply if the scaling makes a significant improvement
+            if (c + row_norm) / f < 0.95 * s {
+                converged = false;
+                let g = 1.0 / f;
+                // Scale row i by 1/f and column i by f
+                for j in 0..n {
+                    a[i * n + j] *= g;
+                }
+                for j in 0..n {
+                    a[j * n + i] *= f;
+                }
+            }
         }
     }
 }

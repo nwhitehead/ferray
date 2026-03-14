@@ -60,7 +60,10 @@ pub fn title<D: Dimension>(a: &StringArray<D>) -> FerrayResult<StringArray<D>> {
         let mut result = String::with_capacity(s.len());
         let mut capitalize_next = true;
         for ch in s.chars() {
-            if ch.is_whitespace() {
+            if !ch.is_alphabetic() {
+                // Non-alphabetic characters pass through unchanged and
+                // mark the next alphabetic character as word-start (matching
+                // NumPy/Python str.title() behaviour).
                 result.push(ch);
                 capitalize_next = true;
             } else if capitalize_next {

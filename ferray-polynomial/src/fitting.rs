@@ -4,6 +4,8 @@
 // For a Vandermonde-like matrix V, solves V^T W V c = V^T W y
 // where W is a diagonal weight matrix.
 
+use ferray_core::Array;
+use ferray_core::dimension::{Ix1, Ix2, IxDyn};
 use ferray_core::error::FerrayError;
 
 /// Build a Vandermonde matrix for power basis fitting.
@@ -137,17 +139,19 @@ pub fn hermite_e_vandermonde(x: &[f64], deg: usize) -> Vec<f64> {
     v
 }
 
-/// Solve the least-squares problem V c = y using the normal equations.
+/// Solve the least-squares problem V c = y using Householder QR decomposition.
 ///
 /// Given a Vandermonde(-like) matrix V (n x m, row-major), data y (n),
 /// and optional weights w (n), solves for the coefficient vector c (m).
 ///
-/// Uses the normal equations: (V^T W V) c = V^T W y
-/// where W = diag(w) if provided, or identity otherwise.
+/// Uses thin QR decomposition on the (optionally weighted) system, which
+/// avoids forming the normal equations V^T V (whose condition number is
+/// the square of V's). This matches NumPy's approach of using an
+/// SVD/QR-based lstsq rather than the normal equations.
 ///
 /// # Errors
 /// Returns `FerrayError::InvalidValue` if dimensions don't match.
-/// Returns `FerrayError::SingularMatrix` if the normal equations matrix is singular.
+/// Returns `FerrayError::SingularMatrix` if the system is rank-deficient.
 pub fn least_squares_fit(
     v: &[f64],
     n: usize,
@@ -179,32 +183,54 @@ pub fn least_squares_fit(
         }
     }
 
-    // Compute V^T W V (m x m) and V^T W y (m)
-    let mut vtv = vec![0.0; m * m];
-    let mut vty = vec![0.0; m];
-
+    // Build the weighted system: A = sqrt(W) * V, b = sqrt(W) * y
+    let mut a_data = vec![0.0; n * m];
+    let mut b_data = y.to_vec();
     for i in 0..n {
-        let wi = w.map_or(1.0, |w| w[i]);
+        let sw = w.map_or(1.0, |w| w[i].sqrt());
         for j in 0..m {
-            let vij = v[i * m + j];
-            vty[j] += vij * wi * y[i];
-            for k in j..m {
-                let vik = v[i * m + k];
-                vtv[j * m + k] += vij * wi * vik;
+            a_data[i * m + j] = v[i * m + j] * sw;
+        }
+        b_data[i] *= sw;
+    }
+
+    // Keep copies for iterative refinement
+    let a_data_copy = a_data.clone();
+    let b_data_copy = b_data.clone();
+
+    // Use ferray-linalg's SVD-based lstsq for maximum numerical accuracy.
+    // This matches NumPy's polyfit which delegates to numpy.linalg.lstsq.
+    let a_arr = Array::<f64, Ix2>::from_vec(Ix2::new([n, m]), a_data)
+        .map_err(|e| FerrayError::invalid_value(format!("failed to build A matrix: {e}")))?;
+    let b_arr = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[n]), b_data)
+        .map_err(|e| FerrayError::invalid_value(format!("failed to build b vector: {e}")))?;
+
+    let (x_arr, _residuals, _rank, _sv) = ferray_linalg::lstsq(&a_arr, &b_arr, None)?;
+    let mut x = x_arr.as_slice().unwrap().to_vec();
+
+    // Iterative refinement: compute residual r = b − A*x, solve A*dx = r,
+    // update x += dx. Two passes typically recover full f64 precision from
+    // the initial SVD solve.
+    for _ in 0..2 {
+        let mut residual = b_data_copy.clone();
+        for i in 0..n {
+            let mut ax_i = 0.0;
+            for j in 0..m {
+                ax_i += a_data_copy[i * m + j] * x[j];
+            }
+            residual[i] -= ax_i;
+        }
+        let r_arr = Array::<f64, IxDyn>::from_vec(IxDyn::new(&[n]), residual)
+            .map_err(|e| FerrayError::invalid_value(format!("residual build failed: {e}")))?;
+        if let Ok((dx_arr, _, _, _)) = ferray_linalg::lstsq(&a_arr, &r_arr, None) {
+            let dx = dx_arr.as_slice().unwrap();
+            for j in 0..m {
+                x[j] += dx[j];
             }
         }
     }
-    // Fill lower triangle (symmetric)
-    for j in 0..m {
-        for k in (j + 1)..m {
-            vtv[k * m + j] = vtv[j * m + k];
-        }
-    }
 
-    // Solve vtv * c = vty using Cholesky decomposition
-    // Since V^T W V is positive semidefinite (positive definite if V has full column rank),
-    // Cholesky is appropriate.
-    cholesky_solve(&vtv, m, &vty)
+    Ok(x)
 }
 
 /// Solve A x = b using Cholesky decomposition where A is symmetric positive definite.

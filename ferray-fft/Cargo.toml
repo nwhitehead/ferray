@@ -19,3 +19,5 @@ rayon = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
+ferray-test-oracle = { path = "../ferray-test-oracle" }
+num-complex = { workspace = true }

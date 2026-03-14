@@ -29,3 +29,4 @@ f16 = ["dep:half", "ferray-core/f16"]
 
 [dev-dependencies]
 proptest = { workspace = true }
+ferray-test-oracle = { path = "../ferray-test-oracle" }
