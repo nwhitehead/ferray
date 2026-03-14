@@ -5,12 +5,12 @@
 use proptest::prelude::*;
 
 use ferray_strings::align::center;
+use ferray_strings::array;
 use ferray_strings::case::{lower, upper};
 use ferray_strings::concat::{add, multiply};
 use ferray_strings::search::{count, endswith, find, replace, startswith};
 use ferray_strings::split_join::{join, split};
 use ferray_strings::strip::strip;
-use ferray_strings::array;
 
 fn config() -> ProptestConfig {
     ProptestConfig::with_cases(256)

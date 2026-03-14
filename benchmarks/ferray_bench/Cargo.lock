@@ -399,7 +399,7 @@ dependencies = [
 
 [[package]]
 name = "ferray-core"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "ferray-core-macros",
  "ndarray",
@@ -410,7 +410,7 @@ dependencies = [
 
 [[package]]
 name = "ferray-core-macros"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -419,7 +419,7 @@ dependencies = [
 
 [[package]]
 name = "ferray-fft"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "ferray-core",
  "num-complex",
@@ -429,7 +429,7 @@ dependencies = [
 
 [[package]]
 name = "ferray-linalg"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "faer",
  "ferray-core",
@@ -441,7 +441,7 @@ dependencies = [
 
 [[package]]
 name = "ferray-stats"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "ferray-core",
  "ferray-ufunc",
@@ -452,7 +452,7 @@ dependencies = [
 
 [[package]]
 name = "ferray-ufunc"
-version = "0.1.0"
+version = "0.2.3"
 dependencies = [
  "core-math",
  "ferray-core",

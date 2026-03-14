@@ -6,9 +6,7 @@ use ferray_core::Array;
 use ferray_core::dimension::Ix1;
 
 use ferray_ma::mask_ops::count_masked;
-use ferray_ma::{
-    masked_add, masked_equal, masked_invalid, masked_mul, masked_sub, MaskedArray,
-};
+use ferray_ma::{MaskedArray, masked_add, masked_equal, masked_invalid, masked_mul, masked_sub};
 
 use proptest::prelude::*;
 

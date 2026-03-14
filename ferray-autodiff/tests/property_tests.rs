@@ -1,4 +1,4 @@
-use ferray_autodiff::{derivative, gradient, DualNumber};
+use ferray_autodiff::{DualNumber, derivative, gradient};
 use proptest::prelude::*;
 
 const TOL: f64 = 1e-8;
